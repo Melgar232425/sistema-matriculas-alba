@@ -4,15 +4,16 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    // Dirección IP literal de smtp.gmail.com para saltarnos el error de IPv6 (ENETUNREACH)
-    host: '74.125.141.108',
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
         user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
         pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
+    // Fuerza IPv4 y añade un tiempo de espera para que no se quede colgado
     family: 4,
+    connectionTimeout: 10000, 
     tls: {
         rejectUnauthorized: false
     }
