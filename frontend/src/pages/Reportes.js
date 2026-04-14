@@ -316,7 +316,7 @@ const Reportes = () => {
                 <tbody>
                   {morosidad?.morosos && morosidad.morosos.length > 0 ? (
                     morosidad.morosos.map((moroso) => (
-                      <tr key={moroso.matricula_codigo}>
+                      <tr key={moroso.estudiante_codigo}>
                         <td>{moroso.estudiante_codigo}</td>
                         <td>{moroso.dni}</td>
                         <td>{moroso.nombres} {moroso.apellidos}</td>

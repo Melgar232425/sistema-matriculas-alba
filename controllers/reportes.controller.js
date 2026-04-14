@@ -225,11 +225,12 @@ exports.morosidad = async (req, res) => {
 
     let query = `SELECT e.codigo as estudiante_codigo, e.dni, e.nombres, e.apellidos,
               e.telefono, e.telefono_apoderado, e.nombre_apoderado,
-              c.nombre as curso, c.nivel,
-              m.codigo as matricula_codigo, m.fecha_matricula,
-              m.monto_total, m.monto_pagado,
-              (m.monto_total - m.monto_pagado) as monto_pendiente,
-              m.estado_pago
+              GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ', ') as curso,
+              GROUP_CONCAT(DISTINCT c.nivel SEPARATOR ', ') as nivel,
+              SUM(CAST(IFNULL(m.monto_total, 0) AS DECIMAL(10,2))) as monto_total, 
+              SUM(CAST(IFNULL(m.monto_pagado, 0) AS DECIMAL(10,2))) as monto_pagado,
+              SUM(CAST(IFNULL(m.monto_total, 0) AS DECIMAL(10,2)) - CAST(IFNULL(m.monto_pagado, 0) AS DECIMAL(10,2))) as monto_pendiente,
+              MIN(m.fecha_matricula) as fecha_matricula
        FROM matriculas m
        INNER JOIN estudiantes e ON m.estudiante_id = e.id
        INNER JOIN cursos c ON m.curso_id = c.id
@@ -238,17 +239,11 @@ exports.morosidad = async (req, res) => {
 
     const params = [];
 
-    if (fecha_inicio) {
-      query += ' AND DATE(m.fecha_matricula) >= ?';
-      params.push(fecha_inicio);
-    }
+    // Ignoramos fecha_inicio y fecha_fin para morosidad porque la morosidad 
+    // debe ser el total histórico adeudado por el estudiante.
+    // FILTROS DE FECHAS REMOVIDOS DEL REPORTE DE MOROSIDAD.
 
-    if (fecha_fin) {
-      query += ' AND DATE(m.fecha_matricula) <= ?';
-      params.push(fecha_fin);
-    }
-
-    query += ' ORDER BY monto_pendiente DESC, e.apellidos, e.nombres';
+    query += ' GROUP BY e.id ORDER BY monto_pendiente DESC, e.apellidos, e.nombres';
 
     const [morosos] = await promisePool.query(query, params);
 

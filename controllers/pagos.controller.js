@@ -32,11 +32,14 @@ const actualizarEstadoPagoMatricula = async (connection, matricula_id) => {
     
     if (matricula.length > 0) {
       const { monto_total, monto_pagado } = matricula[0];
+      const totalNum = parseFloat(monto_total || 0);
+      const pagadoNum = parseFloat(monto_pagado || 0);
+      
       let estado_pago = 'pendiente';
       
-      if (monto_pagado >= monto_total) {
+      if (pagadoNum >= totalNum) {
         estado_pago = 'pagado';
-      } else if (monto_pagado > 0) {
+      } else if (pagadoNum > 0) {
         estado_pago = 'parcial';
       }
       

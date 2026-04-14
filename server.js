@@ -69,6 +69,19 @@ app.use('/api/reportes', verifyToken, reportesRoutes);
 app.use('/api/docentes', verifyToken, docentesRoutes);
 app.use('/api/ciclos', verifyToken, ciclosRoutes);
 
+// Ruta temporal para corregir la base de datos (Error de estados de pago)
+app.get('/api/fix-db', async (req, res) => {
+  try {
+    const { promisePool } = require('./config/database');
+    await promisePool.query("UPDATE matriculas SET estado_pago = 'pagado' WHERE CAST(monto_pagado AS DECIMAL(10,2)) >= CAST(monto_total AS DECIMAL(10,2))");
+    await promisePool.query("UPDATE matriculas SET estado_pago = 'parcial' WHERE CAST(monto_pagado AS DECIMAL(10,2)) > 0 AND CAST(monto_pagado AS DECIMAL(10,2)) < CAST(monto_total AS DECIMAL(10,2))");
+    await promisePool.query("UPDATE matriculas SET estado_pago = 'pendiente' WHERE CAST(monto_pagado AS DECIMAL(10,2)) = 0 OR monto_pagado IS NULL");
+    res.json({ success: true, message: "Base de datos corregida correctamente" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Manejo de rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Ruta no encontrada' });

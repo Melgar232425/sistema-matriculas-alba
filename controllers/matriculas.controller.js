@@ -193,9 +193,9 @@ exports.crear = async (req, res) => {
     // Insertar matrícula con código temporal
     const [result] = await connection.query(
       `INSERT INTO matriculas 
-       (codigo, estudiante_id, curso_id, fecha_matricula, monto_total, observaciones) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      ['TEMP', estudiante_id, curso_id, fecha_matricula, curso[0].precio, observaciones]
+       (codigo, estudiante_id, curso_id, fecha_matricula, monto_total, monto_pagado, observaciones) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['TEMP', estudiante_id, curso_id, fecha_matricula, curso[0].precio, 0, observaciones]
     );
 
     const matriculaId = result.insertId;
