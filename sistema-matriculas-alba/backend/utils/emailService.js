@@ -4,12 +4,12 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT) || 587,
-    secure: process.env.EMAIL_PORT === '465',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
-        user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
-        pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
+        user: 'alexis052304@gmail.com',
+        pass: 'wurslqalniaflavc'
     }
 });
 
@@ -23,12 +23,13 @@ transporter.verify((error, success) => {
 });
 
 const logoUrl = 'https://sistema-matriculas-alba.vercel.app/logo_oficial.png';
+const EMAIL_FROM_DEFAULT = '"Academia Alba" <alexis052304@gmail.com>';
 
 /**
  * Envía un correo de bienvenida a un nuevo estudiante
  */
 const sendWelcomeEmail = async (estudiante) => {
-    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
+    const from_email = EMAIL_FROM_DEFAULT;
     const mailOptions = {
         from: from_email,
         to: estudiante.email,
@@ -70,7 +71,7 @@ const sendWelcomeEmail = async (estudiante) => {
  * Envía un correo de confirmación de matrícula
  */
 const sendEnrollmentEmail = async (estudiante, curso, matricula) => {
-    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
+    const from_email = EMAIL_FROM_DEFAULT;
     const mailOptions = {
         from: from_email,
         to: estudiante.email,
@@ -98,7 +99,7 @@ const sendEnrollmentEmail = async (estudiante, curso, matricula) => {
  * Envía un recibo de pago digital
  */
 const sendPaymentEmail = async (estudiante, pago, cursoNombre) => {
-    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
+    const from_email = EMAIL_FROM_DEFAULT;
     const mailOptions = {
         from: from_email,
         to: estudiante.email,
@@ -125,7 +126,7 @@ const sendPaymentEmail = async (estudiante, pago, cursoNombre) => {
  * Envía un correo de bienvenida a un docente
  */
 const sendTeacherWelcomeEmail = async (docente) => {
-    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
+    const from_email = EMAIL_FROM_DEFAULT;
     const mailOptions = {
         from: from_email,
         to: docente.email,
@@ -162,7 +163,7 @@ const sendTeacherWelcomeEmail = async (docente) => {
  * Notifica al docente sobre un nuevo curso asignado
  */
 const sendTeacherCourseEmail = async (docente, curso) => {
-    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
+    const from_email = EMAIL_FROM_DEFAULT;
     const mailOptions = {
         from: from_email,
         to: docente.email,
