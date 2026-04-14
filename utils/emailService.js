@@ -4,17 +4,16 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    // IP Directa de Google para saltarnos TODA la red de Railway e IPv6
-    host: '173.194.216.108', 
-    port: 465,
-    secure: true,
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false para puerto 587
+    requireTLS: true, // Forzar uso de TLS
     auth: {
         user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
         pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
-    // Esto es CLAVE para que Gmail acepte la conexión segura por IP
+    family: 4,
     tls: {
-        servername: 'smtp.gmail.com',
         rejectUnauthorized: false
     }
 });
