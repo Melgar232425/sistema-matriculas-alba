@@ -5,15 +5,13 @@ const path = require('path');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true, // true para puerto 465
     auth: {
         user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
         pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
-    // Fuerza IPv4 y añade un tiempo de espera para que no se quede colgado
     family: 4,
-    connectionTimeout: 10000, 
     tls: {
         rejectUnauthorized: false
     }
