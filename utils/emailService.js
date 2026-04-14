@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
         pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
+    // FORZAR IPv4 para evitar el error ENETUNREACH
+    family: 4,
     tls: {
         rejectUnauthorized: false
     }
