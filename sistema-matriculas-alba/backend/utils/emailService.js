@@ -4,16 +4,17 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true para puerto 465
     auth: {
         user: 'alexis052304@gmail.com',
         pass: 'wurslqalniaflavc'
     },
-    // Ajustes de red extremos para Render
-    family: 4, 
-    tls: {
-        rejectUnauthorized: false
-    }
+    // Limitar reintentos y tiempo de espera para que no se cuelgue
+    connectionTimeout: 5000, 
+    socketTimeout: 5000,
+    family: 4
 });
 
 // Verificar conexión al iniciar
