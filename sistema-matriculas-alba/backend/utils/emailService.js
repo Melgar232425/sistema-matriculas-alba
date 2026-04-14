@@ -10,6 +10,14 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: 'alexis052304@gmail.com',
         pass: 'wurslqalniaflavc'
+    },
+    family: 4, // <-- ESTO FUERZA AL SISTEMA A NO USAR IPV6
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 30000,
+    tls: {
+        // No fallar por certificados y usar IPv4
+        rejectUnauthorized: false
     }
 });
 
