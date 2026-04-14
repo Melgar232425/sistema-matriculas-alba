@@ -4,19 +4,14 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    service: 'gmail',
     auth: {
         user: 'alexis052304@gmail.com',
         pass: 'wurslqalniaflavc'
     },
-    family: 4, // <-- ESTO FUERZA AL SISTEMA A NO USAR IPV6
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 30000,
+    // Ajustes de red extremos para Render
+    family: 4, 
     tls: {
-        // No fallar por certificados y usar IPv4
         rejectUnauthorized: false
     }
 });
