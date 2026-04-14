@@ -1,7 +1,42 @@
-node_modules/
-.env
-build/
-.idea/
-*.log
-dist/
-.DS_Store
+# Dependencies
+**/node_modules/
+**/.pnp
+**/.pnp.js
+
+# Testing
+**/coverage/
+
+# Production
+**/build/
+**/dist/
+
+# Misc
+**/.DS_Store
+**/*.pem
+
+# Debug
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Local env files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# IDEs
+**/.idea/
+**/.vscode/
+**/*.swp
+**/*.swo
+**/*.swn
+**/.DS_Store
+
+# Logs
+**/*.log
+
+# Specific scripts to ignore if any
+backend/scripts/diag_output*.txt
+backend/diag_output*.txt
