@@ -302,14 +302,14 @@ const Docentes = () => {
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
                                                     <button
-                                                        className="btn btn-small btn-warning"
+                                                        className="btn-icon btn-icon-edit"
                                                         onClick={() => abrirModalEditar(docente)}
                                                         title="Editar docente"
                                                     >
                                                         <FaEdit />
                                                     </button>
                                                     <button
-                                                        className="btn btn-small btn-danger"
+                                                        className="btn-icon btn-icon-delete"
                                                         onClick={() => eliminarDocente(docente.id)}
                                                         title="Desactivar docente"
                                                     >
@@ -337,124 +337,127 @@ const Docentes = () => {
                             <button className="modal-close" onClick={cerrarModal}>×</button>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Nombres *</label>
-                                    <input
-                                        type="text"
-                                        name="nombres"
-                                        value={formData.nombres}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Apellidos *</label>
-                                    <input
-                                        type="text"
-                                        name="apellidos"
-                                        value={formData.apellidos}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>DNI *</label>
-                                    <input
-                                        type="text"
-                                        name="dni"
-                                        value={formData.dni}
-                                        onChange={handleInputChange}
-                                        maxLength="8"
-                                        pattern="\d{8}"
-                                        title="El DNI debe tener 8 dígitos"
-                                        required
-                                        style={dniDuplicado ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' } : {}}
-                                    />
-                                    {dniDuplicado && (
-                                        <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', fontWeight: '600' }}>
-                                             {dniDuplicado}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Teléfono</label>
-                                    <input
-                                        type="text"
-                                        name="telefono"
-                                        value={formData.telefono}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Correo Electrónico (Auto-generado) *</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        required
-                                        title="El correo se genera automáticamente a partir del nombre"
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Especialidad *</label>
-                                    <select
-                                        name="especialidad"
-                                        value={formData.especialidad}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="form-control"
-                                    >
-                                        <option value="">Seleccionar especialidad</option>
-                                        <option value="Ingeniería / Ciencias Exactas">Ingeniería / Ciencias Exactas</option>
-                                        <option value="Matemática / Física">Matemática / Física</option>
-                                        <option value="Ciencias de la Salud / Biología">Ciencias de la Salud / Biología</option>
-                                        <option value="Biología / Química">Biología / Química</option>
-                                        <option value="Letras / Comunicación">Letras / Comunicación</option>
-                                        <option value="Lengua / Literatura">Lengua / Literatura</option>
-                                        <option value="Ciencias Sociales / Humanidades">Ciencias Sociales / Humanidades</option>
-                                        <option value="Historia y Geografía">Historia y Geografía</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {modoEdicion && (
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label>Estado</label>
-                                        <select
-                                            name="estado"
-                                            value={formData.estado}
+                                        <label>Nombres</label>
+                                        <input
+                                            type="text"
+                                            name="nombres"
+                                            value={formData.nombres}
                                             onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Apellidos</label>
+                                        <input
+                                            type="text"
+                                            name="apellidos"
+                                            value={formData.apellidos}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>DNI</label>
+                                        <input
+                                            type="text"
+                                            name="dni"
+                                            value={formData.dni}
+                                            onChange={handleInputChange}
+                                            maxLength="8"
+                                            pattern="\d{8}"
+                                            title="El DNI debe tener 8 dígitos"
+                                            required
+                                            style={dniDuplicado ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' } : {}}
+                                        />
+                                        {dniDuplicado && (
+                                            <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', fontWeight: '600' }}>
+                                                {dniDuplicado}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Teléfono</label>
+                                        <input
+                                            type="text"
+                                            name="telefono"
+                                            value={formData.telefono}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Correo Electrónico (Auto-generado)</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            readOnly
+                                            required
+                                            style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', color: '#64748b' }}
+                                            title="El correo se genera automáticamente a partir del nombre y no puede ser editado manualmente"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Especialidad</label>
+                                        <select
+                                            name="especialidad"
+                                            value={formData.especialidad}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="form-control"
                                         >
-                                            <option value="activo">Activo</option>
-                                            <option value="inactivo">Inactivo</option>
+                                            <option value="">Seleccionar especialidad</option>
+                                            <option value="Ingeniería / Ciencias Exactas">Ingeniería / Ciencias Exactas</option>
+                                            <option value="Matemática / Física">Matemática / Física</option>
+                                            <option value="Ciencias de la Salud / Biología">Ciencias de la Salud / Biología</option>
+                                            <option value="Biología / Química">Biología / Química</option>
+                                            <option value="Letras / Comunicación">Letras / Comunicación</option>
+                                            <option value="Lengua / Literatura">Lengua / Literatura</option>
+                                            <option value="Ciencias Sociales / Humanidades">Ciencias Sociales / Humanidades</option>
+                                            <option value="Historia y Geografía">Historia y Geografía</option>
                                         </select>
                                     </div>
-                                    <div className="form-group"></div>
                                 </div>
-                            )}
 
-                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="btn btn-primary">
-                                    {modoEdicion ? 'Actualizar' : 'Guardar'}
-                                </button>
-                            </div>
-                        </form>
+                                {modoEdicion && (
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Estado</label>
+                                            <select
+                                                name="estado"
+                                                value={formData.estado}
+                                                onChange={handleInputChange}
+                                            >
+                                                <option value="activo">Activo</option>
+                                                <option value="inactivo">Inactivo</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group"></div>
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+                                    <button type="button" className="btn btn-outline" onClick={cerrarModal}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        {modoEdicion ? 'Actualizar' : 'Guardar'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

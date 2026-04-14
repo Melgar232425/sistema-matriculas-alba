@@ -1,9 +1,10 @@
-// Página de Cursos - Gestión de cursos
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import { cursosAPI, docentesAPI, ciclosAPI } from '../services/api';
-import { FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaTimes, FaSync, FaCalendarCheck } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaTimes, FaSync, FaCalendarCheck, FaLayerGroup, FaFileExcel } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 const CURSOS_PRESET = [
   // Ciencias Exactas (4)
@@ -80,13 +81,11 @@ const Cursos = () => {
     'Jueves',
     'Viernes',
     'Sábado',
-    'Domingo',
     // Combinaciones frecuentes
     'Lunes a Viernes',
     'Lunes, Miércoles y Viernes',
     'Martes y Jueves',
-    'Sábados',
-    'Sábados y Domingos'
+    'Sábados'
   ];
 
   const opcionesHoras = [
@@ -106,11 +105,8 @@ const Cursos = () => {
     'Laboratorio 1', 'Laboratorio 2'
   ];
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  const cargarDatos = async () => {
+  // Punto 3: Gestión de datos optimizada (Senior)
+  const cargarDatos = useCallback(async () => {
     try {
       setLoading(true);
       const [cursosRes, docentesRes, ciclosRes] = await Promise.all([
@@ -123,11 +119,19 @@ const Cursos = () => {
       setCiclos(ciclosRes.data.data);
     } catch (error) {
       console.error('Error al cargar datos:', error);
-      toast.error('Error al cargar datos');
+      // Solo mostramos toast si hay un error real de red o servidor
+      if (!error.response || error.response.status !== 401) {
+        toast.error('Error al cargar datos del sistema');
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    cargarDatos();
+  }, [cargarDatos]);
+
 
   // Consulta disponibilidad de bloques horarios al backend
   const fetchDisponibilidad = async (ciclo_id, dia, docente_id, excluir_id) => {
@@ -440,6 +444,160 @@ const Cursos = () => {
     }
   };
 
+  const exportarExcel = async () => {
+    try {
+      const cicloNombreInfo = filtroCiclo ? ciclos.find(c => c.id === parseInt(filtroCiclo))?.nombre : 'Todos los Ciclos';
+      
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('REPORTE OFICIAL');
+
+      // 0. Arquitectura de Margen (A en blanco, todo desde B)
+      worksheet.views = [{ showGridLines: false }];
+      worksheet.getColumn(1).width = 5; // Margen visible blanco (A)
+      
+      // Ajuste de anchos desde B
+      worksheet.getColumn(2).width = 15; 
+      worksheet.getColumn(3).width = 12; 
+      worksheet.getColumn(4).width = 40; 
+      worksheet.getColumn(5).width = 15; 
+      worksheet.getColumn(6).width = 30; 
+      worksheet.getColumn(7).width = 25; 
+      worksheet.getColumn(8).width = 12; 
+      worksheet.getColumn(9).width = 10; 
+      worksheet.getColumn(10).width = 10; 
+      worksheet.getColumn(11).width = 15; 
+      worksheet.getColumn(12).width = 15; 
+
+      // 1. Logo Institucional (En B2)
+      try {
+        const logoResponse = await fetch('/logo_alba_v3.png');
+        if (logoResponse.ok) {
+          const blob = await logoResponse.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          const logoId = workbook.addImage({
+            buffer: arrayBuffer,
+            extension: 'png',
+          });
+          worksheet.addImage(logoId, {
+            tl: { col: 1, row: 1 }, // Inicia en B2
+            ext: { width: 170, height: 170 }
+          });
+        }
+      } catch (e) { console.log('Logo error'); }
+
+      // 2. Info Centralizada en el área de datos (B a L)
+      worksheet.getRow(2).height = 45;
+      worksheet.getRow(3).height = 45;
+
+      worksheet.mergeCells('B2:L3'); // Centrado respecto al área B-L
+      const titleCell = worksheet.getCell('B2');
+      titleCell.value = 'ACADEMIA ALBA PERÚ';
+      titleCell.font = { name: 'Arial Black', size: 34, color: { argb: 'FF002D72' } };
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      worksheet.mergeCells('B4:L5');
+      const subTitleCell = worksheet.getCell('B4');
+      subTitleCell.value = `REPORTE OFICIAL DE GESTIÓN ACADÉMICA | CICLO: ${cicloNombreInfo.toUpperCase()}`;
+      subTitleCell.font = { name: 'Arial', size: 12, color: { argb: 'FF64748B' }, bold: true };
+      subTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      // 3. Tabla (A partir de Fila 10)
+      const headers = ['', 'CICLO', 'CÓDIGO', 'MATERIA', 'AULA', 'DOCENTE', 'HORARIO', 'TURNO', 'TOTAL', 'DISP.', 'PRECIO', 'ESTADO'];
+      worksheet.addRow([]); worksheet.addRow([]); worksheet.addRow([]); worksheet.addRow([]);
+      const actualHeaderRow = worksheet.addRow(headers);
+      actualHeaderRow.height = 35;
+      actualHeaderRow.eachCell((cell, colNum) => {
+        if (colNum > 1) { // IGNORAR COLUMNA A
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF002D72' } };
+          cell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          cell.border = { bottom: { style: 'medium', color: { argb: 'FFF47B20' } } };
+        }
+      });
+
+      // 4. Datos Estrictamente desde B a L
+      cursosFiltrados.forEach((c, index) => {
+        const row = worksheet.addRow([
+          '', // Columna A vacía
+          c.ciclo_nombre || '-',
+          c.codigo,
+          c.nombre,
+          c.aula || 'S/A',
+          c.docente_nombres ? `${c.docente_nombres} ${c.docente_apellidos}` : 'Por asignar',
+          c.horario || '-',
+          c.seccion || '-',
+          c.cupos_totales,
+          c.cupos_disponibles,
+          parseFloat(c.precio),
+          c.estado.toUpperCase()
+        ]);
+
+        row.height = 25;
+        const rowColor = (index % 2 === 0) ? 'FFFFFFFF' : 'FFF9FAFB';
+        
+        row.eachCell((cell, colNum) => {
+          if (colNum > 1) { // IGNORAR A
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowColor } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.font = { color: { argb: 'FF1E293B' }, size: 10 };
+            
+            if (colNum === 2 || colNum === 4) {
+              cell.font = { bold: true, color: { argb: 'FF002D72' } };
+            }
+            if (colNum === 11) {
+              cell.numFmt = '"S/ " #,##0.00';
+              cell.alignment = { horizontal: 'right' };
+            }
+            if (colNum === 12) {
+              cell.font = { color: { argb: cell.value === 'ACTIVO' ? 'FF16A34A' : 'FFEF4444' }, bold: true };
+            }
+          }
+        });
+      });
+
+      // 5. Ajustes Finales de Columnas (A a L)
+      worksheet.columns.forEach((col, i) => {
+        // A, B, C, D, E, F, G, H, I, J, K, L
+        const widths = [5, 20, 15, 35, 12, 35, 35, 20, 10, 10, 15, 15];
+        if (widths[i]) col.width = widths[i];
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `reporte_cursos_alba.xlsx`);
+      toast.success('¡Reporte Institucional Generado!');
+    } catch (error) {
+      console.error('Excel Error:', error);
+      toast.error('Error al generar Excel');
+    }
+  };
+
+  // Punto 2: Filtrado optimizado con useMemo (Evita recalculos pesados)
+  const cursosFiltrados = useMemo(() => {
+    return cursos.filter(curso => {
+      // 1. Filtro de Eliminados
+      if (curso.estado === 'inactivo') return false;
+
+      // 2. Filtro de Ciclo
+      const matchCiclo = filtroCiclo ? curso.ciclo_id === parseInt(filtroCiclo) : true;
+      if (!matchCiclo) return false;
+
+      // 3. Filtro de Búsqueda
+      const term = searchTerm.toLowerCase().trim();
+      if (!term) return true;
+
+      const nombreDocente = curso.docente_nombres ? `${curso.docente_nombres} ${curso.docente_apellidos}`.toLowerCase() : '';
+      return (
+        curso.nombre.toLowerCase().includes(term) ||
+        (curso.seccion && curso.seccion.toLowerCase().includes(term)) ||
+        nombreDocente.includes(term) ||
+        curso.codigo.toLowerCase().includes(term) ||
+        (curso.aula && curso.aula.toLowerCase().includes(term))
+      );
+    });
+  }, [cursos, searchTerm, filtroCiclo]);
+
+  const countActivos = useMemo(() => cursosFiltrados.length, [cursosFiltrados]);
+
   return (
     <div className="main-content">
       <Navbar title="Gestión de Cursos" />
@@ -496,6 +654,22 @@ const Cursos = () => {
               ))}
             </select>
           </div>
+
+          <button 
+            className="btn" 
+            onClick={exportarExcel}
+            style={{ 
+              background: '#f0fdf4', 
+              color: '#16a34a', 
+              border: '1px solid #dcfce7',
+              padding: '8px 16px',
+              fontSize: '13px',
+              fontWeight: '700'
+            }}
+          >
+            <FaFileExcel size={14} /> Descargar Reporte
+          </button>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
               width: '10px',
@@ -504,16 +678,7 @@ const Cursos = () => {
               backgroundColor: searchTerm ? '#4361ee' : '#cbd5e1'
             }}></span>
             <span style={{ fontSize: '13px', fontWeight: '500', color: '#64748b' }}>
-              {searchTerm ? `Resultado: ${cursos.filter(curso => curso.estado !== 'inactivo').filter(curso => {
-                const term = searchTerm.toLowerCase();
-                const nombreDocente = curso.docente_nombres ? `${curso.docente_nombres} ${curso.docente_apellidos}`.toLowerCase() : '';
-                return (
-                  curso.nombre.toLowerCase().includes(term) ||
-                  (curso.seccion && curso.seccion.toLowerCase().includes(term)) ||
-                  nombreDocente.includes(term) ||
-                  curso.codigo.toLowerCase().includes(term)
-                );
-              }).length} curso(s)` : `Mostrando ${cursos.filter(c => c.estado !== 'inactivo').length} curso(s) activos`}
+              {searchTerm ? `Resultado: ${countActivos} curso(s)` : `Mostrando ${countActivos} curso(s) activos`}
             </span>
           </div>
         </div>
@@ -521,7 +686,7 @@ const Cursos = () => {
         {loading ? (
           <div className="loading"><div className="spinner"></div></div>
         ) : (
-          <div className="table-container">
+          <div className="table-container table-compact">
             <table>
               <thead>
                 <tr>
@@ -539,29 +704,15 @@ const Cursos = () => {
                 </tr>
               </thead>
               <tbody>
-                {cursos.length === 0 ? (
+                {cursosFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan="11" style={{ textAlign: 'center', padding: '20px' }}>
-                      No hay cursos registrados
+                    <td colSpan="11" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                      <div style={{ fontSize: '24px', marginBottom: '10px' }}>🔍</div>
+                      No se encontraron cursos con los filtros actuales
                     </td>
                   </tr>
                 ) : (
-                  cursos.filter(curso => curso.estado !== 'inactivo').filter(curso => {
-                    if (searchTerm === '' && filtroCiclo === '') return true;
-                    const term = searchTerm.toLowerCase();
-                    const nombreDocente = curso.docente_nombres ? `${curso.docente_nombres} ${curso.docente_apellidos}`.toLowerCase() : '';
-
-                    const matchSearch = (
-                      curso.nombre.toLowerCase().includes(term) ||
-                      (curso.seccion && curso.seccion.toLowerCase().includes(term)) ||
-                      nombreDocente.includes(term) ||
-                      curso.codigo.toLowerCase().includes(term)
-                    );
-
-                    const matchCiclo = filtroCiclo ? curso.ciclo_id === parseInt(filtroCiclo) : true;
-
-                    return matchSearch && matchCiclo;
-                  }).map((curso) => {
+                  cursosFiltrados.map((curso) => {
                     const isVencido = curso.fecha_fin && new Date(curso.fecha_fin) < new Date(new Date().setHours(0, 0, 0, 0));
                     return (
                       <tr key={curso.id} style={{ opacity: isVencido ? 0.7 : 1 }}>
@@ -576,8 +727,8 @@ const Cursos = () => {
                            {curso.ciclo_nombre || '-'}
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                           <span className={curso.aula ? 'badge badge-info' : 'badge badge-secondary'} style={{ background: curso.aula ? '#e0f2fe' : '#f1f5f9', color: curso.aula ? '#0369a1' : '#64748b', minWidth: '80px' }}>
-                              {curso.aula || 'Sin aula'}
+                           <span className={curso.aula ? 'badge badge-info' : 'badge badge-secondary'} style={{ background: curso.aula ? '#e0f2fe' : '#f1f5f9', color: curso.aula ? '#0369a1' : '#64748b', fontSize: '10px' }}>
+                              {curso.aula || '-'}
                            </span>
                         </td>
                         <td style={{ fontSize: '0.95em' }}>
@@ -603,13 +754,9 @@ const Cursos = () => {
                           </div>
                         </td>
                         <td style={{ whiteSpace: 'nowrap' }}>S/ {parseFloat(curso.precio).toFixed(2)}</td>
-                        <td>
-                          {curso.fecha_inicio ? new Date(curso.fecha_inicio).toLocaleDateString() : '-'}
-                          {curso.fecha_fin && (
-                            <div style={{ fontSize: '0.8em', color: '#666' }}>
-                              al {new Date(curso.fecha_fin).toLocaleDateString()}
-                            </div>
-                          )}
+                        <td style={{ whiteSpace: 'nowrap', fontSize: '11px' }}>
+                          {curso.fecha_inicio ? new Date(curso.fecha_inicio).toLocaleDateString('es-PE', { day:'numeric', month:'numeric' }) : '-'}
+                          {curso.fecha_fin && ` - ${new Date(curso.fecha_fin).toLocaleDateString('es-PE', { day:'numeric', month:'numeric', year:'2-digit' })}`}
                         </td>
                         <td>
                           {isVencido ? (
@@ -621,28 +768,27 @@ const Cursos = () => {
                           )}
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                             <button
-                              className="btn btn-small btn-warning"
-                              onClick={() => abrirModalEditar(curso)}
-                              title="Editar curso"
+                               className="btn-icon btn-icon-edit"
+                               onClick={() => abrirModalEditar(curso)}
+                               style={{ width: '28px', height: '28px' }}
                             >
-                              <FaEdit />
+                               <FaEdit size={12} />
                             </button>
                             <button
-                              className="btn btn-small btn-danger"
-                              onClick={() => eliminarCurso(curso.id)}
-                              title="Desactivar curso"
+                               className="btn-icon btn-icon-delete"
+                               onClick={() => eliminarCurso(curso.id)}
+                               style={{ width: '28px', height: '28px' }}
                             >
-                              <FaTrash />
+                               <FaTrash size={12} />
                             </button>
                             <button
-                              className="btn btn-small btn-info"
-                              onClick={() => duplicarCurso(curso)}
-                              title="Duplicar curso (Crear nueva sección)"
-                              style={{ backgroundColor: '#0ea5e9', color: 'white' }}
+                               className="btn-icon btn-icon-view"
+                               onClick={() => duplicarCurso(curso)}
+                               style={{ width: '28px', height: '28px', border: '1px solid #0ea5e9' }}
                             >
-                              <FaCopy />
+                               <FaCopy size={12} />
                             </button>
                           </div>
                         </td>
@@ -666,245 +812,257 @@ const Cursos = () => {
               </h2>
               <button className="modal-close" onClick={cerrarModal}>×</button>
             </div>
+            <div className="modal-body">
+              <form onSubmit={handleSubmit}>
+                {/* BLOQUE 1: Identidad y Ciclo */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nombre del Curso</label>
+                    <select
+                      name="nombre"
+                      className="form-control"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Seleccionar curso</option>
+                      {CURSOS_PRESET.map((c, index) => (
+                        <option key={index} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
 
-            <form onSubmit={handleSubmit}>
-              {/* BLOQUE 1: Identidad y Ciclo */}
-              <div className="form-row">
+                  <div className="form-group">
+                    <label>Ciclo Académico</label>
+                    <select
+                      name="ciclo_id"
+                      value={formData.ciclo_id}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Seleccionar ciclo</option>
+                      {ciclos.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.nombre} {c.estado === 'inactivo' ? '(Cerrado)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* BLOQUE 2: Fechas del Ciclo */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Fecha de Inicio del Ciclo</label>
+                    <input
+                      type="date"
+                      name="fecha_inicio"
+                      value={formData.fecha_inicio}
+                      readOnly
+                      style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Fecha de Fin del Ciclo</label>
+                    <input
+                      type="date"
+                      name="fecha_fin"
+                      value={formData.fecha_fin}
+                      readOnly
+                      style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }}
+                    />
+                  </div>
+                </div>
+
+                {/* BLOQUE 3: Logística del Curso */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Docente Asignado</label>
+                    <select
+                      name="docente_id"
+                      value={formData.docente_id}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Sin asignar</option>
+                      {docentes.map(d => (
+                        <option key={d.id} value={d.id}>{d.nombres} {d.apellidos}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Aula (Seleccionar Horario primero)</label>
+                    <select
+                      name="aula"
+                      className="form-control"
+                      value={formData.aula}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Seleccionar Aula (Opcional)</option>
+                      {opcionesAulas.map(aula => (
+                        <option key={aula} value={aula}>
+                          {aula}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* BLOQUE 4: Programación y Horarios */}
                 <div className="form-group">
-                  <label>Nombre del Curso</label>
-                  <select
-                    name="nombre"
-                    className="form-control"
-                    value={formData.nombre}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccionar curso</option>
-                    {CURSOS_PRESET.map((c, index) => (
-                      <option key={index} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <label>Horario Fijo</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select
+                      name="dias"
+                      value={formData.dias}
+                      onChange={handleInputChange}
+                      style={{ flex: 1 }}
+                      required
+                    >
+                      <option value="">Días</option>
+                      {opcionesDias.map(d => <option key={d} value={d}>{d}</option>)}
+                      {formData.dias && !opcionesDias.includes(formData.dias) && (
+                        <option value={formData.dias}>{formData.dias} (Personalizado)</option>
+                      )}
+                    </select>
+
+                    <select
+                      name="horas"
+                      value={formData.horas}
+                      onChange={handleInputChange}
+                      style={{ flex: 1 }}
+                      required
+                    >
+                      <option value="">Bloque de Hora</option>
+                      <optgroup label="Turno Mañana">
+                        {["7:00 AM - 9:00 AM", "9:00 AM - 11:00 AM", "11:30 AM - 1:30 PM"].map(bloque => {
+                          const key = bloque.trim().toUpperCase();
+                          const razonOcupado = bloquesOcupados[key];
+                          const isOcupado = !!razonOcupado;
+
+                          return (
+                            <option key={bloque} value={bloque} disabled={isOcupado}
+                              style={{ color: isOcupado ? '#ef4444' : '#16a34a', fontWeight: '500' }}>
+                              {bloque} {isOcupado ? `— ${razonOcupado}` : '— Disponible'}
+                            </option>
+                          );
+                        })}
+                      </optgroup>
+                      <optgroup label="Turno Tarde">
+                        {["2:00 PM - 4:00 PM", "4:00 PM - 6:00 PM", "6:00 PM - 7:00 PM"].map(bloque => {
+                          const key = bloque.trim().toUpperCase();
+                          const razonOcupado = bloquesOcupados[key];
+                          const isOcupado = !!razonOcupado;
+
+                          return (
+                            <option key={bloque} value={bloque} disabled={isOcupado}
+                              style={{ color: isOcupado ? '#ef4444' : '#16a34a', fontWeight: '500' }}>
+                              {bloque} {isOcupado ? `— ${razonOcupado}` : '— Disponible'}
+                            </option>
+                          );
+                        })}
+                      </optgroup>
+                    </select>
+                  </div>
+                  {formData.dias && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '10px 15px',
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      color: '#1e40af',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      animation: 'fadeIn 0.3s ease-in-out'
+                    }}>
+                      <FaCalendarCheck color="#3b82f6" size={16} />
+                      <span>
+                        <strong>Estado del {formData.dias}:</strong> 
+                        {!formData.horas ? " Consulta el desplegable de horas para ver disponibilidad." : " Horario seleccionado correctamente."}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* BLOQUE 5: Detalles Finales (Turno, Cupos, Precio) */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Turno / Sección (Auto)</label>
+                    <input
+                      type="text"
+                      name="seccion"
+                      value={formData.seccion}
+                      readOnly
+                      style={{ backgroundColor: '#f8fafc', fontWeight: 'bold', color: '#4361ee' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Cupos Totales</label>
+                    <input
+                      type="number"
+                      name="cupos_totales"
+                      value={formData.cupos_totales}
+                      onChange={handleInputChange}
+                      required
+                      min="1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Precio Matrícula (S/)</label>
+                    <input
+                      type="number"
+                      name="precio"
+                      value={formData.precio}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Ciclo Académico</label>
-                  <select
-                    name="ciclo_id"
-                    value={formData.ciclo_id}
+                  <label>Notas Adicionales</label>
+                  <textarea
+                    name="descripcion"
+                    value={formData.descripcion}
                     onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Seleccionar ciclo</option>
-                    {ciclos.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.nombre} {c.estado === 'inactivo' ? '(Cerrado)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* BLOQUE 2: Fechas del Ciclo */}
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Fecha de Inicio del Ciclo</label>
-                  <input
-                    type="date"
-                    name="fecha_inicio"
-                    value={formData.fecha_inicio}
-                    readOnly
-                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }}
-                  />
+                    placeholder="Detalles sobre el curso, materiales, etc."
+                    rows="2"
+                    style={{ height: 'auto', padding: '12px' }}
+                  ></textarea>
                 </div>
 
-                <div className="form-group">
-                  <label>Fecha de Fin del Ciclo</label>
-                  <input
-                    type="date"
-                    name="fecha_fin"
-                    value={formData.fecha_fin}
-                    readOnly
-                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }}
-                  />
-                </div>
-              </div>
-
-              {/* BLOQUE 3: Logística del Curso */}
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Docente Asignado</label>
-                  <select
-                    name="docente_id"
-                    value={formData.docente_id}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Sin asignar</option>
-                    {docentes.map(d => (
-                      <option key={d.id} value={d.id}>{d.nombres} {d.apellidos}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Aula (Seleccionar Horario primero)</label>
-                  <select
-                    name="aula"
-                    className="form-control"
-                    value={formData.aula}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccionar Aula (Opcional)</option>
-                    {opcionesAulas.map(aula => (
-                      <option key={aula} value={aula}>
-                        {aula}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* BLOQUE 4: Programación y Horarios */}
-              <div className="form-group">
-                <label>Horario Fijo</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <select
-                    name="dias"
-                    value={formData.dias}
-                    onChange={handleInputChange}
-                    style={{ flex: 1 }}
-                    required
-                  >
-                    <option value="">Días</option>
-                    {opcionesDias.map(d => <option key={d} value={d}>{d}</option>)}
-                    {formData.dias && !opcionesDias.includes(formData.dias) && (
-                      <option value={formData.dias}>{formData.dias} (Personalizado)</option>
-                    )}
-                  </select>
-
-                  <select
-                    name="horas"
-                    value={formData.horas}
-                    onChange={handleInputChange}
-                    style={{ flex: 1 }}
-                    required
-                  >
-                    <option value="">Bloque de Hora</option>
-                    <optgroup label="Turno Mañana">
-                      {["7:00 AM - 9:00 AM", "9:00 AM - 11:00 AM", "11:30 AM - 1:30 PM"].map(bloque => {
-                        const key = bloque.trim().toUpperCase();
-                        const razonOcupado = bloquesOcupados[key];
-                        const isOcupado = !!razonOcupado;
-
-                        return (
-                          <option key={bloque} value={bloque} disabled={isOcupado}
-                            style={{ color: isOcupado ? '#ef4444' : '#16a34a', fontWeight: '500' }}>
-                            {bloque} {isOcupado ? `— ${razonOcupado}` : '— Disponible'}
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                    <optgroup label="Turno Tarde">
-                      {["2:00 PM - 4:00 PM", "4:00 PM - 6:00 PM", "6:00 PM - 7:00 PM"].map(bloque => {
-                        const key = bloque.trim().toUpperCase();
-                        const razonOcupado = bloquesOcupados[key];
-                        const isOcupado = !!razonOcupado;
-
-                        return (
-                          <option key={bloque} value={bloque} disabled={isOcupado}
-                            style={{ color: isOcupado ? '#ef4444' : '#16a34a', fontWeight: '500' }}>
-                            {bloque} {isOcupado ? `— ${razonOcupado}` : '— Disponible'}
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                  </select>
-                </div>
-                {formData.dias && (
-                  <div style={{
-                    marginTop: '12px',
-                    padding: '10px 15px',
-                    backgroundColor: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '10px',
-                    fontSize: '13px',
-                    color: '#1e40af',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    animation: 'fadeIn 0.3s ease-in-out'
-                  }}>
-                    <FaCalendarCheck color="#3b82f6" size={16} />
-                    <span>
-                      <strong>Estado del {formData.dias}:</strong> 
-                      {!formData.horas ? " Consulta el desplegable de horas para ver disponibilidad." : " Horario seleccionado correctamente."}
-                    </span>
+                {modoEdicion && (
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Estado</label>
+                      <select
+                        name="estado"
+                        value={formData.estado}
+                        onChange={handleInputChange}
+                      >
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                      </select>
+                    </div>
                   </div>
                 )}
-              </div>
 
-              {/* BLOQUE 5: Detalles Finales (Turno, Cupos, Precio) */}
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Turno / Sección (Auto)</label>
-                  <input
-                    type="text"
-                    name="seccion"
-                    value={formData.seccion}
-                    readOnly
-                    placeholder="Auto-asignado por horario"
-                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', fontWeight: 'bold' }}
-                  />
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+                  <button type="button" className="btn btn-outline" onClick={cerrarModal}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">
+                    {modoEdicion ? 'Actualizar Curso' : 'Crear Curso'}
+                  </button>
                 </div>
-
-                <div className="form-group">
-                  <label>Cupos Totales (Auto)</label>
-                  <input
-                    type="number"
-                    name="cupos_totales"
-                    value={formData.cupos_totales}
-                    onChange={handleInputChange}
-                    readOnly
-                    style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', fontWeight: 'bold' }}
-                    title="La capacidad está fijada en 40 estudiantes por aula según normativa."
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Precio (S/)</label>
-                  <input
-                    type="number"
-                    name="precio"
-                    value={formData.precio}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
-                    required
-                    style={{ fontWeight: 'bold', color: '#0f172a' }}
-                  />
-                </div>
-              </div>
-
-              {/* OPCIONAL: Descripción */}
-              <div className="form-group">
-                <label>Descripción / Observación (Opcional)</label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleInputChange}
-                  rows="2"
-                  placeholder="Detalles adicionales sobre el curso..."
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  {modoEdicion ? 'Actualizar' : 'Guardar'}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}

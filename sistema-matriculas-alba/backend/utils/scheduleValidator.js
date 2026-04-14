@@ -1,4 +1,4 @@
-const moment = require('moment');
+// No moment import needed (Point 6)
 
 const DIAS_SEMANA = {
     'lunes': 1, 'lun': 1, 'lu': 1,
@@ -6,8 +6,7 @@ const DIAS_SEMANA = {
     'miercoles': 3, 'miércoles': 3, 'mie': 3, 'mié': 3, 'mi': 3,
     'jueves': 4, 'jue': 4, 'ju': 4,
     'viernes': 5, 'vie': 5, 'vi': 5,
-    'sabado': 6, 'sábado': 6, 'sab': 6, 'sáb': 6, 'sa': 6,
-    'domingo': 0, 'dom': 0, 'do': 0
+    'sabado': 6, 'sábado': 6, 'sab': 6, 'sáb': 6, 'sa': 6
 };
 
 const KEYWORDS_DIARIO = ['diario', 'todos los dias', 'todos los días', 'lunes a viernes', 'lun a vie'];

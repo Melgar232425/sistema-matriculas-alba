@@ -44,61 +44,65 @@ function App() {
     <AuthProvider>
       <Toaster position="top-right" />
       <Router>
-        <div className="app">
-          <Sidebar />
-          <Routes>
-            <Route path="/login" element={<Login />} />
+        <Routes>
+          {/* Ruta de Login independiente */}
+          <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={
-              <PrivateRoute allowedRoles={['director', 'admin']}>
-                <Dashboard />
-              </PrivateRoute>
-            } />
-            <Route path="/estudiantes" element={
-              <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                <Estudiantes />
-              </PrivateRoute>
-            } />
-            <Route path="/docentes" element={
-              <PrivateRoute allowedRoles={['director', 'admin']}>
-                <Docentes />
-              </PrivateRoute>
-            } />
-            <Route path="/cursos" element={
-              <PrivateRoute allowedRoles={['director', 'admin']}>
-                <Cursos />
-              </PrivateRoute>
-            } />
-            <Route path="/ciclos" element={
-              <PrivateRoute allowedRoles={['director', 'admin']}>
-                <Ciclos />
-              </PrivateRoute>
-            } />
-            <Route path="/matriculas" element={
-              <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                <Matriculas />
-              </PrivateRoute>
-            } />
-            <Route path="/pagos" element={
-              <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                <Pagos />
-              </PrivateRoute>
-            } />
-            <Route path="/reportes" element={
-              <PrivateRoute allowedRoles={['director', 'admin']}>
-                <Reportes />
-              </PrivateRoute>
-            } />
-            <Route path="/calendario" element={
-              <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                <Calendario />
-              </PrivateRoute>
-            } />
-            <Route path="*" element={
-              <Navigate to="/" replace />
-            } />
-          </Routes>
-        </div>
+          {/* Rutas Protegidas dentro del Layout General */}
+          <Route path="*" element={
+            <div className="app">
+              <Sidebar />
+              <Routes>
+                <Route path="/" element={
+                  <PrivateRoute allowedRoles={['director', 'admin']}>
+                    <Dashboard />
+                  </PrivateRoute>
+                } />
+                <Route path="/estudiantes" element={
+                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+                    <Estudiantes />
+                  </PrivateRoute>
+                } />
+                <Route path="/docentes" element={
+                  <PrivateRoute allowedRoles={['director', 'admin']}>
+                    <Docentes />
+                  </PrivateRoute>
+                } />
+                <Route path="/cursos" element={
+                  <PrivateRoute allowedRoles={['director', 'admin']}>
+                    <Cursos />
+                  </PrivateRoute>
+                } />
+                <Route path="/ciclos" element={
+                  <PrivateRoute allowedRoles={['director', 'admin']}>
+                    <Ciclos />
+                  </PrivateRoute>
+                } />
+                <Route path="/matriculas" element={
+                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+                    <Matriculas />
+                  </PrivateRoute>
+                } />
+                <Route path="/pagos" element={
+                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+                    <Pagos />
+                  </PrivateRoute>
+                } />
+                <Route path="/reportes" element={
+                  <PrivateRoute allowedRoles={['director', 'admin']}>
+                    <Reportes />
+                  </PrivateRoute>
+                } />
+                <Route path="/calendario" element={
+                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+                    <Calendario />
+                  </PrivateRoute>
+                } />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          } />
+        </Routes>
       </Router>
     </AuthProvider>
   );

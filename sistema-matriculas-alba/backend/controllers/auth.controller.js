@@ -6,12 +6,17 @@ const jwt = require('jsonwebtoken');
 // Login
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    let { username, password } = req.body;
     
-    if (!username || !password) {
+    // Punto S5: Sanitización de inputs (trim)
+    username = username?.trim();
+    password = password?.trim();
+    
+    // Punto S6: Límite de longitud
+    if (!username || !password || username.length > 100 || password.length > 200) {
       return res.status(400).json({
         success: false,
-        message: 'Usuario y contraseña son requeridos'
+        message: 'Usuario y contraseña no válidos'
       });
     }
     
@@ -41,13 +46,18 @@ exports.login = async (req, res) => {
     }
     
     // Generar token JWT
+    // Punto 5: Eliminamos fallback de JWT_SECRET
+    if (!process.env.JWT_SECRET) {
+        throw new Error('CRITICAL: JWT_SECRET no configurado');
+    }
+
     const token = jwt.sign(
       { 
         id: usuario.id, 
         username: usuario.username,
         rol: usuario.rol 
       },
-      process.env.JWT_SECRET || 'academia_alba_secret',
+      process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '24h' }
     );
     

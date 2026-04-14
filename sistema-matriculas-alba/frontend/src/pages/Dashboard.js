@@ -1,4 +1,4 @@
-// Página Dashboard - Inicio con estadísticas
+// Página Dashboard - Versión Premium 2026
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { reportesAPI } from '../services/api';
@@ -7,17 +7,17 @@ import {
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
-  FaExclamationTriangle,
-  FaChartLine
+  FaChartPie,
+  FaArrowUp,
+  FaUserPlus
 } from 'react-icons/fa';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     cargarDashboard();
@@ -28,9 +28,7 @@ const Dashboard = () => {
       setLoading(true);
       const response = await reportesAPI.getDashboard();
       setStats(response.data.data);
-      setError(null);
     } catch (err) {
-      setError('Error al cargar estadísticas');
       console.error(err);
     } finally {
       setLoading(false);
@@ -40,174 +38,156 @@ const Dashboard = () => {
   if (loading && !stats) {
     return (
       <div className="main-content">
-        <Navbar title="Dashboard" />
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-          <div className="spinner"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="main-content">
-        <Navbar title="Dashboard" />
-        <div className="alert alert-error">{error}</div>
+        <Navbar title="Cargando..." />
+        <div className="loading"><div className="spinner"></div></div>
       </div>
     );
   }
 
   return (
     <div className="main-content">
-      <Navbar title="Dashboard" />
+      <Navbar title="Resumen Ejecutivo" />
 
-      {/* Tarjetas de estadísticas */}
+      {/* Saludo y Acción Rápida */}
+      <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '28px', fontWeight: '800' }}>¡Hola, Administrador!</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '15px' }}>
+             <button className="btn btn-primary" onClick={() => window.location.href='/matriculas'}>
+                <FaUserPlus /> Nueva Matrícula
+             </button>
+        </div>
+      </div>
+
+      {/* Tarjetas de estadísticas Premium */}
       <div className="stats-grid">
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon primary">
-            <FaUserGraduate />
-          </div>
+        <div className="stat-card">
+          <div className="stat-icon primary"><FaUserGraduate /></div>
           <div className="stat-info">
             <h3>{stats?.totalEstudiantes || 0}</h3>
-            <p>Estudiantes Activos</p>
+            <p>Estudiantes Totales</p>
           </div>
         </div>
 
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon success">
-            <FaBook />
-          </div>
+        <div className="stat-card">
+          <div className="stat-icon success"><FaBook /></div>
           <div className="stat-info">
             <h3>{stats?.totalCursos || 0}</h3>
-            <p>Cursos Disponibles</p>
+            <p>Cursos Activos</p>
           </div>
         </div>
 
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon warning">
-            <FaClipboardList />
-          </div>
+        <div className="stat-card">
+          <div className="stat-icon warning"><FaClipboardList /></div>
           <div className="stat-info">
             <h3>{stats?.totalMatriculas || 0}</h3>
-            <p>Matrículas Activas</p>
+            <p>Matrículas este Mes</p>
           </div>
         </div>
 
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon success">
-            <FaMoneyBillWave />
-          </div>
+        <div className="stat-card">
+          <div className="stat-icon success"><FaMoneyBillWave /></div>
           <div className="stat-info">
             <h3>S/ {stats?.ingresosTotales || '0.00'}</h3>
-            <p>Ingresos Totales</p>
-          </div>
-        </div>
-
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon danger">
-            <FaExclamationTriangle />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.estudiantesMorosos || 0}</h3>
-            <p>Alumnos con Deuda</p>
-          </div>
-        </div>
-
-        <div className="stat-card" style={{ transform: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
-          <div className="stat-icon primary">
-            <FaChartLine />
-          </div>
-          <div className="stat-info">
-            <h3>{stats?.totalMatriculas || 0}</h3>
-            <p>Matrículas Totales</p>
+            <p>Recaudación Total</p>
           </div>
         </div>
       </div>
 
-      {/* Gráficos y Actividad Reciente */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px', marginBottom: '24px' }}>
-
-        {/* Gráfico de Cursos Populares */}
-        <div className="card" style={{ marginBottom: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', marginBottom: '30px' }}>
+        
+        {/* Gráfico de Barras: Popularidad */}
+        <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Cursos Más Populares</h2>
+            <h2 className="card-title">Tendencia de Inscripciones</h2>
           </div>
-          <div style={{ width: '100%', height: 300, padding: '10px' }}>
+          <div style={{ width: '100%', height: 350 }}>
             <ResponsiveContainer>
               <BarChart data={stats?.cursosPopulares || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="nombre"
-                  fontSize={10}
-                  tick={{ fill: '#475569' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
-                  interval={0}
-                  angle={-15}
-                  textAnchor="end"
-                  height={80}
+                <XAxis dataKey="nombre" fontSize={11} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  cursor={{fill: '#f8fafc'}}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                 />
-                <YAxis fontSize={12} tick={{ fill: '#475569' }} axisLine={{ stroke: '#e2e8f0' }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="total_matriculas" fill="#4361ee" radius={[4, 4, 0, 0]} name="Matrículas" />
+                <Bar dataKey="total_matriculas" fill="var(--primary)" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Gráfico de Métodos de Pago */}
-        <div className="card" style={{ marginBottom: 0 }}>
+        {/* Gráfico Circular: Métodos de Pago */}
+        <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Métodos de Pago</h2>
+            <h2 className="card-title">Canales de Pago</h2>
           </div>
-          <div style={{ width: '100%', height: 300, padding: '10px' }}>
+          <div style={{ width: '100%', height: 350 }}>
             <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={stats?.metodosPago || []}
-                  cx="50%"
-                  cy="55%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
+                  innerRadius={80}
+                  outerRadius={110}
+                  paddingAngle={8}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
                 >
                   {(stats?.metodosPago || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '-20px' }}>
+                {(stats?.metodosPago || []).map((entry, index) => (
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 'bold' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: COLORS[index % COLORS.length] }}></div>
+                        {entry.name}
+                    </div>
+                ))}
+            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Resumen Final simple */}
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Resumen del Sistema</h2>
+          <h2 className="card-title">Estado del Ciclo Académico</h2>
+          <span className="badge badge-info">Año 2026</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-          <div style={{ padding: '15px', borderLeft: '4px solid #4361ee', background: '#f8fafc' }}>
-            <p style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>Estudiantes Totales</p>
-            <h3 style={{ fontSize: '24px', margin: 0 }}>{stats?.totalEstudiantes || 0}</h3>
-          </div>
-          <div style={{ padding: '15px', borderLeft: '4px solid #10b981', background: '#f8fafc' }}>
-            <p style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>Cursos Activos</p>
-            <h3 style={{ fontSize: '24px', margin: 0 }}>{stats?.totalCursos || 0}</h3>
-          </div>
-          <div style={{ padding: '15px', borderLeft: '4px solid #f59e0b', background: '#f8fafc' }}>
-            <p style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>Ingresos del Mes</p>
-            <h3 style={{ fontSize: '24px', margin: 0 }}>S/ {stats?.ingresosMes || '0.00'}</h3>
-          </div>
-          <div style={{ padding: '15px', borderLeft: '4px solid #ef4444', background: '#f8fafc' }}>
-            <p style={{ color: '#64748b', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>Balance Total</p>
-            <h3 style={{ fontSize: '24px', margin: 0, color: '#10b981' }}>S/ {stats?.ingresosTotales || '0.00'}</h3>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+            <div style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 'bold' }}>ESTUDIANTES</p>
+                <h4 style={{ fontSize: '24px', margin: '5px 0' }}>{stats?.totalEstudiantes}</h4>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '10px' }}>
+                    <div style={{ width: '75%', height: '100%', background: 'var(--primary)', borderRadius: '2px' }}></div>
+                </div>
+            </div>
+            <div style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 'bold' }}>RECAUDADO</p>
+                <h4 style={{ fontSize: '24px', margin: '5px 0' }}>S/ {stats?.ingresosTotales}</h4>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '10px' }}>
+                    <div style={{ width: '60%', height: '100%', background: 'var(--secondary)', borderRadius: '2px' }}></div>
+                </div>
+            </div>
+            <div style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 'bold' }}>CURSOS</p>
+                <h4 style={{ fontSize: '24px', margin: '5px 0' }}>{stats?.totalCursos}</h4>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '10px' }}>
+                    <div style={{ width: '90%', height: '100%', background: 'var(--warning)', borderRadius: '2px' }}></div>
+                </div>
+            </div>
+            <div style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 'bold' }}>META MENSUAL</p>
+                <h4 style={{ fontSize: '24px', margin: '5px 0' }}>85%</h4>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '10px' }}>
+                    <div style={{ width: '85%', height: '100%', background: '#8b5cf6', borderRadius: '2px' }}></div>
+                </div>
+            </div>
         </div>
       </div>
     </div>

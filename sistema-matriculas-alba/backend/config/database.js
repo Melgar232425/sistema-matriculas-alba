@@ -11,7 +11,10 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000, // Punto P6: Timeout de 10s
+  charset: 'utf8mb4',     // Punto S11
+  timezone: '-05:00'      // Punto S11: Hora de Perú
 });
 
 // Promisificar el pool para usar async/await
@@ -21,12 +24,12 @@ const promisePool = pool.promise();
 const testConnection = async () => {
   try {
     const connection = await promisePool.getConnection();
-    console.log('Conexión exitosa a la base de datos MySQL');
+    console.log('Conexión exitosa a la base de datos MySQL (Perú Timezone)');
     connection.release();
     return true;
   } catch (error) {
-    console.error('Error al conectar a la base de datos:', error.message);
-    return false;
+    console.error('CRITICAL: Error al conectar a la base de datos:', error.message);
+    throw error; // Punto 3: Lanzar error para que server.js lo atrape
   }
 };
 

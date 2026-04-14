@@ -1,23 +1,10 @@
 // Controlador para gestión de estudiantes
 const { promisePool } = require('../config/database');
+const { sendWelcomeEmail } = require('../utils/emailService');
 
-// Generar código de estudiante automático
-const generarCodigoEstudiante = async () => {
-  try {
-    const [rows] = await promisePool.query(
-      'SELECT codigo FROM estudiantes ORDER BY id DESC LIMIT 1'
-    );
-
-    if (rows.length === 0) {
-      return 'EST-0001';
-    }
-
-    const ultimoCodigo = rows[0].codigo;
-    const numero = parseInt(ultimoCodigo.split('-')[1]) + 1;
-    return `EST-${numero.toString().padStart(4, '0')}`;
-  } catch (error) {
-    throw error;
-  }
+// Función para generar código basado en ID
+const formatearCodigoEstudiante = (id) => {
+  return `EST-${id.toString().padStart(4, '0')}`;
 };
 
 // Obtener todos los estudiantes
@@ -211,6 +198,11 @@ exports.crear = async (req, res) => {
         [dni]
       );
 
+      // Enviar correo de bienvenida (Seguimiento asíncrono)
+      if (estudianteReactivado[0].email) {
+        sendWelcomeEmail(estudianteReactivado[0]).catch(e => console.error('Error enviando email:', e));
+      }
+
       return res.status(200).json({
         success: true,
         message: 'Estudiante reactivado exitosamente',
@@ -224,17 +216,23 @@ exports.crear = async (req, res) => {
       });
     }
 
-    // Generar código de estudiante
-    const codigo = await generarCodigoEstudiante();
-
-    // Insertar estudiante
+    // Insertar estudiante con código temporal
     const [result] = await promisePool.query(
       `INSERT INTO estudiantes 
        (codigo, dni, nombres, apellidos, fecha_nacimiento, direccion, telefono, 
         email, telefono_apoderado, nombre_apoderado, estado) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')`,
-      [codigo, dni, nombres, apellidos, fecha_nacimiento, direccion,
+      ['TEMP', dni, nombres, apellidos, fecha_nacimiento, direccion,
         telefono, email, telefono_apoderado, nombre_apoderado]
+    );
+
+    const estudianteId = result.insertId;
+    const codigoFinal = formatearCodigoEstudiante(estudianteId);
+
+    // Actualizar con el código real
+    await promisePool.query(
+      'UPDATE estudiantes SET codigo = ? WHERE id = ?',
+      [codigoFinal, estudianteId]
     );
 
     // Obtener el estudiante creado
@@ -242,6 +240,11 @@ exports.crear = async (req, res) => {
       'SELECT * FROM estudiantes WHERE id = ?',
       [result.insertId]
     );
+
+    // Enviar correo de bienvenida al estudiante (ejecución asíncrona para no retrasar respuesta)
+    if (nuevoEstudiante[0].email) {
+      sendWelcomeEmail(nuevoEstudiante[0]).catch(e => console.error('Error enviando email de bienvenida:', e));
+    }
 
     res.status(201).json({
       success: true,
@@ -313,7 +316,7 @@ exports.actualizar = async (req, res) => {
 
     // Verificar si el estudiante existe
     const [existente] = await promisePool.query(
-      'SELECT id FROM estudiantes WHERE id = ?',
+      'SELECT id, email FROM estudiantes WHERE id = ?',
       [id]
     );
 
@@ -368,6 +371,15 @@ exports.actualizar = async (req, res) => {
       'SELECT * FROM estudiantes WHERE id = ?',
       [id]
     );
+
+    // Enviar notificación al nuevo correo si fue actualizado
+    if (email && email !== existente[0].email) {
+        try {
+            sendWelcomeEmail(estudianteActualizado[0]).catch(e => console.error('Error enviando email actualizado:', e));
+        } catch (e) {
+            console.error('Error al preparar email de actualización:', e);
+        }
+    }
 
     res.json({
       success: true,

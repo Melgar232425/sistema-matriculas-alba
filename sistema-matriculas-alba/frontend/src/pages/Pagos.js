@@ -401,152 +401,155 @@ const Pagos = () => {
               <button className="modal-close" onClick={cerrarModal}>×</button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              {/* Buscador por DNI */}
-              <div className="form-group">
-                <label>Buscar por DNI del alumno</label>
-                <input
-                  type="text"
-                  placeholder="Escribe el DNI para filtrar..."
-                  value={buscadorDni}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setBuscadorDni(newValue);
-                    
-                    // Siempre reiniciar la selección cuando el DNI cambia para evitar 
-                    // que quede seleccionado un ID antiguo (fuga de estado)
-                    if (formData.matricula_id) {
-                      setMatriculaSeleccionada(null);
-                      setFormData(prev => ({ ...prev, matricula_id: '', monto: '', numero_recibo: '' }));
-                    }
-                  }}
-                  maxLength="8"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Matrícula</label>
-                <select
-                  value={formData.matricula_id}
-                  onChange={handleMatriculaChange}
-                  required
-                >
-                  <option value="">
-                    {buscadorDni
-                      ? matriculas.filter(m => m.dni && m.dni.includes(buscadorDni)).length === 0
-                        ? 'Este alumno ya no tiene deudas pendientes'
-                        : 'Seleccionar matrícula'
-                      : 'Escribe el DNI arriba para filtrar'}
-                  </option>
-                  {matriculas
-                    .filter(m => !buscadorDni || (m.dni && m.dni.includes(buscadorDni)))
-                    .map(mat => (
-                      <option key={mat.id} value={mat.id}>
-                        {mat.dni} - {mat.nombres} {mat.apellidos} | {mat.curso_nombre}
-                        {' '}(Pendiente: S/ {(mat.monto_total - mat.monto_pagado).toFixed(2)})
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* Recuadro de confirmación visual */}
-              {matriculaSeleccionada && (
-                <div style={{
-                  backgroundColor: '#f8f9fa',
-                  padding: '15px',
-                  borderRadius: '8px',
-                  marginBottom: '20px',
-                  borderLeft: '4px solid #4361ee'
-                }}>
-                  <h4 style={{ margin: '0 0 10px 0', color: '#2b2d42' }}>Detalles del Estudiante</h4>
-                  <p style={{ margin: '5px 0' }}><strong>Estudiante:</strong> {matriculaSeleccionada.nombres} {matriculaSeleccionada.apellidos}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Curso:</strong> {matriculaSeleccionada.curso_nombre}</p>
-                  <p style={{ margin: '5px 0', color: '#e63946' }}><strong>Monto Pendiente:</strong> S/ {(matriculaSeleccionada.monto_total - matriculaSeleccionada.monto_pagado).toFixed(2)}</p>
-                </div>
-              )}
-
-              <div className="form-row">
+            <div className="modal-body">
+              <form onSubmit={handleSubmit}>
+                {/* Buscador por DNI */}
                 <div className="form-group">
-                  <label>Monto (S/)</label>
+                  <label>Buscar por DNI del alumno</label>
                   <input
-                    type="number"
-                    value={formData.monto}
+                    type="text"
+                    placeholder="Escribe el DNI para filtrar..."
+                    value={buscadorDni}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      if (matriculaSeleccionada) {
-                        const max = (matriculaSeleccionada.monto_total - matriculaSeleccionada.monto_pagado);
-                        if (val > max) {
-                          setFormData({ ...formData, monto: max.toFixed(2) });
-                        } else {
-                          setFormData({ ...formData, monto: val });
-                        }
-                      } else {
-                        setFormData({ ...formData, monto: val });
+                      const newValue = e.target.value;
+                      setBuscadorDni(newValue);
+                      
+                      // Siempre reiniciar la selección cuando el DNI cambia para evitar 
+                      // que quede seleccionado un ID antiguo (fuga de estado)
+                      if (formData.matricula_id) {
+                        setMatriculaSeleccionada(null);
+                        setFormData(prev => ({ ...prev, matricula_id: '', monto: '', numero_recibo: '' }));
                       }
                     }}
-                    step="0.01"
-                    min="0"
-                    required
+                    maxLength="8"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Fecha de Pago</label>
-                  <input
-                    type="date"
-                    value={formData.fecha_pago}
-                    onChange={(e) => setFormData({ ...formData, fecha_pago: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Método de Pago</label>
+                  <label>Matrícula</label>
                   <select
-                    value={formData.metodo_pago}
-                    onChange={(e) => setFormData({ ...formData, metodo_pago: e.target.value })}
+                    value={formData.matricula_id}
+                    onChange={handleMatriculaChange}
                     required
                   >
-                    <option value="efectivo">Efectivo</option>
-                    <option value="transferencia">Transferencia</option>
-                    <option value="tarjeta">Tarjeta</option>
-                    <option value="yape">Yape</option>
-                    <option value="plin">Plin</option>
+                    <option value="">
+                      {buscadorDni
+                        ? matriculas.filter(m => m.dni && m.dni.includes(buscadorDni)).length === 0
+                          ? 'Este alumno ya no tiene deudas pendientes'
+                          : 'Seleccionar matrícula'
+                        : 'Escribe el DNI arriba para filtrar'}
+                    </option>
+                    {matriculas
+                      .filter(m => !buscadorDni || (m.dni && m.dni.includes(buscadorDni)))
+                      .map(mat => (
+                        <option key={mat.id} value={mat.id}>
+                          {mat.dni} - {mat.nombres} {mat.apellidos} | {mat.curso_nombre}
+                          {' '}(Pendiente: S/ {(mat.monto_total - mat.monto_pagado).toFixed(2)})
+                        </option>
+                      ))}
                   </select>
                 </div>
 
+                {/* Recuadro de confirmación visual */}
+                {matriculaSeleccionada && (
+                  <div style={{
+                    backgroundColor: '#eff6ff',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    marginBottom: '20px',
+                    borderLeft: '4px solid #4361ee'
+                  }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#1e40af', fontSize: '14px' }}>Detalles de la Matrícula</h4>
+                    <p style={{ margin: '5px 0', fontSize: '13px' }}><strong>Estudiante:</strong> {matriculaSeleccionada.nombres} {matriculaSeleccionada.apellidos}</p>
+                    <p style={{ margin: '5px 0', fontSize: '13px' }}><strong>Curso:</strong> {matriculaSeleccionada.curso_nombre}</p>
+                    <p style={{ margin: '5px 0', color: '#e63946', fontWeight: 'bold', fontSize: '13px' }}><strong>Monto Pendiente:</strong> S/ {(matriculaSeleccionada.monto_total - matriculaSeleccionada.monto_pagado).toFixed(2)}</p>
+                  </div>
+                )}
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Monto a Pagar (S/)</label>
+                    <input
+                      type="number"
+                      value={formData.monto}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (matriculaSeleccionada) {
+                          const max = (matriculaSeleccionada.monto_total - matriculaSeleccionada.monto_pagado);
+                          if (val > max) {
+                            setFormData({ ...formData, monto: max.toFixed(2) });
+                          } else {
+                            setFormData({ ...formData, monto: val });
+                          }
+                        } else {
+                          setFormData({ ...formData, monto: val });
+                        }
+                      }}
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Fecha de Pago</label>
+                    <input
+                      type="date"
+                      value={formData.fecha_pago}
+                      onChange={(e) => setFormData({ ...formData, fecha_pago: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Método de Pago</label>
+                    <select
+                      value={formData.metodo_pago}
+                      onChange={(e) => setFormData({ ...formData, metodo_pago: e.target.value })}
+                      required
+                    >
+                      <option value="efectivo">Efectivo</option>
+                      <option value="transferencia">Transferencia</option>
+                      <option value="tarjeta">Tarjeta</option>
+                      <option value="yape">Yape</option>
+                      <option value="plin">Plin</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Número de Recibo</label>
+                    <input
+                      type="text"
+                      value={formData.numero_recibo}
+                      onChange={(e) => setFormData({ ...formData, numero_recibo: e.target.value })}
+                      readOnly
+                      style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed', fontWeight: 'bold' }}
+                    />
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label>Número de Recibo</label>
-                  <input
-                    type="text"
-                    value={formData.numero_recibo}
-                    onChange={(e) => setFormData({ ...formData, numero_recibo: e.target.value })}
-                    readOnly
-                    style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+                  <label>Observaciones</label>
+                  <textarea
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                    rows="2"
+                    placeholder="Opcional: Detalles del depósito, banco, etc."
                   />
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label>Observaciones</label>
-                <textarea
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  rows="3"
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Registrar Pago
-                </button>
-              </div>
-            </form>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+                  <button type="button" className="btn btn-outline" onClick={cerrarModal}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Registrar Pago
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div >
       )}

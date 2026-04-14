@@ -50,7 +50,7 @@ const Reportes = () => {
     // =============================
     if (hayIngresos) {
       const rowsIngresos = [];
-      rowsIngresos.push([{
+      rowsIngresos.push(["", {
         v: "REPORTE OFICIAL DE INGRESOS - ACADEMIA ALBA",
         t: "s",
         s: {
@@ -59,20 +59,20 @@ const Reportes = () => {
           alignment: { horizontal: "center", vertical: "center" }
         }
       }]);
-      rowsIngresos.push([{
+      rowsIngresos.push(["", {
         v: `Período: ${fechaInicio} al ${fechaFin}`,
         t: "s",
         s: { font: { name: "Arial", sz: 12, italic: true }, alignment: { horizontal: "center" } }
       }]);
-      rowsIngresos.push([{ v: "" }]);
-      rowsIngresos.push([
+      rowsIngresos.push([""]);
+      rowsIngresos.push(["",
         { v: `Total Ingresos: S/ ${ingresos.total || '0.00'}`, t: "s", s: { font: { bold: true, sz: 12, color: { rgb: "10B981" } } } },
         { v: `Cantidad de Pagos: ${ingresos.cantidad || 0}`, t: "s", s: { font: { bold: true, sz: 12 } } }
       ]);
-      rowsIngresos.push([{ v: "" }]);
+      rowsIngresos.push([""]);
 
-      const headersIngresos = ["Fecha", "Código de Recibo", "Nombres", "Apellidos", "Curso", "Monto (S/)", "Método de Pago"];
-      rowsIngresos.push(headersIngresos.map(h => ({
+      const headersIngresos = ["", "Fecha", "Código de Recibo", "Nombres", "Apellidos", "Curso", "Monto (S/)", "Método de Pago"];
+      rowsIngresos.push(headersIngresos.map((h, i) => i === 0 ? "" : ({
         v: h, t: "s",
         s: {
           font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "3B82F6" } },
@@ -83,6 +83,7 @@ const Reportes = () => {
 
       ingresos.pagos.forEach(pago => {
         rowsIngresos.push([
+          "",
           { v: new Date(pago.fecha_pago).toLocaleDateString(), t: "s", s: { alignment: { horizontal: "center" } } },
           { v: pago.codigo, t: "s", s: { alignment: { horizontal: "center" } } },
           { v: pago.nombres, t: "s" },
@@ -95,12 +96,12 @@ const Reportes = () => {
 
       const wsIngresos = XLSX.utils.aoa_to_sheet(rowsIngresos);
       wsIngresos["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
+        { s: { r: 0, c: 1 }, e: { r: 0, c: 7 } },
+        { s: { r: 1, c: 1 }, e: { r: 1, c: 7 } }
       ];
       // Aumentamos los anchos de columna para que el contenido no se corte
       wsIngresos['!cols'] = [
-        { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 20 }, { wch: 25 }
+        { wch: 5 }, { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 20 }, { wch: 25 }
       ];
       XLSX.utils.book_append_sheet(wb, wsIngresos, "Ingresos");
     }
@@ -110,7 +111,7 @@ const Reportes = () => {
     // =============================
     if (hayMorosidad) {
       const rowsDeudas = [];
-      rowsDeudas.push([{
+      rowsDeudas.push(["", {
         v: "REPORTE DE MOROSIDAD Y DEUDAS PENDIENTES - ACADEMIA ALBA",
         t: "s",
         s: {
@@ -119,20 +120,20 @@ const Reportes = () => {
           alignment: { horizontal: "center", vertical: "center" }
         }
       }]);
-      rowsDeudas.push([{
+      rowsDeudas.push(["", {
         v: `Matrículas del Período: ${fechaInicio} al ${fechaFin}`,
         t: "s",
         s: { font: { name: "Arial", sz: 12, italic: true }, alignment: { horizontal: "center" } }
       }]);
-      rowsDeudas.push([{ v: "" }]);
-      rowsDeudas.push([
+      rowsDeudas.push([""]);
+      rowsDeudas.push(["",
         { v: `Deuda Total Acumulada: S/ ${morosidad.totalDeuda || '0.00'}`, t: "s", s: { font: { bold: true, sz: 12, color: { rgb: "EF4444" } } } },
         { v: `Total de Morosos: ${morosidad.totalMorosos || 0}`, t: "s", s: { font: { bold: true, sz: 12 } } }
       ]);
-      rowsDeudas.push([{ v: "" }]);
+      rowsDeudas.push([""]);
 
-      const headersDeudas = ["DNI", "Estudiante", "Curso", "Teléfono", "Monto Total", "Pagado", "Deuda Pendiente", "Fecha Matrícula"];
-      rowsDeudas.push(headersDeudas.map(h => ({
+      const headersDeudas = ["", "DNI", "Estudiante", "Curso", "Teléfono", "Monto Total", "Pagado", "Deuda Pendiente", "Fecha Matrícula"];
+      rowsDeudas.push(headersDeudas.map((h, i) => i === 0 ? "" : ({
         v: h, t: "s",
         s: {
           font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "F59E0B" } },
@@ -143,6 +144,7 @@ const Reportes = () => {
 
       morosidad.morosos.forEach(m => {
         rowsDeudas.push([
+          "",
           { v: m.dni, t: "s", s: { alignment: { horizontal: "center" } } },
           { v: `${m.nombres} ${m.apellidos}`, t: "s" },
           { v: m.curso, t: "s" },
@@ -156,12 +158,12 @@ const Reportes = () => {
 
       const wsDeudas = XLSX.utils.aoa_to_sheet(rowsDeudas);
       wsDeudas["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }
+        { s: { r: 0, c: 1 }, e: { r: 0, c: 8 } },
+        { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } }
       ];
       // Aumentamos los anchos de columna
       wsDeudas['!cols'] = [
-        { wch: 15 }, { wch: 40 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 20 }
+        { wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 20 }
       ];
       XLSX.utils.book_append_sheet(wb, wsDeudas, "Morosidad");
     }
@@ -179,11 +181,11 @@ const Reportes = () => {
         <div className="card-header">
           <h2 className="card-title">Reporte de Ingresos</h2>
           <button
-            className="btn btn-secondary"
+            className="btn btn-primary"
             onClick={exportarExcelConsolidado}
-            style={{ backgroundColor: '#10b981', color: 'white', borderColor: '#059669', fontSize: '1.05rem', padding: '10px 20px' }}
+            style={{ backgroundColor: '#10b981', color: 'white' }}
           >
-            <FaFileExport /> Descargar Reporte (Excel)
+            <FaFileExport /> Descargar Excel
           </button>
         </div>
 
@@ -206,7 +208,7 @@ const Reportes = () => {
           </div>
           <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button className="btn btn-primary" onClick={cargarReportes}>
-              Buscar
+              Generar
             </button>
           </div>
         </div>
@@ -215,18 +217,21 @@ const Reportes = () => {
           <div className="loading"><div className="spinner"></div></div>
         ) : (
           <>
-            <div style={{ marginBottom: '20px', padding: '15px', background: '#f3f4f6', borderRadius: '8px' }}>
-              <h3 style={{ marginBottom: '10px' }}>Resumen de Ingresos</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px' }}>
-                <div>
-                  <p style={{ color: '#6b7280', fontSize: '14px' }}>Total Ingresos</p>
-                  <h2 style={{ color: '#10b981', fontSize: '24px' }}>S/ {ingresos?.total || '0.00'}</h2>
+            <div className="stats-grid" style={{ marginBottom: '25px' }}>
+                <div className="stat-card">
+                  <div className="stat-icon success" style={{ background: '#dcfce7', color: '#10b981' }}>S/</div>
+                  <div className="stat-info">
+                      <h3>S/ {ingresos?.total || '0.00'}</h3>
+                      <p>Total Ingresos</p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ color: '#6b7280', fontSize: '14px' }}>Cantidad de Pagos</p>
-                  <h2 style={{ fontSize: '24px' }}>{ingresos?.cantidad || 0}</h2>
+                <div className="stat-card">
+                  <div className="stat-icon primary" style={{ background: '#eff6ff', color: '#3b82f6' }}>#</div>
+                  <div className="stat-info">
+                      <h3>{ingresos?.cantidad || 0}</h3>
+                      <p>Cantidad de Pagos</p>
+                  </div>
                 </div>
-              </div>
             </div>
 
             <div className="table-container">

@@ -1,5 +1,6 @@
 // Controlador para gestión de pagos
 const { promisePool } = require('../config/database');
+const { sendPaymentEmail } = require('../utils/emailService');
 
 // Generar código de pago automático
 const generarCodigoPago = async () => {
@@ -209,6 +210,25 @@ exports.registrar = async (req, res) => {
       message: 'Pago registrado exitosamente',
       data: nuevoPago[0]
     });
+
+    // Enviar recibo por correo electrónico de forma asíncrona
+    try {
+        const [fullInfo] = await promisePool.query(`
+            SELECT e.email, e.nombres, p.codigo as codigo_recibo, p.monto, p.metodo_pago, c.nombre as curso_nombre
+            FROM pagos p
+            JOIN matriculas m ON p.matricula_id = m.id
+            JOIN estudiantes e ON m.estudiante_id = e.id
+            JOIN cursos c ON m.curso_id = c.id
+            WHERE p.id = ?
+        `, [result.insertId]);
+
+        if (fullInfo.length > 0 && fullInfo[0].email) {
+            const data = fullInfo[0];
+            sendPaymentEmail(data, data, data.curso_nombre).catch(e => console.error('Error email pago:', e));
+        }
+    } catch (e) {
+        console.error('Error al preparar email de pago:', e);
+    }
   } catch (error) {
     await connection.rollback();
     console.error('Error al registrar pago:', error);

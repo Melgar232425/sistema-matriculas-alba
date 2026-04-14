@@ -1,23 +1,10 @@
 const { promisePool } = require('../config/database');
 const { parsearHorario, hayCruce } = require('../utils/scheduleValidator');
+const { sendEnrollmentEmail } = require('../utils/emailService');
 
-// Generar código de matrícula automático
-const generarCodigoMatricula = async () => {
-  try {
-    const [rows] = await promisePool.query(
-      'SELECT codigo FROM matriculas ORDER BY id DESC LIMIT 1'
-    );
-
-    if (rows.length === 0) {
-      return 'MAT-0001';
-    }
-
-    const ultimoCodigo = rows[0].codigo;
-    const numero = parseInt(ultimoCodigo.split('-')[1]) + 1;
-    return `MAT-${numero.toString().padStart(4, '0')}`;
-  } catch (error) {
-    throw error;
-  }
+// Función para generar código basado en ID
+const formatearCodigoMatricula = (id) => {
+  return `MAT-${id.toString().padStart(4, '0')}`;
 };
 
 // Obtener todas las matrículas
@@ -203,15 +190,21 @@ exports.crear = async (req, res) => {
       }
     }
 
-    // Generar código de matrícula
-    const codigo = await generarCodigoMatricula();
-
-    // Insertar matrícula
+    // Insertar matrícula con código temporal
     const [result] = await connection.query(
       `INSERT INTO matriculas 
        (codigo, estudiante_id, curso_id, fecha_matricula, monto_total, observaciones) 
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [codigo, estudiante_id, curso_id, fecha_matricula, curso[0].precio, observaciones]
+      ['TEMP', estudiante_id, curso_id, fecha_matricula, curso[0].precio, observaciones]
+    );
+
+    const matriculaId = result.insertId;
+    const codigoFinal = formatearCodigoMatricula(matriculaId);
+
+    // Actualizar con el código real basado en el ID autoincremental
+    await connection.query(
+      'UPDATE matriculas SET codigo = ? WHERE id = ?',
+      [codigoFinal, matriculaId]
     );
 
     // Reducir cupos disponibles del curso
@@ -239,6 +232,17 @@ exports.crear = async (req, res) => {
       message: 'Matrícula registrada exitosamente',
       data: nuevaMatricula[0]
     });
+
+    // Enviar notificación por correo de forma asíncrona
+    try {
+        const [estData] = await promisePool.query('SELECT * FROM estudiantes WHERE id = ?', [estudiante_id]);
+        const [curData] = await promisePool.query('SELECT * FROM cursos WHERE id = ?', [curso_id]);
+        if (estData[0].email) {
+            sendEnrollmentEmail(estData[0], curData[0], nuevaMatricula[0]).catch(e => console.error('Error email matrícula:', e));
+        }
+    } catch (e) {
+        console.error('Error al preparar email de matrícula:', e);
+    }
   } catch (error) {
     await connection.rollback();
     console.error('Error al crear matrícula:', error);

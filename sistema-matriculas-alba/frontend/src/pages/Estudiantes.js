@@ -278,25 +278,23 @@ const Estudiantes = () => {
                           {estudiante.estado}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ display: 'flex', gap: '8px' }}>
                         <button
-                          className="btn btn-small btn-info"
+                          className="btn-icon btn-icon-view"
                           onClick={() => abrirModalHistorial(estudiante.id)}
-                          style={{ marginRight: '5px' }}
                           title="Ver Historial"
                         >
                           <FaEye />
                         </button>
                         <button
-                          className="btn btn-small btn-warning"
+                          className="btn-icon btn-icon-edit"
                           onClick={() => abrirModalEditar(estudiante)}
-                          style={{ marginRight: '5px' }}
                           title="Editar"
                         >
                           <FaEdit />
                         </button>
                         <button
-                          className="btn btn-small btn-danger"
+                          className="btn-icon btn-icon-delete"
                           onClick={() => eliminarEstudiante(estudiante.id)}
                           title="Eliminar"
                         >
@@ -323,139 +321,156 @@ const Estudiantes = () => {
               <button className="modal-close" onClick={cerrarModal}>×</button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-row">
+            <div className="modal-body">
+              <form onSubmit={handleSubmit}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>DNI</label>
+                    <input
+                      type="text"
+                      name="dni"
+                      placeholder="8 dígitos"
+                      value={formData.dni}
+                      onChange={handleInputChange}
+                      maxLength="8"
+                      required
+                      style={dniDuplicado ? { borderColor: '#ef4444', backgroundColor: '#fff1f2' } : {}}
+                    />
+                    {dniDuplicado && (
+                      <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '4px', fontWeight: '700' }}>
+                        ¡DNI ya registrado!
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Fecha de Nacimiento</label>
+                    <input
+                      type="date"
+                      name="fecha_nacimiento"
+                      value={formData.fecha_nacimiento}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nombres</label>
+                    <input
+                      type="text"
+                      name="nombres"
+                      placeholder="Nombres completos"
+                      value={formData.nombres}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Apellidos</label>
+                    <input
+                      type="text"
+                      name="apellidos"
+                      placeholder="Apellidos completos"
+                      value={formData.apellidos}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label>DNI</label>
+                  <label>Dirección de Residencia</label>
                   <input
                     type="text"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={handleInputChange}
-                    maxLength="8"
-                    required
-                    style={dniDuplicado ? { borderColor: '#ef4444', backgroundColor: '#fef2f2' } : {}}
-                  />
-                  {dniDuplicado && (
-                    <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', fontWeight: '600' }}>
-                       Este DNI ya está registrado en el sistema
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label>Fecha de Nacimiento</label>
-                  <input
-                    type="date"
-                    name="fecha_nacimiento"
-                    value={formData.fecha_nacimiento}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombres</label>
-                  <input
-                    type="text"
-                    name="nombres"
-                    value={formData.nombres}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Apellidos</label>
-                  <input
-                    type="text"
-                    name="apellidos"
-                    value={formData.apellidos}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Dirección</label>
-                <input
-                  type="text"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Teléfono</label>
-                  <input
-                    type="text"
-                    name="telefono"
-                    value={formData.telefono}
+                    name="direccion"
+                    placeholder="Calle, Número, Distrito..."
+                    value={formData.direccion}
                     onChange={handleInputChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Correo</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Teléfono Móvil</label>
+                    <input
+                      type="text"
+                      name="telefono"
+                      placeholder="Ej: 999 888 777"
+                      value={formData.telefono}
+                      onChange={handleInputChange}
+                    />
+                  </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre del Apoderado</label>
-                  <input
-                    type="text"
-                    name="nombre_apoderado"
-                    value={formData.nombre_apoderado}
-                    onChange={handleInputChange}
-                  />
+                  <div className="form-group">
+                    <label>Correo Electrónico</label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="ejemplo@correo.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Teléfono del Apoderado</label>
-                  <input
-                    type="text"
-                    name="telefono_apoderado"
-                    value={formData.telefono_apoderado}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nombre del Apoderado</label>
+                    <input
+                      type="text"
+                      name="nombre_apoderado"
+                      placeholder="Padre, Madre o Tutor"
+                      value={formData.nombre_apoderado}
+                      onChange={handleInputChange}
+                    />
+                  </div>
 
-              {modoEdicion && (
-                <div className="form-group">
-                  <label>Estado</label>
-                  <select
-                    name="estado"
-                    value={formData.estado || 'activo'}
-                    onChange={handleInputChange}
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                  </select>
+                  <div className="form-group">
+                    <label>Teléfono del Apoderado</label>
+                    <input
+                      type="text"
+                      name="telefono_apoderado"
+                      placeholder="Teléfono de contacto"
+                      value={formData.telefono_apoderado}
+                      onChange={handleInputChange}
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  {modoEdicion ? 'Actualizar' : 'Guardar'}
-                </button>
-              </div>
-            </form>
+                {modoEdicion && (
+                  <div className="form-group">
+                    <label>Estado del Estudiante</label>
+                    <select
+                      name="estado"
+                      value={formData.estado || 'activo'}
+                      onChange={handleInputChange}
+                    >
+                      <option value="activo">Activo</option>
+                      <option value="inactivo">Inactivo</option>
+                    </select>
+                  </div>
+                )}
+
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '10px', 
+                  justifyContent: 'flex-end', 
+                  marginTop: '25px',
+                  borderTop: '1px solid #f1f5f9',
+                  paddingTop: '20px' 
+                }}>
+                  <button type="button" className="btn btn-outline" onClick={cerrarModal}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {modoEdicion ? 'Actualizar Estudiante' : 'Guardar Estudiante'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

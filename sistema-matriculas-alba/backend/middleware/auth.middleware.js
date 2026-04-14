@@ -12,13 +12,28 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'academia_alba_secret');
+    // Punto 4: Eliminamos fallback de JWT_SECRET
+    if (!process.env.JWT_SECRET) {
+        throw new Error('CRITICAL: JWT_SECRET no configurado en servidor');
+    }
+    
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Punto S9: Validar roles permitidos
+    const rolesPermitidos = ['admin', 'director', 'matriculador'];
+    if (!rolesPermitidos.includes(verified.rol)) {
+        return res.status(403).json({ success: false, message: 'Rol de usuario no válido.' });
+    }
+
     req.user = verified;
     next();
   } catch (error) {
+    // Punto S10: Diferenciar expirado de inválido
+    const isExpired = error.name === 'TokenExpiredError';
     res.status(403).json({
       success: false,
-      message: 'Token inválido o expirado.'
+      code: isExpired ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN',
+      message: isExpired ? 'Tu sesión ha expirado.' : 'Token inválido.'
     });
   }
 };

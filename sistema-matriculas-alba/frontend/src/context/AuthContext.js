@@ -8,14 +8,23 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if token exists on load
-        const token = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
+        const checkAuth = async () => {
+            const token = localStorage.getItem('token');
+            const savedUser = localStorage.getItem('user');
 
-        if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
+            if (token && savedUser) {
+                try {
+                    // Punto 9: Verificar si el token sigue siendo válido con el servidor
+                    const response = await authAPI.getProfile();
+                    setUser(response.data.data);
+                } catch (error) {
+                    console.error("Sesión inválida o expirada");
+                    logout(); // Si falla, limpiamos todo
+                }
+            }
+            setLoading(false);
+        };
+        checkAuth();
     }, []);
 
     const login = async (username, password) => {

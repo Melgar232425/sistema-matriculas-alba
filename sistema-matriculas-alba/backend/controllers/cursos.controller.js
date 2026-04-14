@@ -1,5 +1,6 @@
 const { promisePool } = require('../config/database');
 const { parsearHorario, hayCruce, esBloquePermitido, BLOQUES_PERMITIDOS } = require('../utils/scheduleValidator');
+const { sendTeacherCourseEmail } = require('../utils/emailService');
 
 // Generar código de curso automático
 const generarCodigoCurso = async () => {
@@ -155,37 +156,41 @@ exports.crear = async (req, res) => {
       const horarioParsed = parsearHorario(horario);
 
       if (horarioParsed) {
-        // Nueva Regla 1:1: Verificar cruce general (SOLO UN CURSO POR HORARIO EN ESTE CICLO)
-        const [cursosCruce] = await promisePool.query(
-          `SELECT id, nombre, horario FROM cursos 
-           WHERE ciclo_id = ? AND estado = 'activo'`,
-          [ciclo_id]
-        );
+        // Regla Senior 1: El Aula es un espacio físico único (VALIDACIÓN GLOBAL)
+        if (aula) {
+          const [cursosAula] = await promisePool.query(
+            `SELECT c.nombre, c.horario, ci.nombre as ciclo FROM cursos c
+             JOIN ciclos ci ON c.ciclo_id = ci.id
+             WHERE c.aula = ? AND c.estado = 'activo'`,
+            [aula]
+          );
 
-        for (const curso of cursosCruce) {
-          const cursoHorarioParsed = parsearHorario(curso.horario);
-          if (cursoHorarioParsed && hayCruce(horarioParsed, cursoHorarioParsed)) {
-            return res.status(400).json({
-              success: false,
-              message: `Horario Ocupado: El curso "${curso.nombre}" ya ocupa el horario: ${curso.horario}`
-            });
+          for (const c of cursosAula) {
+            const hParsed = parsearHorario(c.horario);
+            if (hParsed && hayCruce(horarioParsed, hParsed)) {
+              return res.status(400).json({
+                success: false,
+                message: `Cruce de AULA: La "${aula}" ya está ocupada por "${c.nombre}" (${c.ciclo}) en el horario: ${c.horario}`
+              });
+            }
           }
         }
 
-        // Verificar cruces de docente
+        // Regla Senior 2: El Docente es una persona única (VALIDACIÓN GLOBAL)
         if (docente_id) {
-          const [cursosDocente] = await promisePool.query(
-            `SELECT id, nombre, seccion, horario FROM cursos 
-             WHERE docente_id = ? AND estado = 'activo'`,
+          const [cursosDoc] = await promisePool.query(
+            `SELECT c.nombre, c.horario, ci.nombre as ciclo FROM cursos c
+             JOIN ciclos ci ON c.ciclo_id = ci.id
+             WHERE c.docente_id = ? AND c.estado = 'activo'`,
             [docente_id]
           );
 
-          for (const curso of cursosDocente) {
-            const cursoHorarioParsed = parsearHorario(curso.horario);
-            if (cursoHorarioParsed && hayCruce(horarioParsed, cursoHorarioParsed)) {
+          for (const c of cursosDoc) {
+            const hParsed = parsearHorario(c.horario);
+            if (hParsed && hayCruce(horarioParsed, hParsed)) {
               return res.status(400).json({
-               success: false,
-                message: `Cruce del Docente: El docente ya dicta "${curso.nombre}" en el horario: ${curso.horario}`
+                success: false,
+                message: `Cruce de DOCENTE: El profesor ya tiene asignado "${c.nombre}" (${c.ciclo}) en el horario: ${c.horario}`
               });
             }
           }
@@ -211,6 +216,18 @@ exports.crear = async (req, res) => {
       'SELECT * FROM cursos WHERE id = ?',
       [result.insertId]
     );
+
+    // Enviar notificación al docente si se asignó uno
+    if (docente_id) {
+        try {
+            const [docente] = await promisePool.query('SELECT * FROM docentes WHERE id = ?', [docente_id]);
+            if (docente.length > 0 && docente[0].email) {
+                sendTeacherCourseEmail(docente[0], nuevoCurso[0]).catch(e => console.error('Error enviando email a docente asignado:', e));
+            }
+        } catch(e) {
+            console.error('Error preparando email asignación curso:', e);
+        }
+    }
 
     res.status(201).json({
       success: true,
@@ -250,7 +267,7 @@ exports.actualizar = async (req, res) => {
 
     // Verificar si el curso existe
     const [existente] = await promisePool.query(
-      'SELECT id, cupos_totales, cupos_disponibles, ciclo_id, fecha_inicio, fecha_fin FROM cursos WHERE id = ?',
+      'SELECT id, cupos_totales, cupos_disponibles, ciclo_id, fecha_inicio, fecha_fin, docente_id FROM cursos WHERE id = ?',
       [id]
     );
 
@@ -310,38 +327,43 @@ exports.actualizar = async (req, res) => {
       const horarioParsed = parsearHorario(horario);
 
       if (horarioParsed) {
-        // Nueva Regla 1:1: Verificar cruce general (SOLO UN CURSO POR HORARIO EN ESTE CICLO)
-        const finalCicloId = ciclo_id ?? existente[0].ciclo_id;
-        const [cursosCruce] = await promisePool.query(
-          `SELECT id, nombre, horario FROM cursos 
-           WHERE ciclo_id = ? AND estado = 'activo' AND id != ?`,
-          [finalCicloId, id]
-        );
+        // Regla Senior 1: El Aula es un espacio físico único (VALIDACIÓN GLOBAL)
+        const finalAula = aula !== undefined ? aula : existente[0].aula;
+        if (finalAula) {
+          const [cursosAula] = await promisePool.query(
+            `SELECT c.nombre, c.horario, ci.nombre as ciclo FROM cursos c
+             JOIN ciclos ci ON c.ciclo_id = ci.id
+             WHERE c.aula = ? AND c.estado = 'activo' AND c.id != ?`,
+            [finalAula, id]
+          );
 
-        for (const curso of cursosCruce) {
-          const cursoHorarioParsed = parsearHorario(curso.horario);
-          if (cursoHorarioParsed && hayCruce(horarioParsed, cursoHorarioParsed)) {
-            return res.status(400).json({
-              success: false,
-              message: `Horario Ocupado: El curso "${curso.nombre}" ya ocupa el horario: ${curso.horario}`
-            });
+          for (const c of cursosAula) {
+            const hParsed = parsearHorario(c.horario);
+            if (hParsed && hayCruce(horarioParsed, hParsed)) {
+              return res.status(400).json({
+                success: false,
+                message: `Cruce de AULA: La "${finalAula}" ya está ocupada por "${c.nombre}" (${c.ciclo}) en el horario: ${c.horario}`
+              });
+            }
           }
         }
 
-        // Verificar cruces de docente
-        if (docente_id) {
-          const [cursosDocente] = await promisePool.query(
-            `SELECT id, nombre, seccion, horario FROM cursos 
-             WHERE docente_id = ? AND estado = 'activo' AND id != ?`,
-            [docente_id, id]
+        // Regla Senior 2: El Docente es una persona única (VALIDACIÓN GLOBAL)
+        const finalDocenteId = docente_id !== undefined ? docente_id : existente[0].docente_id;
+        if (finalDocenteId) {
+          const [cursosDoc] = await promisePool.query(
+            `SELECT c.nombre, c.horario, ci.nombre as ciclo FROM cursos c
+             JOIN ciclos ci ON c.ciclo_id = ci.id
+             WHERE c.docente_id = ? AND c.estado = 'activo' AND c.id != ?`,
+            [finalDocenteId, id]
           );
 
-          for (const curso of cursosDocente) {
-            const cursoHorarioParsed = parsearHorario(curso.horario);
-            if (cursoHorarioParsed && hayCruce(horarioParsed, cursoHorarioParsed)) {
+          for (const c of cursosDoc) {
+            const hParsed = parsearHorario(c.horario);
+            if (hParsed && hayCruce(horarioParsed, hParsed)) {
               return res.status(400).json({
                 success: false,
-                message: `Cruce del Docente: El docente ya dicta "${curso.nombre}" en el horario: ${curso.horario}`
+                message: `Cruce de DOCENTE: El profesor ya tiene asignado "${c.nombre}" (${c.ciclo}) en el horario: ${c.horario}`
               });
             }
           }
@@ -365,6 +387,18 @@ exports.actualizar = async (req, res) => {
       'SELECT * FROM cursos WHERE id = ?',
       [id]
     );
+
+    // Enviar notificación al docente si se le acaba de asignar este curso
+    if (docente_id && docente_id.toString() !== (existente[0].docente_id ? existente[0].docente_id.toString() : null)) {
+        try {
+            const [docente] = await promisePool.query('SELECT * FROM docentes WHERE id = ?', [docente_id]);
+            if (docente.length > 0 && docente[0].email) {
+                sendTeacherCourseEmail(docente[0], cursoActualizado[0]).catch(e => console.error('Error enviando email actualización a docente:', e));
+            }
+        } catch(e) {
+            console.error('Error preparando email actualización asignación curso:', e);
+        }
+    }
 
     res.json({
       success: true,

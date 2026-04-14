@@ -1,30 +1,23 @@
-// Controlador para gestión de docentes
 const { promisePool } = require('../config/database');
+const { successResponse, createdResponse, errorResponse } = require('../utils/apiResponse');
+const { sendTeacherWelcomeEmail } = require('../utils/emailService');
 
-// Generar código de docente
-const generarCodigoDocente = async () => {
-    try {
-        const [rows] = await promisePool.query(
-            'SELECT codigo FROM docentes ORDER BY id DESC LIMIT 1'
-        );
-
-        if (rows.length === 0) {
-            return 'DOC-001';
-        }
-
-        const ultimoCodigo = rows[0].codigo;
-        const numero = parseInt(ultimoCodigo.split('-')[1]) + 1;
-        return `DOC-${numero.toString().padStart(3, '0')}`;
-    } catch (error) {
-        throw error;
-    }
+/**
+ * Función interna para formatear código de docente
+ * @param {number} id 
+ * @returns {string}
+ */
+const formatearCodigoDocente = (id) => {
+    return `DOC-${id.toString().padStart(3, '0')}`;
 };
 
-// Obtener todos los docentes
-exports.obtenerTodos = async (req, res) => {
+/**
+ * Obtener todos los docentes
+ */
+exports.obtenerTodos = async (req, res, next) => {
     try {
         const { estado } = req.query;
-        let query = 'SELECT * FROM docentes';
+        let query = 'SELECT id, codigo, nombres, apellidos, dni, telefono, email, especialidad, estado, fecha_registro FROM docentes';
         const params = [];
 
         if (estado) {
@@ -35,330 +28,153 @@ exports.obtenerTodos = async (req, res) => {
         query += ' ORDER BY apellidos, nombres';
 
         const [docentes] = await promisePool.query(query, params);
-
-        res.json({
-            success: true,
-            data: docentes,
-            total: docentes.length
-        });
+        return successResponse(res, docentes, 'Docentes obtenidos correctamente');
     } catch (error) {
-        console.error('Error al obtener docentes:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener docentes',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// Obtener docente por ID
-exports.obtenerPorId = async (req, res) => {
+/**
+ * Obtener un docente por su ID
+ */
+exports.obtenerPorId = async (req, res, next) => {
     try {
         const { id } = req.params;
-
-        const [docentes] = await promisePool.query(
-            'SELECT * FROM docentes WHERE id = ?',
-            [id]
-        );
+        const [docentes] = await promisePool.query('SELECT * FROM docentes WHERE id = ?', [id]);
 
         if (docentes.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Docente no encontrado'
-            });
+            return errorResponse(res, 'Docente no encontrado', 404);
         }
 
-        res.json({
-            success: true,
-            data: docentes[0]
-        });
+        return successResponse(res, docentes[0]);
     } catch (error) {
-        console.error('Error al obtener docente:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener docente',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// Crear nuevo docente
-exports.crear = async (req, res) => {
+/**
+ * Crear un nuevo docente
+ * Implementa lógica anti-duplicados y generación de código segura
+ */
+exports.crear = async (req, res, next) => {
     try {
-        const {
-            nombres,
-            apellidos,
-            dni,
-            telefono,
-            email,
-            especialidad
-        } = req.body;
+        const { nombres, apellidos, dni, telefono, email, especialidad } = req.body;
 
-        // Validar campos requeridos
+        // Validaciones básicas
         if (!nombres || !apellidos || !dni || !email) {
-            return res.status(400).json({
-                success: false,
-                message: 'Faltan campos requeridos: nombres, apellidos, DNI y correo electrónico'
-            });
+            return errorResponse(res, 'Faltan campos obligatorios', 400);
         }
 
-        // Validar formato de DNI (8 dígitos)
-        if (!/^\d{8}$/.test(dni)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El DNI debe tener exactamente 8 dígitos numéricos'
-            });
+        // Transacción no es necesaria para un simple insert, pero usamos lógica POST-INSERT para el código
+        const connection = await promisePool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // 1. Verificar duplicados (DNI o Correo)
+            const [existentes] = await connection.query(
+                'SELECT id FROM docentes WHERE dni = ? OR email = ?',
+                [dni, email]
+            );
+
+            if (existentes.length > 0) {
+                await connection.release();
+                return errorResponse(res, 'El DNI o correo ya está registrado', 400);
+            }
+
+            // 2. Insertar con código temporal
+            const [result] = await connection.query(
+                `INSERT INTO docentes (codigo, nombres, apellidos, dni, telefono, email, especialidad) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                ['TEMP', nombres, apellidos, dni, telefono, email, especialidad]
+            );
+
+            const lastId = result.insertId;
+            const codigoFinal = formatearCodigoDocente(lastId);
+
+            // 3. Actualizar con código real
+            await connection.query('UPDATE docentes SET codigo = ? WHERE id = ?', [codigoFinal, lastId]);
+
+            // 4. Enviar email de bienvenida de forma asíncrona
+            try {
+                const docenteInfo = { codigo: codigoFinal, nombres, apellidos, dni, telefono, email, especialidad };
+                sendTeacherWelcomeEmail(docenteInfo).catch(e => console.error('Error email docente:', e));
+            } catch (e) {
+                console.error('Error al preparar email de docente:', e);
+            }
+
+            return createdResponse(res, { id: lastId, codigo: codigoFinal }, 'Docente registrado exitosamente');
+        } catch (err) {
+            await connection.rollback();
+            connection.release();
+            throw err;
         }
-
-        // Validar formato de nombres y apellidos (solo letras y espacios)
-        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombres) || !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellidos)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Nombres y apellidos solo deben contener letras'
-            });
-        }
-
-        // Validar formato de email
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El formato del correo electrónico es inválido'
-            });
-        }
-
-        // Validar teléfono si se proporciona (9 dígitos)
-        if (telefono && !/^\d{9}$/.test(telefono)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El teléfono debe tener 9 dígitos'
-            });
-        }
-
-        // Verificar si DNI o email ya existen en docentes
-        const [existentes] = await promisePool.query(
-            'SELECT id FROM docentes WHERE dni = ? OR email = ?',
-            [dni, email]
-        );
-
-        if (existentes.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'El DNI o correo electrónico ya está registrado por otro docente'
-            });
-        }
-
-        // Verificar si el DNI ya existe en estudiantes
-        const [enEstudiantes] = await promisePool.query(
-            'SELECT id, nombres, apellidos FROM estudiantes WHERE dni = ?',
-            [dni]
-        );
-
-        if (enEstudiantes.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `El DNI ya pertenece al estudiante: ${enEstudiantes[0].nombres} ${enEstudiantes[0].apellidos}`
-            });
-        }
-
-        // Generar código
-        const codigo = await generarCodigoDocente();
-
-        // Insertar docente
-        const [result] = await promisePool.query(
-            `INSERT INTO docentes 
-       (codigo, nombres, apellidos, dni, telefono, email, especialidad) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [codigo, nombres, apellidos, dni, telefono, email, especialidad]
-        );
-
-        // Obtener el docente creado
-        const [nuevoDocente] = await promisePool.query(
-            'SELECT * FROM docentes WHERE id = ?',
-            [result.insertId]
-        );
-
-        res.status(201).json({
-            success: true,
-            message: 'Docente registrado exitosamente',
-            data: nuevoDocente[0]
-        });
     } catch (error) {
-        console.error('Error al registrar docente:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al registrar docente',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// Actualizar docente
-exports.actualizar = async (req, res) => {
+/**
+ * Actualizar datos de un docente
+ */
+exports.actualizar = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const {
-            nombres,
-            apellidos,
-            dni,
-            telefono,
-            email,
-            especialidad,
-            estado
-        } = req.body;
+        const { nombres, apellidos, dni, telefono, email, especialidad, estado } = req.body;
 
-        // Validaciones de formato
-        if (dni && !/^\d{8}$/.test(dni)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El DNI debe tener exactamente 8 dígitos numéricos'
-            });
-        }
+        // Verificar existencia y obtener mail antiguo
+        const [existente] = await promisePool.query('SELECT id, email FROM docentes WHERE id = ?', [id]);
+        if (existente.length === 0) return errorResponse(res, 'Docente no encontrado', 404);
 
-        if (nombres && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombres)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Nombres solo deben contener letras'
-            });
-        }
-
-        if (apellidos && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellidos)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Apellidos solo deben contener letras'
-            });
-        }
-
-        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El formato del correo electrónico es inválido'
-            });
-        }
-
-        if (telefono && !/^\d{9}$/.test(telefono)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El teléfono debe tener 9 dígitos'
-            });
-        }
-
-        // Verificar si el docente existe
-        const [existente] = await promisePool.query(
-            'SELECT id FROM docentes WHERE id = ?',
-            [id]
-        );
-
-        if (existente.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Docente no encontrado'
-            });
-        }
-
-        // Verificar si DNI o email pertenecen a otro docente
-        const [duplicados] = await promisePool.query(
-            'SELECT id FROM docentes WHERE (dni = ? OR email = ?) AND id != ?',
-            [dni, email, id]
-        );
-
-        if (duplicados.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'El DNI o correo electrónico ya está en uso por otro docente'
-            });
-        }
-
-        // Verificar si el DNI existe en la tabla de estudiantes
-        const [enEstudiantes] = await promisePool.query(
-            'SELECT id, nombres, apellidos FROM estudiantes WHERE dni = ?',
-            [dni]
-        );
-
-        if (enEstudiantes.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `El DNI ya pertenece al estudiante: ${enEstudiantes[0].nombres} ${enEstudiantes[0].apellidos}`
-            });
-        }
-
-        // Actualizar docente
+        // Actualización optimizada
         await promisePool.query(
             `UPDATE docentes 
-       SET nombres = ?, apellidos = ?, dni = ?, 
-            telefono = ?, email = ?, especialidad = ?, estado = ?
-       WHERE id = ?`,
+             SET nombres = ?, apellidos = ?, dni = ?, telefono = ?, email = ?, especialidad = ?, estado = ?
+             WHERE id = ?`,
             [nombres, apellidos, dni, telefono, email, especialidad, estado || 'activo', id]
         );
 
-        // Obtener el docente actualizado
-        const [docenteActualizado] = await promisePool.query(
-            'SELECT * FROM docentes WHERE id = ?',
-            [id]
-        );
+        if (email && email !== existente[0].email) {
+            try {
+                const [docenteActualizado] = await promisePool.query('SELECT * FROM docentes WHERE id = ?', [id]);
+                sendTeacherWelcomeEmail(docenteActualizado[0]).catch(e => console.error('Error enviando email actualizado a docente:', e));
+            } catch (e) {
+                console.error('Error al preparar email de actualización:', e);
+            }
+        }
 
-        res.json({
-            success: true,
-            message: 'Docente actualizado exitosamente',
-            data: docenteActualizado[0]
-        });
+        return successResponse(res, null, 'Docente actualizado correctamente');
     } catch (error) {
-        console.error('Error al actualizar docente:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al actualizar docente',
-            error: error.message
-        });
+        next(error);
     }
 };
 
-// Eliminar docente (cambiar estado a inactivo)
-exports.eliminar = async (req, res) => {
+/**
+ * Desactivar docente (Soft Delete)
+ * Verifica que no tenga cursos activos antes de proceder
+ */
+exports.eliminar = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Verificar si el docente existe
-        const [existente] = await promisePool.query(
-            'SELECT id FROM docentes WHERE id = ?',
-            [id]
-        );
+        // 1. Validar existencia
+        const [docente] = await promisePool.query('SELECT id, nombres FROM docentes WHERE id = ?', [id]);
+        if (docente.length === 0) return errorResponse(res, 'Docente no encontrado', 404);
 
-        if (existente.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Docente no encontrado'
-            });
-        }
-
-        // Verificar si tiene cursos activos asignados
-        const [cursosAsignados] = await promisePool.query(
-            'SELECT id, nombre FROM cursos WHERE docente_id = ? AND estado = ?',
+        // 2. Validar cursos activos (Regla de negocio Senior)
+        const [cursos] = await promisePool.query(
+            'SELECT id FROM cursos WHERE docente_id = ? AND estado = ?',
             [id, 'activo']
         );
 
-        if (cursosAsignados.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `No se puede desactivar a este docente porque tiene ${cursosAsignados.length} curso(s) activo(s) asignado(s) (Ej: ${cursosAsignados[0].nombre}). Redirija o cancele los cursos del docente primero.`,
-                cursos: cursosAsignados
-            });
+        if (cursos.length > 0) {
+            return errorResponse(res, `No se puede desactivar al docente porque tiene ${cursos.length} curso(s) activo(s)`, 400);
         }
 
-        // Cambiar estado a inactivo
-        await promisePool.query(
-            'UPDATE docentes SET estado = ? WHERE id = ?',
-            ['inactivo', id]
-        );
-
-        res.json({
-            success: true,
-            message: 'Docente desactivado exitosamente'
-        });
+        // 3. Desactivación
+        await promisePool.query('UPDATE docentes SET estado = "inactivo" WHERE id = ?', [id]);
+        
+        return successResponse(res, null, 'Docente desactivado correctamente');
     } catch (error) {
-        console.error('Error al desactivar docente:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al desactivar docente',
-            error: error.message
-        });
+        next(error);
     }
 };

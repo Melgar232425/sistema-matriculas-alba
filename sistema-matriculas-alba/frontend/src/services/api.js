@@ -1,12 +1,13 @@
 // Servicio para comunicarse con el backend
 import axios from 'axios';
 
-// URL base del backend
-const API_URL = 'http://localhost:5000/api';
+// URL base del backend - Punto 8: Usar variable de entorno
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Crear instancia de axios con configuración por defecto
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 15000, // Punto S7: 15 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
   },

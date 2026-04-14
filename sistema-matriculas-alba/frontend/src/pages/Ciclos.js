@@ -186,22 +186,22 @@ const Ciclos = () => {
                                             </span>
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
                                                 <button 
-                                                    className="btn btn-small"
+                                                    className="btn-icon"
                                                     style={{ 
                                                         backgroundColor: ciclo.estado === 'activo' ? '#fee2e2' : '#dcfce7',
                                                         color: ciclo.estado === 'activo' ? '#dc2626' : '#16a34a',
-                                                        padding: '6px'
+                                                        border: 'none'
                                                     }}
                                                     title={ciclo.estado === 'activo' ? 'Cerrar Ciclo' : 'Abrir Ciclo'}
                                                     onClick={() => handleToggleStatus(ciclo.id, ciclo.estado)}
                                                 >
-                                                    {ciclo.estado === 'activo' ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
+                                                    {ciclo.estado === 'activo' ? <FaToggleOn /> : <FaToggleOff />}
                                                 </button>
                                                 <button 
-                                                    className="btn btn-small"
-                                                    style={{ backgroundColor: '#f1f5f9', color: '#64748b', padding: '6px' }}
+                                                    className="btn-icon"
+                                                    style={{ backgroundColor: '#f1f5f9', color: '#64748b', border: 'none' }}
                                                     title="Eliminar"
                                                     onClick={() => handleDelete(ciclo.id)}
                                                 >
@@ -218,63 +218,81 @@ const Ciclos = () => {
             </div>
 
             {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2 className="modal-title">Crear Nuevo Ciclo Académico</h2>
                             <button className="modal-close" onClick={() => setShowModal(false)}>&times;</button>
                         </div>
-                        <div className="form-group">
-                            <label>Seleccionar Ciclo</label>
-                            <select 
-                                className="form-control" 
-                                onChange={handlePreset}
-                                style={{ backgroundColor: '#f8fafc', borderColor: 'var(--primary-color)' }}
-                            >
-                                <option value="">Seleccionar</option>
-                                <option value="verano">Verano (Enero - Febrero)</option>
-                                <option value="ciclo1">Ciclo I (Abril - Julio)</option>
-                                <option value="ciclo2">Ciclo II (Agosto - Diciembre)</option>
-                            </select>
-                        </div>
-                        <form onSubmit={handleCreate}>
+                        
+                        <div className="modal-body">
                             <div className="form-group">
-                                <label>Nombre del Ciclo</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="Ej: Ciclo Verano 2026"
-                                    required 
-                                    value={newCiclo.nombre}
-                                    onChange={e => setNewCiclo({...newCiclo, nombre: e.target.value})}
-                                />
+                                <label>Plantilla de Ciclo (Opcional)</label>
+                                <select 
+                                    className="form-control" 
+                                    onChange={handlePreset}
+                                    style={{ backgroundColor: '#f8fafc', fontWeight: 'bold' }}
+                                >
+                                    <option value="">-- Seleccionar para autocompletar --</option>
+                                    <option value="verano">Verano (Enero - Febrero)</option>
+                                    <option value="ciclo1">Ciclo I (Abril - Julio)</option>
+                                    <option value="ciclo2">Ciclo II (Agosto - Diciembre)</option>
+                                </select>
+                                <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                    Selecciona un periodo estándar para llenar las fechas automáticamente.
+                                </p>
                             </div>
-                            <div className="form-row">
+
+                            <form onSubmit={handleCreate}>
                                 <div className="form-group">
-                                    <label>Fecha de Inicio</label>
+                                    <label>Nombre del Ciclo</label>
                                     <input 
-                                        type="date" 
-                                        name="fecha_inicio"
-                                        required
-                                        value={newCiclo.fecha_inicio}
-                                        onChange={handleDateChange}
+                                        type="text" 
+                                        placeholder="Ej: Ciclo Verano 2026"
+                                        required 
+                                        value={newCiclo.nombre}
+                                        onChange={e => setNewCiclo({...newCiclo, nombre: e.target.value})}
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label>Fecha de Fin</label>
-                                    <input 
-                                        type="date" 
-                                        name="fecha_fin"
-                                        required
-                                        value={newCiclo.fecha_fin}
-                                        onChange={handleDateChange}
-                                    />
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Fecha de Inicio</label>
+                                        <input 
+                                            type="date" 
+                                            name="fecha_inicio"
+                                            required
+                                            value={newCiclo.fecha_inicio}
+                                            onChange={handleDateChange}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Fecha de Fin</label>
+                                        <input 
+                                            type="date" 
+                                            name="fecha_fin"
+                                            required
+                                            value={newCiclo.fecha_fin}
+                                            onChange={handleDateChange}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                                <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancelar</button>
-                                <button type="submit" className="btn btn-primary">Crear Ciclo</button>
-                            </div>
-                        </form>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    gap: '10px', 
+                                    justifyContent: 'flex-end', 
+                                    marginTop: '25px',
+                                    borderTop: '1px solid #f1f5f9',
+                                    paddingTop: '20px' 
+                                }}>
+                                    <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Crear Ciclo
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}

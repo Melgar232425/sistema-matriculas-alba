@@ -1,42 +1,36 @@
-// Componente Navbar - Barra superior
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { AuthContext } from '../context/AuthContext';
+import { FaSignOutAlt, FaRocket, FaUserAlt } from 'react-icons/fa';
 
-const Navbar = ({ title = 'Dashboard' }) => {
+const Navbar = ({ title = 'Panel de Administración' }) => {
   const navigate = useNavigate();
-  const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  const { user, logout } = React.useContext(AuthContext); // Punto 11
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
+    logout();
     navigate('/login');
   };
 
   return (
     <div className="navbar">
-      <div className="navbar-title">
+      <div className="navbar-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <img src="/logo_oficial.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
         <h1>{title}</h1>
       </div>
-      <div className="navbar-user" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <div style={{ cursor: 'default', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '6px 16px', borderRadius: '50px', display: 'flex', alignItems: 'center' }}>
-          <div style={{
-            width: '10px',
-            height: '10px',
-            backgroundColor: '#10b981',
-            borderRadius: '50%',
-            boxShadow: '0 0 8px rgba(16, 185, 129, 0.5)'
-          }}></div>
-          <span style={{ fontSize: '14px', fontWeight: '700', color: '#166534', marginLeft: '10px' }}>
-            {usuario.nombres ? `${usuario.nombres} - Activo` : 'Sistema - Activo'}
-          </span>
+      <div className="navbar-status">
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FaRocket style={{ color: 'var(--primary)', filter: 'drop-shadow(0 0 5px rgba(67, 97, 238, 0.4))' }} />
+          <span>Servidor: <b style={{ color: 'var(--secondary)' }}>En línea</b></span>
         </div>
+        
         <button 
           onClick={handleLogout}
-          className="btn btn-outline"
-          style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
+          className="btn"
+          style={{ background: '#334155', color: 'white', padding: '8px 16px', fontSize: '13px' }}
         >
-          <FaSignOutAlt /> Salir
+          <FaSignOutAlt /> Desconectar
         </button>
       </div>
     </div>

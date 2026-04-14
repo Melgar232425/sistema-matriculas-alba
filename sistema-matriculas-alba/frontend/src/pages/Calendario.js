@@ -2,9 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { cursosAPI, ciclosAPI } from '../services/api';
-import { FaCalendarAlt, FaClock, FaBook, FaInfoCircle, FaExclamationTriangle, FaChalkboardTeacher, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaBook, FaInfoCircle, FaExclamationTriangle, FaChalkboardTeacher, FaMapMarkerAlt, FaFileExcel } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
-const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 const KEYWORDS_DIAS = {
     'Lunes': ['lunes', 'lun', ' lu ', ' lu,', ' lu-'],
@@ -12,8 +15,7 @@ const KEYWORDS_DIAS = {
     'Miércoles': ['miercoles', 'miércoles', 'mie', 'mié', ' mi ', ' mi,', ' mi-'],
     'Jueves': ['jueves', 'jue', ' ju ', ' ju,', ' ju-'],
     'Viernes': ['viernes', 'vie', ' vi ', ' vi,', ' vi-'],
-    'Sábado': ['sabado', 'sábado', 'sab', 'sáb', ' sa ', ' sa,', ' sa-'],
-    'Domingo': ['domingo', 'dom', ' do ', ' do,', ' do-'],
+    'Sábado': ['sabado', 'sábado', 'sab', 'sáb', ' sa ', ' sa,', ' sa-']
 };
 
 // Palabras que indican que el curso es todos los días
@@ -295,6 +297,115 @@ const Calendario = () => {
         return finalCursos;
     };
 
+    const exportarExcel = async () => {
+        try {
+            const cicloInfo = filtroCiclo ? ciclos.find(c => String(c.id) === String(filtroCiclo))?.nombre : 'Todos los Ciclos';
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('HORARIO OFICIAL');
+
+            // 0. Arquitectura (A blanca, todo desde B)
+            worksheet.views = [{ showGridLines: false }];
+            worksheet.getColumn(1).width = 5; // Margen visible blanco
+
+            // Anchos
+            worksheet.getColumn(2).width = 15;
+            worksheet.getColumn(3).width = 30;
+            worksheet.getColumn(4).width = 35;
+            worksheet.getColumn(5).width = 12;
+            worksheet.getColumn(6).width = 30;
+            worksheet.getColumn(7).width = 15;
+            worksheet.getColumn(8).width = 12;
+
+            // 1. Logo (En B2)
+            try {
+                const response = await fetch('/logo_alba_v3.png');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const logoId = workbook.addImage({
+                        buffer: arrayBuffer,
+                        extension: 'png',
+                    });
+                    worksheet.addImage(logoId, {
+                        tl: { col: 1, row: 1 },
+                        ext: { width: 170, height: 170 }
+                    });
+                }
+            } catch (e) { console.log('Sin logo'); }
+
+            // 2. Info Centralizada (B a H)
+            worksheet.getRow(2).height = 40;
+            worksheet.getRow(3).height = 40;
+
+            worksheet.mergeCells('B2:H3'); 
+            const title = worksheet.getCell('B2');
+            title.value = 'ACADEMIA ALBA PERÚ';
+            title.font = { name: 'Arial Black', size: 28, color: { argb: 'FF002D72' } };
+            title.alignment = { horizontal: 'center', vertical: 'middle' };
+
+            worksheet.mergeCells('B4:H5');
+            const sub = worksheet.getCell('B4');
+            sub.value = `HORARIO OFICIAL DE CLASES | CICLO: ${cicloInfo.toUpperCase()}`;
+            sub.font = { name: 'Arial', size: 10, color: { argb: 'FF64748B' }, bold: true };
+            sub.alignment = { horizontal: 'center', vertical: 'middle' };
+
+            // 3. Tabla (B a H)
+            const headers = ['', 'DÍA', 'HORARIO', 'CURSO / MATERIA', 'AULA', 'DOCENTE', 'CICLO', 'TURNO'];
+            worksheet.addRow([]); worksheet.addRow([]); worksheet.addRow([]); worksheet.addRow([]);
+            const actualHeaderRow = worksheet.addRow(headers);
+            
+            actualHeaderRow.height = 30;
+            actualHeaderRow.eachCell((cell, colNum) => {
+                if (colNum > 1) { // IGNORAR A
+                   cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF002D72' } };
+                   cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                   cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                   cell.border = { bottom: { style: 'medium', color: { argb: 'FFF47B20' } } };
+                }
+            });
+
+            // 4. Datos (Desde B)
+            let count = 0;
+            DIAS_SEMANA.forEach(dia => {
+                const cursosDia = procesarCursosConColumnas(dia);
+                cursosDia.forEach(c => {
+                    const row = worksheet.addRow([
+                        '', // A en blanco
+                        dia.toUpperCase(),
+                        c.horario || 'Por definir',
+                        c.nombre,
+                        c.aula || 'S/A',
+                        c.docente_nombres ? `${c.docente_nombres} ${c.docente_apellidos}` : 'Por asignar',
+                        c.ciclo_nombre || cicloInfo,
+                        c.seccion || '-'
+                    ]);
+                    
+                    row.height = 22;
+                    const color = (count % 2 === 0) ? 'FFFFFFFF' : 'FFF9FAFB';
+                    row.eachCell((cell, colNum) => {
+                        if (colNum > 1) { // IGNORAR A
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+                            cell.font = { color: { argb: 'FF334155' }, size: 9 };
+                            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                        }
+                    });
+                    count++;
+                });
+            });
+
+            // Finalización
+            const buffer = await workbook.xlsx.writeBuffer();
+            const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+            const excelBuffer = new Blob([buffer], { type: fileType });
+            saveAs(excelBuffer, `calendario_alba.xlsx`);
+            toast.success('¡Calendario Oficial Generado!');
+        } catch (error) {
+            console.error('Excel Error:', error);
+            toast.error('Error al generar Excel');
+        }
+    };
+
     // Cursos sin horario asignado
     const cursosSinDia = cursosFiltrados.filter(curso => parsearDiasCurso(curso.horario).length === 0);
 
@@ -308,9 +419,9 @@ const Calendario = () => {
             {/* Resumen */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                 {[
-                    { label: 'Total Cursos', value: totalCursos, color: '#2563eb', icon: <FaBook /> },
-                    { label: 'Con Horario', value: cursosConHorario, color: '#16a34a', icon: <FaCalendarAlt /> },
-                    { label: 'Sin Horario', value: cursosSinDia.length, color: '#d97706', icon: <FaClock /> },
+                    { label: 'Total Cursos', value: totalCursos, color: 'var(--primary)', icon: <FaBook /> },
+                    { label: 'Con Horario', value: cursosConHorario, color: 'var(--secondary)', icon: <FaCalendarAlt /> },
+                    { label: 'Sin Horario', value: cursosSinDia.length, color: 'var(--warning)', icon: <FaClock /> },
                 ].map(stat => (
                     <div key={stat.label} style={{
                         background: 'white', borderRadius: '12px', padding: '16px 20px',
@@ -406,6 +517,24 @@ const Calendario = () => {
                 </div>
             </div>
 
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '20px' }}>
+                <button 
+                    onClick={exportarExcel}
+                    className="btn"
+                    style={{ 
+                        background: '#f0fdf4', 
+                        color: '#16a34a', 
+                        border: '1px solid #dcfce7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontWeight: '700'
+                    }}
+                >
+                    <FaFileExcel /> Descargar Calendario
+                </button>
+            </div>
+
             {loading ? (
                 <div className="loading"><div className="spinner"></div></div>
             ) : (
@@ -413,7 +542,7 @@ const Calendario = () => {
                     <div className="card" style={{ padding: '0', overflow: 'auto', maxHeight: '1000px' }}>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '80px repeat(7, 1fr)',
+                            gridTemplateColumns: '80px repeat(6, 1fr)',
                             minWidth: '1200px',
                             backgroundColor: 'white',
                             position: 'relative'
@@ -513,13 +642,12 @@ const Calendario = () => {
 
                             {DIAS_SEMANA.map((dia) => {
                                 const cursosDia = procesarCursosConColumnas(dia);
-                                const isDomingo = dia === 'Domingo';
                                 return (
                                     <div key={dia} style={{
                                         position: 'relative',
                                         height: `${(END_HOUR - START_HOUR) * 60 * PIXELS_PER_MINUTE}px`,
                                         borderRight: '1px solid #e2e8f0',
-                                        background: isDomingo ? '#f8fafc' : 'transparent'
+                                        background: 'transparent'
                                     }}>
                                         {Array.from({ length: END_HOUR - START_HOUR + 1 }).map((_, i) => (
                                             <div key={i} style={{

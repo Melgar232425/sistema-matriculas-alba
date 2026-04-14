@@ -21,6 +21,7 @@ const Matriculas = () => {
   });
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [estudianteCursosModal, setEstudianteCursosModal] = useState(null);
+  const [submitting, setSubmitting] = useState(false); // Punto 12 & U3
   useEffect(() => {
     cargarDatos();
   }, []);
@@ -53,14 +54,20 @@ const Matriculas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+
     try {
+      setSubmitting(true);
       await matriculasAPI.create(formData);
       toast.success('Matrícula registrada exitosamente');
       setShowModal(false);
       setBuscadorDniModal('');
       cargarDatos();
     } catch (error) {
+      // Punto 13: Error visible
       toast.error(`❌ ${error.response?.data?.message || 'Error al matricular'}`, { icon: '' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -251,22 +258,15 @@ const Matriculas = () => {
                           </span>
                         </td>
                         <td style={{ verticalAlign: 'middle' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {/* Acciones principales del Estudiante (Izquierda) */}
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <button
                               className="btn-icon btn-icon-edit"
                               onClick={() => abrirNuevaMatriculaParaEstudiante(grupo)}
                               title="Agregar nueva matrícula"
+                              style={{ width: '28px', height: '28px' }}
                             >
-                              <FaEdit />
+                              <FaPlus size={12} />
                             </button>
-                            
-                            {/* Separador sutil si hay matrículas */}
-                            {grupo.matriculas.length > 0 && (
-                              <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
-                            )}
-
-                            {/* Acciones de Matrículas Individuales se han movido junto al nombre del curso */}
                           </div>
                         </td>
                       </tr>
@@ -287,137 +287,159 @@ const Matriculas = () => {
               <h2 className="modal-title">Nueva Matrícula</h2>
               <button className="modal-close" onClick={cerrarModal}>×</button>
             </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Seleccionar Estudiante</label>
-                <div className="search-box" style={{ marginBottom: '12px', border: 'none' }}>
-                  <FaSearch style={{ left: '14px', right: 'auto' }} />
-                  <input
-                    type="text"
-                    placeholder="Escribe DNI para filtrar..."
-                    value={buscadorDniModal}
-                    onChange={(e) => setBuscadorDniModal(e.target.value)}
-                    className="form-control"
-                    maxLength="8"
-                    style={{
-                      paddingLeft: '42px',
-                      borderRadius: '50px',
-                      backgroundColor: '#f8fafc',
-                      fontSize: '13px'
-                    }}
-                  />
-                  {buscadorDniModal && (
-                    <FaTimes
-                      onClick={() => setBuscadorDniModal('')}
-                      style={{ cursor: 'pointer', color: '#64748b' }}
+            <div className="modal-body">
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label>Seleccionar Estudiante</label>
+                  <div className="search-box" style={{ marginBottom: '12px', border: 'none' }}>
+                    <FaSearch style={{ left: '14px', right: 'auto' }} />
+                    <input
+                      type="text"
+                      placeholder="Escribe DNI para filtrar..."
+                      value={buscadorDniModal}
+                      onChange={(e) => setBuscadorDniModal(e.target.value)}
+                      className="form-control"
+                      maxLength="8"
+                      style={{
+                        paddingLeft: '42px',
+                        borderRadius: '50px',
+                        backgroundColor: '#f8fafc',
+                        fontSize: '13px'
+                      }}
                     />
-                  )}
+                    {buscadorDniModal && (
+                      <FaTimes
+                        onClick={() => setBuscadorDniModal('')}
+                        style={{ cursor: 'pointer', color: '#64748b' }}
+                      />
+                    )}
+                  </div>
+                  <select
+                    name="estudiante_id"
+                    value={formData.estudiante_id}
+                    onChange={(e) => setFormData({ ...formData, estudiante_id: e.target.value })}
+                    style={{ borderRadius: '10px' }}
+                    required
+                  >
+                    <option value="">
+                      {buscadorDniModal
+                        ? (estudiantes.filter(est => est.dni && est.dni.includes(buscadorDniModal)).length > 0 ? 'Seleccionar de los resultados' : 'Sin resultados')
+                        : 'Seleccionar estudiante'}
+                    </option>
+                    {estudiantes
+                      .filter(est => !buscadorDniModal || (est.dni && est.dni.includes(buscadorDniModal)))
+                      .filter(est => {
+                        // Si hay un curso seleccionado, ocultar los alumnos que YA están en ese curso
+                        if (formData.curso_id) {
+                          const yaEnCurso = matriculas.some(m => m.estudiante_id === est.id && m.curso_id.toString() === formData.curso_id.toString());
+                          if (yaEnCurso) return false;
+                        }
+                        return true;
+                      })
+                      .map(est => (
+                        <option key={est.id} value={est.id}>
+                          {est.dni} - {est.nombres} {est.apellidos}
+                        </option>
+                      ))}
+                  </select>
                 </div>
-                <select
-                  name="estudiante_id"
-                  value={formData.estudiante_id}
-                  onChange={(e) => setFormData({ ...formData, estudiante_id: e.target.value })}
-                  style={{ borderRadius: '10px' }}
-                  required
-                >
-                  <option value="">
-                    {buscadorDniModal
-                      ? (estudiantes.filter(est => est.dni && est.dni.includes(buscadorDniModal)).length > 0 ? 'Seleccionar de los resultados' : 'Sin resultados')
-                      : 'Seleccionar estudiante'}
-                  </option>
-                  {estudiantes
-                    .filter(est => !buscadorDniModal || (est.dni && est.dni.includes(buscadorDniModal)))
-                    .map(est => (
-                      <option key={est.id} value={est.id}>
-                        {est.dni} - {est.nombres} {est.apellidos}
+
+                <div className="form-group">
+                  <label>Curso</label>
+                  <select
+                    name="curso_id"
+                    value={formData.curso_id}
+                    onChange={handleCursoChange}
+                    required
+                  >
+                    <option value="">Seleccionar curso</option>
+                    {cursos
+                      .filter(curso => {
+                        // Si hay un estudiante seleccionado, ocultar los cursos en los que YA está matriculado
+                        if (formData.estudiante_id) {
+                          const yaMatriculado = matriculas.some(m => m.curso_id === curso.id && m.estudiante_id.toString() === formData.estudiante_id.toString());
+                          if (yaMatriculado) return false;
+                        }
+                        return true;
+                      })
+                      .map(curso => (
+                      <option key={curso.id} value={curso.id} disabled={curso.cupos_disponibles <= 0}>
+                        {curso.nombre} - {curso.ciclo_nombre || 'Sin ciclo'} ({curso.cupos_disponibles} vacantes)
                       </option>
                     ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Curso</label>
-                <select
-                  name="curso_id"
-                  value={formData.curso_id}
-                  onChange={handleCursoChange}
-                  required
-                >
-                  <option value="">Seleccionar curso</option>
-                  {cursos.map(curso => (
-                    <option key={curso.id} value={curso.id}>
-                      {curso.nombre} - {curso.ciclo_nombre || 'Sin ciclo'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Detalles del Curso Separados */}
-              {cursoSeleccionado && (
-                <div style={{
-                  backgroundColor: '#f0f9ff',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  marginBottom: '20px',
-                  borderLeft: '4px solid #0284c7',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '10px'
-                }}>
-                  <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0284c7' }}></div>
-                    <span style={{ fontSize: '11px', color: '#0369a1', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Información del Curso</span>
-                  </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Periodo Académico</span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>
-                      {cursoSeleccionado.fecha_inicio ? new Date(cursoSeleccionado.fecha_inicio).toLocaleDateString() : 'Ver ciclo'} - {cursoSeleccionado.fecha_fin ? new Date(cursoSeleccionado.fecha_fin).toLocaleDateString() : 'Ver ciclo'}
-                    </span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Inversión</span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#059669' }}>
-                      S/ {parseFloat(cursoSeleccionado.precio).toFixed(2)}
-                    </span>
-                  </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Disponibilidad</span>
-                    <span style={{ fontSize: '13px', fontWeight: '700', color: cursoSeleccionado.cupos_disponibles > 5 ? '#0f172a' : '#ef4444' }}>
-                      {cursoSeleccionado.cupos_disponibles} vacantes
-                    </span>
-                  </div>
+                  </select>
                 </div>
-              )}
 
-              <div className="form-group">
-                <label>Fecha de Matrícula</label>
-                <input
-                  type="date"
-                  value={formData.fecha_matricula}
-                  onChange={(e) => setFormData({ ...formData, fecha_matricula: e.target.value })}
-                  required
-                />
-              </div>
+                {/* Detalles del Curso Separados */}
+                {cursoSeleccionado && (
+                  <div style={{
+                    backgroundColor: '#f0f9ff',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    marginBottom: '20px',
+                    borderLeft: '4px solid #0284c7',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '10px'
+                  }}>
+                    <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0284c7' }}></div>
+                      <span style={{ fontSize: '11px', color: '#0369a1', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Información del Curso</span>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Periodo Académico</span>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>
+                        {cursoSeleccionado.fecha_inicio ? new Date(cursoSeleccionado.fecha_inicio).toLocaleDateString() : 'Ver ciclo'} - {cursoSeleccionado.fecha_fin ? new Date(cursoSeleccionado.fecha_fin).toLocaleDateString() : 'Ver ciclo'}
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Inversión</span>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#059669' }}>
+                        S/ {parseFloat(cursoSeleccionado.precio).toFixed(2)}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Disponibilidad</span>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: cursoSeleccionado.cupos_disponibles > 5 ? '#0f172a' : '#ef4444' }}>
+                        {cursoSeleccionado.cupos_disponibles} vacantes
+                      </span>
+                    </div>
+                  </div>
+                )}
 
-              <div className="form-group">
-                <label>Observaciones</label>
-                <textarea
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                  rows="3"
-                />
-              </div>
+                <div className="form-group">
+                  <label>Fecha de Matrícula</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_matricula}
+                    onChange={(e) => setFormData({ ...formData, fecha_matricula: e.target.value })}
+                    required
+                  />
+                </div>
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Matricular
-                </button>
-              </div>
-            </form>
+                <div className="form-group">
+                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      Observaciones 
+                      <span style={{ fontSize: '10px', color: '#94a3b8' }}>({formData.observaciones.length}/500)</span>
+                  </label>
+                  <textarea
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value.substring(0, 500) })}
+                    rows="3"
+                    placeholder="Ej: Pago adelantado, requiere horario especial..."
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+                  <button type="button" className="btn btn-outline" onClick={cerrarModal}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? 'Registrando...' : 'Matricular'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
