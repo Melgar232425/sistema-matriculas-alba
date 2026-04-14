@@ -4,20 +4,17 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    host: '173.194.216.109', // IP directa de smtp.gmail.com (IPv4)
-    port: 465,
-    secure: true,
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false para puerto 587
     auth: {
         user: 'alexis052304@gmail.com',
         pass: 'wurslqalniaflavc'
     },
+    // En Railway no necesitamos trucos de IP ni IPv4 forzado
     tls: {
-        // Necesario al usar IP directa para evitar error de nombre de certificado
-        rejectUnauthorized: false,
-        servername: 'smtp.gmail.com'
-    },
-    connectionTimeout: 10000,
-    family: 4
+        rejectUnauthorized: false
+    }
 });
 
 // Verificar conexión al iniciar
