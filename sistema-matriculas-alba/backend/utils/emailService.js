@@ -2,8 +2,6 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
-// Ruta del logo oficial definitivo
-const logoPath = path.join(__dirname, '../../frontend/public/logo_oficial.png');
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -15,18 +13,21 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+const logoUrl = 'https://sistema-matriculas-alba.vercel.app/logo_oficial.png';
+
 /**
  * Envía un correo de bienvenida a un nuevo estudiante
  */
 const sendWelcomeEmail = async (estudiante) => {
+    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
     const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: from_email,
         to: estudiante.email,
         subject: `¡Bienvenido a Academia Alba, ${estudiante.nombres}!`,
         html: `
             <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
                 <div style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); padding: 30px; text-align: center;">
-                    <img src="cid:logo_alba" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
+                    <img src="${logoUrl}" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
                     <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase;">ACADEMIA ALBA</h1>
                 </div>
                 
@@ -42,12 +43,7 @@ const sendWelcomeEmail = async (estudiante) => {
                     </div>
                 </div>
             </div>
-        `,
-        attachments: [{
-            filename: 'logo.png',
-            path: logoPath,
-            cid: 'logo_alba'
-        }]
+        `
     };
 
     try {
@@ -63,14 +59,15 @@ const sendWelcomeEmail = async (estudiante) => {
  * Envía un correo de confirmación de matrícula
  */
 const sendEnrollmentEmail = async (estudiante, curso, matricula) => {
+    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
     const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: from_email,
         to: estudiante.email,
         subject: `Confirmación de Matrícula: ${curso.nombre}`,
         html: `
             <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                 <div style="background: #4361ee; padding: 25px; text-align: center;">
-                    <img src="cid:logo_alba" style="max-height: 60px; margin-bottom: 10px;">
+                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 10px;">
                     <h1 style="color: white; margin: 0; font-size: 20px;">ACADEMIA ALBA</h1>
                 </div>
                 <div style="padding: 30px;">
@@ -79,28 +76,26 @@ const sendEnrollmentEmail = async (estudiante, curso, matricula) => {
                     <p>Horario: <strong>${curso.horario || 'No especificado'}</strong></p>
                 </div>
             </div>
-        `,
-        attachments: [{
-            filename: 'logo.png',
-            path: logoPath,
-            cid: 'logo_alba'
-        }]
+        `
     };
-    await transporter.sendMail(mailOptions);
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch(e) { console.error('Error Email', e); }
 };
 
 /**
  * Envía un recibo de pago digital
  */
 const sendPaymentEmail = async (estudiante, pago, cursoNombre) => {
+    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
     const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: from_email,
         to: estudiante.email,
         subject: `Recibo de Pago: ${pago.codigo_recibo}`,
         html: `
             <div style="font-family: 'Arial', sans-serif; max-width: 500px; margin: 0 auto; border: 2px solid #f1f5f9; border-radius: 16px; overflow: hidden;">
                 <div style="background-color: #059669; padding: 20px; text-align: center;">
-                    <img src="cid:logo_alba" style="max-height: 60px; margin-bottom: 5px;">
+                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 5px;">
                     <h1 style="color: white; margin: 0; font-size: 16px;">ACADEMIA ALBA</h1>
                 </div>
                 <div style="padding: 30px; text-align: center;">
@@ -108,28 +103,26 @@ const sendPaymentEmail = async (estudiante, pago, cursoNombre) => {
                     <p>Pago de Curso: ${cursoNombre}</p>
                 </div>
             </div>
-        `,
-        attachments: [{
-            filename: 'logo.png',
-            path: logoPath,
-            cid: 'logo_alba'
-        }]
+        `
     };
-    await transporter.sendMail(mailOptions);
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch(e) { console.error('Error Email', e); }
 };
 
 /**
  * Envía un correo de bienvenida a un docente
  */
 const sendTeacherWelcomeEmail = async (docente) => {
+    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
     const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: from_email,
         to: docente.email,
         subject: `¡Bienvenido al Equipo Docente Alba, ${docente.nombres}!`,
         html: `
             <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
                 <div style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); padding: 30px; text-align: center;">
-                    <img src="cid:logo_alba" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
+                    <img src="${logoUrl}" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
                     <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase;">ACADEMIA ALBA</h1>
                 </div>
                 <div style="padding: 30px; line-height: 1.6;">
@@ -143,12 +136,7 @@ const sendTeacherWelcomeEmail = async (docente) => {
                     </div>
                 </div>
             </div>
-        `,
-        attachments: [{
-            filename: 'logo.png',
-            path: logoPath,
-            cid: 'logo_alba'
-        }]
+        `
     };
     try {
         await transporter.sendMail(mailOptions);
@@ -163,14 +151,15 @@ const sendTeacherWelcomeEmail = async (docente) => {
  * Notifica al docente sobre un nuevo curso asignado
  */
 const sendTeacherCourseEmail = async (docente, curso) => {
+    const from_email = process.env.EMAIL_FROM || '"Academia Alba" <alexis052304@gmail.com>';
     const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: from_email,
         to: docente.email,
         subject: `Nuevo Curso Asignado: ${curso.nombre}`,
         html: `
             <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
                 <div style="background: #0f172a; padding: 25px; text-align: center;">
-                    <img src="cid:logo_alba" style="max-height: 60px; margin-bottom: 10px;">
+                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 10px;">
                     <h1 style="color: white; margin: 0; font-size: 20px;">ASIGNACIÓN DE CURSO</h1>
                 </div>
                 <div style="padding: 30px;">
@@ -181,12 +170,7 @@ const sendTeacherCourseEmail = async (docente, curso) => {
                     <p><strong>Nivel / Especialidad:</strong> ${curso.nivel || 'General'}</p>
                 </div>
             </div>
-        `,
-        attachments: [{
-            filename: 'logo.png',
-            path: logoPath,
-            cid: 'logo_alba'
-        }]
+        `
     };
     try {
         await transporter.sendMail(mailOptions);
