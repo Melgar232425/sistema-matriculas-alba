@@ -4,16 +4,19 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: '173.194.216.109', // IP directa de smtp.gmail.com (IPv4)
     port: 465,
-    secure: true, // true para puerto 465
+    secure: true,
     auth: {
         user: 'alexis052304@gmail.com',
         pass: 'wurslqalniaflavc'
     },
-    // Limitar reintentos y tiempo de espera para que no se cuelgue
-    connectionTimeout: 5000, 
-    socketTimeout: 5000,
+    tls: {
+        // Necesario al usar IP directa para evitar error de nombre de certificado
+        rejectUnauthorized: false,
+        servername: 'smtp.gmail.com'
+    },
+    connectionTimeout: 10000,
     family: 4
 });
 
