@@ -6,12 +6,11 @@ const path = require('path');
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // false para puerto 587
+    secure: false,
     auth: {
-        user: 'alexis052304@gmail.com',
-        pass: 'wurslqalniaflavc'
+        user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
+        pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
-    // En Railway no necesitamos trucos de IP ni IPv4 forzado
     tls: {
         rejectUnauthorized: false
     }
