@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import { cursosAPI, docentesAPI, ciclosAPI } from '../services/api';
-import { FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaTimes, FaSync, FaCalendarCheck, FaLayerGroup, FaFileExcel } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaTimes, FaSync, FaCalendarCheck, FaFileExcel } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';

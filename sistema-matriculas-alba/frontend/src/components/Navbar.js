@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaSignOutAlt, FaRocket, FaUserAlt } from 'react-icons/fa';
+import { FaSignOutAlt, FaRocket } from 'react-icons/fa';
 
 const Navbar = ({ title = 'Panel de Administración' }) => {
   const navigate = useNavigate();
-  const { user, logout } = React.useContext(AuthContext); // Punto 11
+  const { logout } = React.useContext(AuthContext); // Punto 11
 
   const handleLogout = () => {
     logout();

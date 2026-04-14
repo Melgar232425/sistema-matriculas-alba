@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { matriculasAPI, estudiantesAPI, cursosAPI } from '../services/api';
-import { FaPlus, FaSearch, FaTimes, FaTrash, FaEdit, FaEye } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const Matriculas = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaSignInAlt, FaGraduationCap } from 'react-icons/fa';
+import { FaSignInAlt } from 'react-icons/fa';
 import '../styles/App.css';
 
 const Login = () => {

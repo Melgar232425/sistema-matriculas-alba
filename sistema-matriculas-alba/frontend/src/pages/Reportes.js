@@ -15,6 +15,7 @@ const Reportes = () => {
 
   useEffect(() => {
     cargarReportes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarReportes = async () => {
