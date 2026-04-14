@@ -4,12 +4,21 @@ const path = require('path');
 
 
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT) || 587,
     secure: process.env.EMAIL_PORT === '465',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
+        pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
+    }
+});
+
+// Verificar conexión al iniciar
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('❌ ERROR SMTP:', error.message);
+    } else {
+        console.log('✅ SERVIDOR DE CORREO LISTO (SMTP)');
     }
 });
 
@@ -47,10 +56,12 @@ const sendWelcomeEmail = async (estudiante) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        console.log(`📧 Intentando enviar bienvenida a: ${estudiante.email}`);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Email enviado exitosamente: ${info.messageId}`);
         return true;
     } catch (error) {
-        console.error('Error welcome email:', error.message);
+        console.error('❌ ERROR al enviar bienvenida:', error.message);
         return false;
     }
 };
