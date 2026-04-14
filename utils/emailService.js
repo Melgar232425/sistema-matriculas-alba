@@ -1,68 +1,51 @@
-const nodemailer = require('nodemailer');
-const fs = require('fs');
-const path = require('path');
+const { Resend } = require('resend');
 
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: {
-        user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
-        pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
-    },
-    family: 4,
-    logger: true, // ¡ACTIVADO PARA VER TODO!
-    debug: true,  // ¡ACTIVADO PARA VER TODO!
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
-console.log('📬 Servicio de correo inicializado (Esperando envio...)');
+const resend = new Resend('re_SMZGPL4B_KgaGwKpvoApWnsCiRZirz4Zo');
 
 const logoUrl = 'https://sistema-matriculas-alba.vercel.app/logo_oficial.png';
-const EMAIL_FROM_DEFAULT = '"Academia Alba" <alexis052304@gmail.com>';
+// Resend solo permite enviar desde este correo hasta que verifiques un dominio
+const EMAIL_FROM_DEFAULT = 'Academia Alba <onboarding@resend.dev>';
 
 /**
  * Envía un correo de bienvenida a un nuevo estudiante
  */
 const sendWelcomeEmail = async (estudiante) => {
-    const from_email = EMAIL_FROM_DEFAULT;
-    const mailOptions = {
-        from: from_email,
-        to: estudiante.email,
-        subject: `¡Bienvenido a Academia Alba, ${estudiante.nombres}!`,
-        html: `
-            <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
-                <div style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); padding: 30px; text-align: center;">
-                    <img src="${logoUrl}" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
-                    <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase;">ACADEMIA ALBA</h1>
-                </div>
-                
-                <div style="padding: 30px; line-height: 1.6;">
-                    <h2 style="color: #4361ee;">¡Hola, ${estudiante.nombres}!</h2>
-                    <p>Tus datos han sido registrados exitosamente en nuestro sistema.</p>
+    try {
+        console.log(`📧 Enviando bienvenida via RESEND a: ${estudiante.email}`);
+        const { data, error } = await resend.emails.send({
+            from: EMAIL_FROM_DEFAULT,
+            to: estudiante.email,
+            subject: `¡Bienvenido a Academia Alba, ${estudiante.nombres}!`,
+            html: `
+                <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
+                    <div style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); padding: 30px; text-align: center;">
+                        <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase;">ACADEMIA ALBA</h1>
+                    </div>
                     
-                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                        <table style="width: 100%; font-size: 14px;">
-                            <tr><td style="color: #64748b;">Código:</td><td style="font-weight: bold;">${estudiante.codigo}</td></tr>
-                            <tr><td style="color: #64748b;">DNI:</td><td style="font-weight: bold;">${estudiante.dni}</td></tr>
-                        </table>
+                    <div style="padding: 30px; line-height: 1.6;">
+                        <h2 style="color: #4361ee;">¡Hola, ${estudiante.nombres}!</h2>
+                        <p>Tus datos han sido registrados exitosamente en nuestro sistema.</p>
+                        
+                        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                            <table style="width: 100%; font-size: 14px;">
+                                <tr><td style="color: #64748b;">Código:</td><td style="font-weight: bold;">${estudiante.codigo}</td></tr>
+                                <tr><td style="color: #64748b;">DNI:</td><td style="font-weight: bold;">${estudiante.dni}</td></tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `
-    };
+            `
+        });
 
-    try {
-        console.log(`📧 Intentando enviar bienvenida a: ${estudiante.email}`);
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email enviado exitosamente: ${info.messageId}`);
+        if (error) {
+            console.error('❌ ERROR RESEND:', error);
+            return false;
+        }
+
+        console.log(`✅ Email enviado via RESEND: ${data.id}`);
         return true;
     } catch (error) {
-        console.error('❌ ERROR al enviar bienvenida:', error.message);
+        console.error('❌ ERROR CRITICO EMAIL:', error.message);
         return false;
     }
 };
@@ -71,90 +54,44 @@ const sendWelcomeEmail = async (estudiante) => {
  * Envía un correo de confirmación de matrícula
  */
 const sendEnrollmentEmail = async (estudiante, curso, matricula) => {
-    const from_email = EMAIL_FROM_DEFAULT;
-    const mailOptions = {
-        from: from_email,
-        to: estudiante.email,
-        subject: `Confirmación de Matrícula: ${curso.nombre}`,
-        html: `
-            <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                <div style="background: #4361ee; padding: 25px; text-align: center;">
-                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 10px;">
-                    <h1 style="color: white; margin: 0; font-size: 20px;">ACADEMIA ALBA</h1>
-                </div>
-                <div style="padding: 30px;">
-                    <h3>Constancia de Matrícula</h3>
-                    <p>Curso: <strong>${curso.nombre}</strong></p>
-                    <p>Horario: <strong>${curso.horario || 'No especificado'}</strong></p>
-                </div>
-            </div>
-        `
-    };
     try {
-        await transporter.sendMail(mailOptions);
-    } catch(e) { console.error('Error Email', e); }
+        await resend.emails.send({
+            from: EMAIL_FROM_DEFAULT,
+            to: estudiante.email,
+            subject: `Confirmación de Matrícula: ${curso.nombre}`,
+            html: `<div style="padding: 20px;"><h3>Constancia de Matrícula</h3><p>Curso: <strong>${curso.nombre}</strong></p></div>`
+        });
+    } catch(e) { console.error('Error Resend', e); }
 };
 
 /**
  * Envía un recibo de pago digital
  */
 const sendPaymentEmail = async (estudiante, pago, cursoNombre) => {
-    const from_email = EMAIL_FROM_DEFAULT;
-    const mailOptions = {
-        from: from_email,
-        to: estudiante.email,
-        subject: `Recibo de Pago: ${pago.codigo_recibo}`,
-        html: `
-            <div style="font-family: 'Arial', sans-serif; max-width: 500px; margin: 0 auto; border: 2px solid #f1f5f9; border-radius: 16px; overflow: hidden;">
-                <div style="background-color: #059669; padding: 20px; text-align: center;">
-                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 5px;">
-                    <h1 style="color: white; margin: 0; font-size: 16px;">ACADEMIA ALBA</h1>
-                </div>
-                <div style="padding: 30px; text-align: center;">
-                    <div style="font-size: 32px; color: #059669; font-weight: bold;">S/ ${pago.monto}</div>
-                    <p>Pago de Curso: ${cursoNombre}</p>
-                </div>
-            </div>
-        `
-    };
     try {
-        await transporter.sendMail(mailOptions);
-    } catch(e) { console.error('Error Email', e); }
+        await resend.emails.send({
+            from: EMAIL_FROM_DEFAULT,
+            to: estudiante.email,
+            subject: `Recibo de Pago: ${pago.codigo_recibo}`,
+            html: `<div style="padding: 20px;"><h1>S/ ${pago.monto}</h1><p>Pago de Curso: ${cursoNombre}</p></div>`
+        });
+    } catch(e) { console.error('Error Resend', e); }
 };
 
 /**
  * Envía un correo de bienvenida a un docente
  */
 const sendTeacherWelcomeEmail = async (docente) => {
-    const from_email = EMAIL_FROM_DEFAULT;
-    const mailOptions = {
-        from: from_email,
-        to: docente.email,
-        subject: `¡Bienvenido al Equipo Docente Alba, ${docente.nombres}!`,
-        html: `
-            <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
-                <div style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); padding: 30px; text-align: center;">
-                    <img src="${logoUrl}" alt="Logo" style="max-height: 80px; margin-bottom: 10px;">
-                    <h1 style="color: white; margin: 0; font-size: 24px; text-transform: uppercase;">ACADEMIA ALBA</h1>
-                </div>
-                <div style="padding: 30px; line-height: 1.6;">
-                    <h2 style="color: #4361ee;">¡Hola, profesor(a) ${docente.nombres}!</h2>
-                    <p>Es un placer darle la bienvenida al equipo docente de nuestra institución.</p>
-                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                        <table style="width: 100%; font-size: 14px;">
-                            <tr><td style="color: #64748b;">Código Docente:</td><td style="font-weight: bold;">${docente.codigo}</td></tr>
-                            <tr><td style="color: #64748b;">Especialidad:</td><td style="font-weight: bold;">${docente.especialidad}</td></tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `
-    };
     try {
-        await transporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: EMAIL_FROM_DEFAULT,
+            to: docente.email,
+            subject: `¡Bienvenido al Equipo Docente Alba, ${docente.nombres}!`,
+            html: `<div style="padding: 20px;"><h2>¡Hola, profesor(a) ${docente.nombres}!</h2></div>`
+        });
         return true;
     } catch (error) {
-        console.error('Error enviando email a docente:', error.message);
+        console.error('Error Resend Docente:', error.message);
         return false;
     }
 };
@@ -163,32 +100,14 @@ const sendTeacherWelcomeEmail = async (docente) => {
  * Notifica al docente sobre un nuevo curso asignado
  */
 const sendTeacherCourseEmail = async (docente, curso) => {
-    const from_email = EMAIL_FROM_DEFAULT;
-    const mailOptions = {
-        from: from_email,
-        to: docente.email,
-        subject: `Nuevo Curso Asignado: ${curso.nombre}`,
-        html: `
-            <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                <div style="background: #0f172a; padding: 25px; text-align: center;">
-                    <img src="${logoUrl}" style="max-height: 60px; margin-bottom: 10px;">
-                    <h1 style="color: white; margin: 0; font-size: 20px;">ASIGNACIÓN DE CURSO</h1>
-                </div>
-                <div style="padding: 30px;">
-                    <h3>Detalles de tu nuevo curso</h3>
-                    <p><strong>Curso:</strong> ${curso.nombre}</p>
-                    <p><strong>Horario:</strong> ${curso.horario || 'Por definir'}</p>
-                    <p><strong>Aula:</strong> ${curso.aula || 'Por asignar'}</p>
-                    <p><strong>Nivel / Especialidad:</strong> ${curso.nivel || 'General'}</p>
-                </div>
-            </div>
-        `
-    };
     try {
-        await transporter.sendMail(mailOptions);
-    } catch(e) {
-        console.error('Error enviando curso a docente:', e.message);
-    }
+        await resend.emails.send({
+            from: EMAIL_FROM_DEFAULT,
+            to: docente.email,
+            subject: `Nuevo Curso Asignado: ${curso.nombre}`,
+            html: `<div style="padding: 20px;"><h3>Nuevo curso asignado: ${curso.nombre}</h3></div>`
+        });
+    } catch(e) { console.error('Error Resend curso docente', e.message); }
 };
 
 module.exports = {
