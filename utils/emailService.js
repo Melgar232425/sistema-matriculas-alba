@@ -6,26 +6,21 @@ const path = require('path');
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // false para puerto 587
-    requireTLS: true, // Forzar uso de TLS
+    secure: false,
+    requireTLS: true,
     auth: {
         user: process.env.EMAIL_USER || 'alexis052304@gmail.com',
         pass: process.env.EMAIL_PASS || 'wurslqalniaflavc'
     },
     family: 4,
+    logger: true, // ¡ACTIVADO PARA VER TODO!
+    debug: true,  // ¡ACTIVADO PARA VER TODO!
     tls: {
         rejectUnauthorized: false
     }
 });
 
-// Verificar conexión al iniciar
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ ERROR SMTP:', error.message);
-    } else {
-        console.log('✅ SERVIDOR DE CORREO LISTO (SMTP)');
-    }
-});
+console.log('📬 Servicio de correo inicializado (Esperando envio...)');
 
 const logoUrl = 'https://sistema-matriculas-alba.vercel.app/logo_oficial.png';
 const EMAIL_FROM_DEFAULT = '"Academia Alba" <alexis052304@gmail.com>';
