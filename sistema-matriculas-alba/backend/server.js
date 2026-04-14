@@ -41,7 +41,7 @@ const loginLimiter = rateLimit({
 app.use(helmet()); // Punto S1: Seguridad de cabeceras
 app.use(generalLimiter); // Punto S2
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Punto S4
+  origin: true, // Punto S4 - Modificado para aceptar peticiones de celulares en la misma red
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' })); // Punto P5: Límite de 1mb
