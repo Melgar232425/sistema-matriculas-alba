@@ -20,6 +20,7 @@ import PortalHorario from './pages/PortalHorario';
 import PortalAsistencia from './pages/PortalAsistencia';
 import PortalDocenteLogin from './pages/PortalDocenteLogin';
 import PortalDocenteInicio from './pages/PortalDocenteInicio';
+import LandingPage from './pages/LandingPage';
 import { Toaster } from 'react-hot-toast';
 
 // Componente para proteger rutas según rol
@@ -40,7 +41,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     if (user.rol === 'matriculador') {
       return <Navigate to="/matriculas" replace />;
     }
-    return <Navigate to="/" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   return children;
@@ -66,6 +67,9 @@ function App() {
       <Toaster position="top-right" />
       <Router>
         <Routes>
+          {/* Selección de Portal - Página principal pública */}
+          <Route path="/" element={<LandingPage />} />
+
           {/* Ruta de Login independiente */}
           <Route path="/login" element={<Login />} />
 
@@ -85,7 +89,7 @@ function App() {
             <div className="app">
               <Sidebar />
               <Routes>
-                <Route path="/" element={
+                <Route path="/admin" element={
                   <PrivateRoute allowedRoles={['director', 'admin']}>
                     <Dashboard />
                   </PrivateRoute>
@@ -130,7 +134,7 @@ function App() {
                     <Calendario />
                   </PrivateRoute>
                 } />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Routes>
             </div>
           } />

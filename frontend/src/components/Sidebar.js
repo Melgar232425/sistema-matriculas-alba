@@ -23,7 +23,7 @@ const Sidebar = () => {
   if (!user) return null;
 
   const menuItems = [
-    { path: '/', icon: <FaHome />, label: 'Inicio', roles: ['director', 'admin'] },
+    { path: '/admin', icon: <FaHome />, label: 'Inicio', roles: ['director', 'admin'] },
     { path: '/ciclos', icon: <FaLayerGroup />, label: 'Gestión de Ciclos', roles: ['director', 'admin'] }, // Punto 14
     { path: '/estudiantes', icon: <FaUserGraduate />, label: 'Estudiantes', roles: ['director', 'admin', 'matriculador'] },
     { path: '/docentes', icon: <FaUserTie />, label: 'Docentes', roles: ['director', 'admin'] },

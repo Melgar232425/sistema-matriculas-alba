@@ -30,7 +30,7 @@ const Login = () => {
             if (rol === 'matriculador') {
                 navigate('/matriculas');
             } else {
-                navigate('/');
+                navigate('/admin');
             }
         } else {
             setError(result.message);
