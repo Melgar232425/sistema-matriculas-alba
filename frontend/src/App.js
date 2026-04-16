@@ -9,6 +9,7 @@ import Pagos from './pages/Pagos';
 import Reportes from './pages/Reportes';
 import Calendario from './pages/Calendario';
 import Docentes from './pages/Docentes';
+import Tutores from './pages/Tutores';
 import Ciclos from './pages/Ciclos';
 import './styles/App.css';
 import { AuthProvider, AuthContext } from './context/AuthContext';
@@ -102,6 +103,12 @@ function App() {
           <Route path="/docentes" element={
             <PrivateRoute allowedRoles={['director', 'admin']}>
               <div className="app"><Sidebar /><Docentes /></div>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/tutores" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app"><Sidebar /><Tutores /></div>
             </PrivateRoute>
           } />
 

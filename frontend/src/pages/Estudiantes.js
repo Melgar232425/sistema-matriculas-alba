@@ -119,6 +119,11 @@ const Estudiantes = () => {
       return;
     }
 
+    if (formData.telefono && formData.telefono_apoderado && formData.telefono === formData.telefono_apoderado) {
+      toast.error('❌ El teléfono del apoderado debe ser diferente al del estudiante para una mejor comunicación.', { icon: '' });
+      return;
+    }
+
     if (formData.telefono && formData.telefono.length !== 9) {
       toast.error('❌ El teléfono del estudiante debe tener 9 números.', { icon: '' });
       return;
