@@ -80,6 +80,7 @@ const PortalInicio = () => {
           {[
             { to: '/portal/inicio',  icon: <FaUserGraduate />,    label: 'Mi Perfil' },
             { to: '/portal/horario', icon: <FaCalendarAlt />,     label: 'Mi Horario' },
+            { to: '/portal/asistencia', icon: <FaCheckCircle />, label: 'Mi Asistencia' },
             { to: '/portal/pagos',   icon: <FaMoneyBillWave />,   label: 'Mis Pagos' },
           ].map(item => (
             <Link

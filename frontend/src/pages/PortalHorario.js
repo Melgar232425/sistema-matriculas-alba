@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaCheckCircle } from 'react-icons/fa';
 
 const PortalHorario = () => {
   const [horario, setHorario] = useState([]);
@@ -38,6 +38,7 @@ const PortalHorario = () => {
           {[
             { to: '/portal/inicio',  icon: <FaUserGraduate />,  label: 'Mi Perfil' },
             { to: '/portal/horario', icon: <FaCalendarAlt />,   label: 'Mi Horario' },
+            { to: '/portal/asistencia', icon: <FaCheckCircle />, label: 'Mi Asistencia' },
             { to: '/portal/pagos',   icon: <FaMoneyBillWave />, label: 'Mis Pagos' },
           ].map(item => (
             <Link key={item.to} to={item.to} style={{ ...styles.navLink, ...(window.location.pathname === item.to ? styles.navLinkActive : {}) }}>

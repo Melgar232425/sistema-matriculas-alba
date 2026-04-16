@@ -17,6 +17,7 @@ import PortalLogin from './pages/PortalLogin';
 import PortalInicio from './pages/PortalInicio';
 import PortalPagos from './pages/PortalPagos';
 import PortalHorario from './pages/PortalHorario';
+import PortalAsistencia from './pages/PortalAsistencia';
 import PortalDocenteLogin from './pages/PortalDocenteLogin';
 import PortalDocenteInicio from './pages/PortalDocenteInicio';
 import { Toaster } from 'react-hot-toast';
@@ -71,6 +72,7 @@ function App() {
           {/* Rutas del Portal de Estudiantes — sin Sidebar del admin */}
           <Route path="/portal" element={<PortalLogin />} />
           <Route path="/portal/inicio" element={<StudentRoute><PortalInicio /></StudentRoute>} />
+          <Route path="/portal/asistencia" element={<StudentRoute><PortalAsistencia /></StudentRoute>} />
           <Route path="/portal/pagos" element={<StudentRoute><PortalPagos /></StudentRoute>} />
           <Route path="/portal/horario" element={<StudentRoute><PortalHorario /></StudentRoute>} />
 

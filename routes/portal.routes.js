@@ -13,5 +13,6 @@ router.get('/perfil',     verifyStudentToken, portalController.getMiPerfil);
 router.get('/matriculas', verifyStudentToken, portalController.getMisMatriculas);
 router.get('/pagos',      verifyStudentToken, portalController.getMisPagos);
 router.get('/horario',    verifyStudentToken, portalController.getMiHorario);
+router.get('/asistencias', verifyStudentToken, portalController.getMisAsistencias);
 
 module.exports = router;

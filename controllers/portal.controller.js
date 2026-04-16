@@ -172,3 +172,25 @@ exports.getMiHorario = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error del servidor.', error: error.message });
   }
 };
+
+// ─────────────────────────────────────────────
+// MIS ASISTENCIAS
+// ─────────────────────────────────────────────
+exports.getMisAsistencias = async (req, res) => {
+  try {
+    const [asistencias] = await promisePool.query(
+      `SELECT a.id, a.fecha, a.estado, c.nombre as curso_nombre
+       FROM asistencias a
+       INNER JOIN matriculas m ON a.matricula_id = m.id
+       INNER JOIN cursos c ON m.curso_id = c.id
+       WHERE m.estudiante_id = ?
+       ORDER BY a.fecha DESC`,
+      [req.estudiante.id]
+    );
+    res.json({ success: true, data: asistencias, total: asistencias.length });
+  } catch (error) {
+    console.error('Error al obtener asistencias:', error);
+    res.status(500).json({ success: false, message: 'Error del servidor.', error: error.message });
+  }
+};
+

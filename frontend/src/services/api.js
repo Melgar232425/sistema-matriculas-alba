@@ -158,6 +158,7 @@ export const portalAPI = {
   getMatriculas: () => portalApi.get('/portal/matriculas'),
   getPagos: () => portalApi.get('/portal/pagos'),
   getHorario: () => portalApi.get('/portal/horario'),
+  getAsistencias: () => portalApi.get('/portal/asistencias'),
 };
 
 // ============ PORTAL DE DOCENTES ============
