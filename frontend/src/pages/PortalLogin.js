@@ -61,15 +61,6 @@ const PortalLogin = () => {
               </div>
             ))}
           </div>
-
-          {/* Tarjeta de ejemplo */}
-          <div style={styles.exampleCard}>
-            <p style={styles.exampleLabel}>Tu código de estudiante</p>
-            <p style={styles.exampleCode}>EST-0001</p>
-            <p style={styles.exampleHint}>
-              Lo encontrarás en el correo de bienvenida que te envió la academia cuando te registraste.
-            </p>
-          </div>
         </div>
 
         {/* Círculos decorativos */}
