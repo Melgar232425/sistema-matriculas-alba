@@ -57,6 +57,12 @@ const Pagos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (parseFloat(formData.monto) <= 0) {
+      toast.error('❌ El monto a pagar debe ser mayor a 0.', { icon: '' });
+      return;
+    }
+
     try {
       await pagosAPI.create(formData);
       toast.success('Pago registrado');

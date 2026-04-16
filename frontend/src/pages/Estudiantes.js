@@ -45,27 +45,64 @@ const Estudiantes = () => {
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === 'dni' && !modoEdicion && value.length === 8) {
-      try {
-        const existente = estudiantes.find(est => est.dni === value);
-        if (existente) {
-          setDniDuplicado(true);
-          toast.error(`❌ ¡DNI duplicado! Ya existe el estudiante: ${existente.nombres} ${existente.apellidos}`, { icon: '' });
+    
+    // Validaciones preventivas en tiempo real
+    if (name === 'dni') {
+      const onlyNums = value.replace(/[^0-9]/g, '');
+      if (onlyNums.length <= 8) {
+        setFormData({ ...formData, [name]: onlyNums });
+        
+        if (onlyNums.length === 8 && !modoEdicion) {
+          const existente = estudiantes.find(est => est.dni === onlyNums);
+          if (existente) {
+            setDniDuplicado(true);
+            toast.error(`❌ ¡DNI duplicado! Ya existe el estudiante: ${existente.nombres} ${existente.apellidos}`, { icon: '' });
+          } else {
+            setDniDuplicado(false);
+          }
         } else {
           setDniDuplicado(false);
         }
-      } catch {
-        setDniDuplicado(false);
       }
-    } else if (name === 'dni') {
-      setDniDuplicado(false);
+      return;
     }
+
+    if (name === 'telefono' || name === 'telefono_apoderado') {
+      const onlyNums = value.replace(/[^0-9]/g, '');
+      if (onlyNums.length <= 9) {
+        setFormData({ ...formData, [name]: onlyNums });
+      }
+      return;
+    }
+
+    if (name === 'nombres' || name === 'apellidos' || name === 'nombre_apoderado') {
+      const onlyLetters = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '');
+      setFormData({ ...formData, [name]: onlyLetters });
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validaciones finales antes de enviar
+    if (formData.dni.length !== 8) {
+      toast.error('❌ El DNI debe tener exactamente 8 números.', { icon: '' });
+      return;
+    }
+
+    if (formData.telefono && formData.telefono.length !== 9) {
+      toast.error('❌ El teléfono del estudiante debe tener 9 números.', { icon: '' });
+      return;
+    }
+
+    if (formData.telefono_apoderado && formData.telefono_apoderado.length !== 9) {
+      toast.error('❌ El teléfono del apoderado debe tener 9 números.', { icon: '' });
+      return;
+    }
+
     if (dniDuplicado) {
       toast.error('❌ No se puede guardar: el DNI ya está registrado en el sistema.', { icon: '' });
       return;

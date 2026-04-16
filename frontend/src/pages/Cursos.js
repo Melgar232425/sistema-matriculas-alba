@@ -270,6 +270,24 @@ const Cursos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validaciones de Negocio
+    if (parseFloat(formData.precio) <= 0) {
+      toast.error('❌ El precio del curso debe ser mayor a 0.', { icon: '' });
+      return;
+    }
+
+    if (parseInt(formData.cupos_totales) <= 0) {
+      toast.error('❌ La cantidad de cupos debe ser mayor a 0.', { icon: '' });
+      return;
+    }
+
+    if (formData.fecha_inicio && formData.fecha_fin) {
+      if (new Date(formData.fecha_inicio) > new Date(formData.fecha_fin)) {
+        toast.error('❌ La fecha de inicio no puede ser posterior a la fecha de fin.', { icon: '' });
+        return;
+      }
+    }
+
     try {
       // VALIDACIÓN ESTRICTA DE ESPECIALIDAD
       if (formData.docente_id) {
@@ -294,15 +312,12 @@ const Cursos = () => {
         }
       }
 
-      // Validar fechas contra el ciclo seleccionado
-
       const horarioGenerado = formData.dias && formData.horas ? `${formData.dias} ${formData.horas}` : '';
-      // En modo edición, si no se puede reconstruir el horario desde dias+horas, usar el horario original del curso
       const horarioFinal = horarioGenerado || (modoEdicion && cursoActual?.horario) || '';
 
       const data = {
         ...formData,
-        nivel: 'Preuniversitario', // Hardcoded value since all are Preuniversitario
+        nivel: 'Preuniversitario', 
         horario: horarioFinal,
         cupos_totales: parseInt(formData.cupos_totales),
         precio: parseFloat(formData.precio),

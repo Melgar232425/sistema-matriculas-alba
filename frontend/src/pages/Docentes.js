@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { docentesAPI, estudiantesAPI } from '../services/api';
+import { docentesAPI } from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -73,42 +73,56 @@ const Docentes = () => {
 
     const handleInputChange = async (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-
-        // Verificar DNI duplicado en tiempo real (solo en modo creación)
-        if (name === 'dni' && !modoEdicion && value.length === 8) {
-            // Verificar contra docentes locales
-            const existenteLocal = docentes.find(d => d.dni === value);
-            if (existenteLocal) {
-                setDniDuplicado(`¡DNI duplicado! Ya existe el docente: ${existenteLocal.nombres} ${existenteLocal.apellidos}`);
-                toast.error(`❌ ¡DNI duplicado! Ya existe el docente: ${existenteLocal.nombres} ${existenteLocal.apellidos}`, { icon: '' });
-                return;
-            }
-            
-            // Verificar contra la base de datos de estudiantes
-            try {
-                const response = await estudiantesAPI.getByDni(value);
-                if (response.data && response.data.success) {
-                    const est = response.data.data;
-                    setDniDuplicado(`¡DNI duplicado! Ya existe el estudiante: ${est.nombres} ${est.apellidos}`);
-                    toast.error(`❌ ¡DNI duplicado! Ya existe el estudiante: ${est.nombres} ${est.apellidos}`, { icon: '' });
-                }
-            } catch (error) {
-                // Si da 404, significa que NO existe en estudiantes, lo cual es correcto.
-                // Si el error no es 404, de todos modos no asumimos duplicado, el backend lo atrapará
-                if (error.response?.status === 404) {
-                    setDniDuplicado(false);
-                } else if (!dniDuplicado) {
+        
+        // Validaciones preventivas en tiempo real
+        if (name === 'dni') {
+            const onlyNums = value.replace(/[^0-9]/g, '');
+            if (onlyNums.length <= 8) {
+                setFormData({ ...formData, [name]: onlyNums });
+                
+                if (onlyNums.length === 8 && !modoEdicion) {
+                    const existenteLocal = docentes.find(d => d.dni === onlyNums);
+                    if (existenteLocal) {
+                        setDniDuplicado(`¡DNI duplicado! Ya existe el docente: ${existenteLocal.nombres} ${existenteLocal.apellidos}`);
+                        toast.error(`❌ ¡DNI duplicado! Ya existe el docente: ${existenteLocal.nombres} ${existenteLocal.apellidos}`, { icon: '' });
+                    }
+                } else {
                     setDniDuplicado(false);
                 }
             }
-        } else if (name === 'dni') {
-            setDniDuplicado(false);
+            return;
         }
+
+        if (name === 'telefono') {
+            const onlyNums = value.replace(/[^0-9]/g, '');
+            if (onlyNums.length <= 9) {
+                setFormData({ ...formData, [name]: onlyNums });
+            }
+            return;
+        }
+
+        if (name === 'nombres' || name === 'apellidos') {
+            const onlyLetters = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '');
+            setFormData({ ...formData, [name]: onlyLetters });
+            return;
+        }
+
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validaciones finales
+        if (formData.dni.length !== 8) {
+            toast.error('❌ El DNI debe tener exactamente 8 números.', { icon: '' });
+            return;
+        }
+
+        if (formData.telefono && formData.telefono.length !== 9) {
+            toast.error('❌ El teléfono debe tener 9 números (9XXXXXXXX).', { icon: '' });
+            return;
+        }
 
         if (dniDuplicado) {
             toast.error('❌ No se puede guardar: el DNI ya está registrado.', { icon: '' });
