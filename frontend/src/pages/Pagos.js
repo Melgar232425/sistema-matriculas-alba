@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { pagosAPI, matriculasAPI } from '../services/api';
-import { FaPlus, FaFilePdf, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaFilePdf, FaSearch } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
 const Pagos = () => {
   const [pagos, setPagos] = useState([]);
@@ -12,7 +11,6 @@ const Pagos = () => {
   const [showModal, setShowModal] = useState(false);
   const [filtroCodigo, setFiltroCodigo] = useState('');
   const [buscadorDni, setBuscadorDni] = useState('');
-  const [matriculaSeleccionada, setMatriculaSeleccionada] = useState(null);
   const [formData, setFormData] = useState({
     matricula_id: '',
     monto: '',
@@ -52,7 +50,6 @@ const Pagos = () => {
   const handleMatriculaChange = (e) => {
     const id = e.target.value;
     const sel = matriculas.find(m => m.id.toString() === id);
-    setMatriculaSeleccionada(sel);
     if (sel) {
       setFormData({ ...formData, matricula_id: id, monto: (sel.monto_total - sel.monto_pagado).toFixed(2), numero_recibo: generarNumeroRecibo() });
     }

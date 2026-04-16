@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaUserShield, FaEnvelope, FaLock, FaSignInAlt, FaArrowLeft } from 'react-icons/fa';
+import { FaUserShield, FaEnvelope, FaLock, FaSignInAlt, FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import '../styles/App.css';
 
 const Login = () => {

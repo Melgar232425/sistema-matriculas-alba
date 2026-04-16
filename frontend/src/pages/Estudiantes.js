@@ -10,7 +10,6 @@ const Estudiantes = () => {
   const [showModalHistorial, setShowModalHistorial] = useState(false);
   const [historialData, setHistorialData] = useState(null);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
-  const [tabActiva, setTabActiva] = useState('datos');
   const [modoEdicion, setModoEdicion] = useState(false);
   const [estudianteActual, setEstudianteActual] = useState(null);
   const [busqueda, setBusqueda] = useState('');
