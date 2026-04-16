@@ -1,6 +1,4 @@
-// Página de Docentes - Gestión de Profesores
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { docentesAPI, estudiantesAPI } from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -186,8 +184,6 @@ const Docentes = () => {
 
     return (
         <div className="main-content">
-            <Navbar title="Gestión de Docentes" />
-
             <div className="card">
                 <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
                     <h2 className="card-title">Lista de Docentes</h2>

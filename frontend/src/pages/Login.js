@@ -25,7 +25,7 @@ const Login = () => {
         const result = await login(username, password);
 
         if (result.success) {
-            const rol = result.data?.usuario?.rol;
+            const rol = result.user?.rol;
             if (rol === 'matriculador') {
                 navigate('/matriculas');
             } else {
@@ -49,10 +49,22 @@ const Login = () => {
                     <p style={styles.leftSubtitle}>Control Académico Administrativo</p>
                     
                     <div style={styles.features}>
-                        <div style={styles.featureItem}>✔️ Gestión de Ciclos y Cursos</div>
-                        <div style={styles.featureItem}>✔️ Control de Matrículas y Pagos</div>
-                        <div style={styles.featureItem}>✔️ Reportes y Estadísticas en tiempo real</div>
-                        <div style={styles.featureItem}>✔️ Configuración de Calendario</div>
+                        <div style={styles.featureItem}>
+                            <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                            <span>Gestión de Ciclos y Cursos</span>
+                        </div>
+                        <div style={styles.featureItem}>
+                            <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                            <span>Control de Matrículas y Pagos</span>
+                        </div>
+                        <div style={styles.featureItem}>
+                            <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                            <span>Reportes y Estadísticas en tiempo real</span>
+                        </div>
+                        <div style={styles.featureItem}>
+                            <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                            <span>Configuración de Calendario Académico</span>
+                        </div>
                     </div>
                 </div>
 
@@ -161,7 +173,7 @@ const styles = {
     leftTitle: { fontSize: 34, fontWeight: 900, marginBottom: 8, letterSpacing: '-1px' },
     leftSubtitle: { fontSize: 17, color: 'rgba(255,255,255,0.7)', marginBottom: 40 },
     features: { display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32 },
-    featureItem: { fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)' },
+    featureItem: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)' },
     circle: {
         position: 'absolute', background: 'rgba(255,255,255,0.06)',
         borderRadius: '50%',

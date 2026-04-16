@@ -1,6 +1,5 @@
 // Página de Calendario de Cursos - Vista semanal
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { cursosAPI, ciclosAPI } from '../services/api';
 import { FaCalendarAlt, FaClock, FaBook, FaInfoCircle, FaExclamationTriangle, FaChalkboardTeacher, FaMapMarkerAlt, FaFileExcel } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -414,9 +413,7 @@ const Calendario = () => {
 
     return (
         <div className="main-content">
-            <Navbar title="Calendario de Cursos" />
-
-            {/* Resumen */}
+            <div className="card">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '16px' }}>
                 {[
                     { label: 'Total Cursos', value: totalCursos, color: 'var(--primary)', icon: <FaBook /> },
@@ -790,7 +787,8 @@ const Calendario = () => {
                 </div>
             )}
         </div>
-    );
+    </div>
+);
 };
 
 export default Calendario;

@@ -1,6 +1,5 @@
 // Página de Matrículas
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { matriculasAPI, estudiantesAPI, cursosAPI } from '../services/api';
 import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -144,8 +143,6 @@ const Matriculas = () => {
 
   return (
     <div className="main-content">
-      <Navbar title="Gestión de Matrículas" />
-
       <div className="card">
         <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Lista de Estudiantes Matriculados</h2>

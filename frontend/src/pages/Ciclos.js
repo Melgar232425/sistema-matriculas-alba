@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ciclosAPI } from '../services/api';
-import Navbar from '../components/Navbar';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaCalendarAlt, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 
@@ -126,8 +125,6 @@ const Ciclos = () => {
 
     return (
         <div className="main-content">
-            <Navbar title="Ciclos Académicos" />
-
             <div className="card">
                 <div className="card-header" style={{ flexWrap: 'wrap', gap: '20px' }}>
                     <div>

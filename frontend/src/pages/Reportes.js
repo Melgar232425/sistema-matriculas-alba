@@ -1,6 +1,5 @@
 // Página de Reportes
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { reportesAPI } from '../services/api';
 import { FaFileExport, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -175,9 +174,6 @@ const Reportes = () => {
 
   return (
     <div className="main-content">
-      <Navbar title="Reportes y Estadísticas" />
-
-      {/* Reporte de Ingresos */}
       <div className="card">
         <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Reporte de Ingresos</h2>

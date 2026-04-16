@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(usuario));
                 setUser(usuario);
-                return { success: true };
+                return { success: true, user: usuario };
             }
             return { success: false, message: 'Fallo al iniciar sesión' };
         } catch (error) {

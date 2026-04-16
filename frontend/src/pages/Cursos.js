@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import Navbar from '../components/Navbar';
 import { cursosAPI, docentesAPI, ciclosAPI } from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaTimes, FaSync, FaCalendarCheck, FaFileExcel } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -600,8 +599,6 @@ const Cursos = () => {
 
   return (
     <div className="main-content">
-      <Navbar title="Gestión de Cursos" />
-
       <div className="card">
         <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Lista de Cursos</h2>
