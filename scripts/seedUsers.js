@@ -23,7 +23,8 @@ async function seedUsers() {
         const users = [
             ['director', 'admin123', 'Director General', 'director@academiaalba.com', 'director'],
             ['admin', 'admin123', 'Administrador del Sistema', 'admin@academiaalba.com', 'admin'],
-            ['matriculador', 'admin123', 'Encargado de Matrículas', 'matriculas@academiaalba.com', 'matriculador']
+            ['matriculador', 'admin123', 'Encargado de Matrículas', 'matriculas@academiaalba.com', 'matriculador'],
+            ['tutor_alba', 'tutor2026', 'Tutor Académico', 'tutoria@academiaalba.com', 'tutor']
         ];
 
         for (const user of users) {

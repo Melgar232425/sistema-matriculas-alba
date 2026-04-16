@@ -40,6 +40,9 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     if (user.rol === 'matriculador') {
       return <Navigate to="/matriculas" replace />;
     }
+    if (user.rol === 'tutor') {
+      return <Navigate to="/tutores" replace />;
+    }
     return <Navigate to="/admin" replace />;
   }
 
@@ -107,7 +110,7 @@ function App() {
           } />
           
           <Route path="/tutores" element={
-            <PrivateRoute allowedRoles={['director', 'admin']}>
+            <PrivateRoute allowedRoles={['director', 'admin', 'tutor']}>
               <div className="app"><Sidebar /><Tutores /></div>
             </PrivateRoute>
           } />

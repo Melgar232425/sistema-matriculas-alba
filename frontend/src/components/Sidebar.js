@@ -24,11 +24,11 @@ const Sidebar = () => {
   if (!user) return null;
 
   const menuItems = [
-    { path: '/admin', icon: <FaHome />, label: 'Inicio', roles: ['director', 'admin'] },
+    { path: '/admin', icon: <FaHome />, label: 'Inicio', roles: ['director', 'admin', 'tutor'] },
     { path: '/ciclos', icon: <FaLayerGroup />, label: 'Gestión de Ciclos', roles: ['director', 'admin'] }, // Punto 14
     { path: '/estudiantes', icon: <FaUserGraduate />, label: 'Estudiantes', roles: ['director', 'admin', 'matriculador'] },
     { path: '/docentes', icon: <FaUserTie />, label: 'Docentes', roles: ['director', 'admin'] },
-    { path: '/tutores', icon: <FaUserShield />, label: 'Seguimiento Tutoría', roles: ['director', 'admin'] },
+    { path: '/tutores', icon: <FaUserShield />, label: 'Seguimiento Tutoría', roles: ['director', 'admin', 'tutor'] },
     { path: '/cursos', icon: <FaBook />, label: 'Cursos', roles: ['director', 'admin'] },
     { path: '/matriculas', icon: <FaClipboardList />, label: 'Matrículas', roles: ['director', 'admin', 'matriculador'] },
     { path: '/pagos', icon: <FaMoneyBillWave />, label: 'Pagos y Recibos', roles: ['director', 'admin', 'matriculador'] },
