@@ -111,10 +111,6 @@ const PortalInicio = () => {
               Bienvenido a tu portal estudiantil — Academia Alba Perú
             </p>
           </div>
-          <div style={styles.codigoBadge}>
-            <FaIdCard />
-            <span>{perfil?.codigo}</span>
-          </div>
         </div>
 
         {/* Stats */}
