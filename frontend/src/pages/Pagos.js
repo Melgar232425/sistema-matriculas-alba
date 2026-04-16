@@ -58,17 +58,29 @@ const Pagos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (parseFloat(formData.monto) <= 0) {
+    const montoNum = parseFloat(formData.monto);
+    if (montoNum <= 0) {
       toast.error('❌ El monto a pagar debe ser mayor a 0.', { icon: '' });
       return;
     }
 
+    // Validar que no pague más de la deuda
+    const sel = matriculas.find(m => m.id.toString() === formData.matricula_id.toString());
+    if (sel) {
+        const deudaPendiente = sel.monto_total - sel.monto_pagado;
+        if (montoNum > (deudaPendiente + 0.01)) { // Margen pequeño por redondeo
+            toast.error(`❌ El monto (S/ ${montoNum}) supera la deuda pendiente (S/ ${deudaPendiente.toFixed(2)}).`, { icon: '' });
+            return;
+        }
+    }
+
     try {
       await pagosAPI.create(formData);
-      toast.success('Pago registrado');
+      toast.success('Pago registrado con éxito');
       setShowModal(false);
       cargarDatos();
     } catch (error) {
+      console.error(error);
       toast.error('Error al registrar pago');
     }
   };

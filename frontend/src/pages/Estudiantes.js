@@ -43,6 +43,10 @@ const Estudiantes = () => {
     }
   };
 
+  const formatName = (text) => {
+    return text.toLowerCase().split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' ');
+  };
+
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     
@@ -93,6 +97,28 @@ const Estudiantes = () => {
       return;
     }
 
+    if (formData.nombres.trim().length < 2 || formData.apellidos.trim().length < 2) {
+      toast.error('❌ Los nombres y apellidos deben ser válidos.', { icon: '' });
+      return;
+    }
+
+    // Validación de Edad (Mínimo 12 años)
+    const fechaNac = new Date(formData.fecha_nacimiento);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mes = hoy.getMonth() - fechaNac.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
+    
+    if (edad < 12) {
+      toast.error('❌ El estudiante debe tener al menos 12 años para el nivel preuniversitario.', { icon: '' });
+      return;
+    }
+
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error('❌ El formato del correo electrónico es inválido.', { icon: '' });
+      return;
+    }
+
     if (formData.telefono && formData.telefono.length !== 9) {
       toast.error('❌ El teléfono del estudiante debe tener 9 números.', { icon: '' });
       return;
@@ -108,11 +134,19 @@ const Estudiantes = () => {
       return;
     }
     try {
+      // Autoformatear nombres antes de enviar
+      const dataToSave = {
+        ...formData,
+        nombres: formatName(formData.nombres),
+        apellidos: formatName(formData.apellidos),
+        nombre_apoderado: formatName(formData.nombre_apoderado)
+      };
+
       if (modoEdicion) {
-        await estudiantesAPI.update(estudianteActual.id, formData);
+        await estudiantesAPI.update(estudianteActual.id, dataToSave);
         toast.success('Estudiante actualizado exitosamente');
       } else {
-        await estudiantesAPI.create(formData);
+        await estudiantesAPI.create(dataToSave);
         toast.success('Estudiante registrado exitosamente');
       }
       cerrarModal();

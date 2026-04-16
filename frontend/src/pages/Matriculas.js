@@ -55,15 +55,38 @@ const Matriculas = () => {
     e.preventDefault();
     if (submitting) return;
 
+    if (!formData.estudiante_id || !formData.curso_id) {
+        toast.error('❌ Seleccione un estudiante y un curso.', { icon: '' });
+        return;
+    }
+
+    // 1. Validar Duplicado en el mismo Ciclo
+    const cursoSel = cursos.find(c => c.id.toString() === formData.curso_id.toString());
+    const estudianteYaMatriculado = matriculas.find(m => 
+      m.estudiante_id.toString() === formData.estudiante_id.toString() && 
+      m.curso_id.toString() === formData.curso_id.toString() &&
+      m.ciclo_id === cursoSel?.ciclo_id
+    );
+
+    if (estudianteYaMatriculado) {
+      toast.error(`❌ El estudiante ya está matriculado en "${cursoSel?.nombre}" para este ciclo.`, { icon: '' });
+      return;
+    }
+
+    // 2. Validar Vacantes
+    if (cursoSel && cursoSel.cupos_disponibles <= 0) {
+      toast.error(`❌ ¡VACANTES AGOTADAS! No quedan cupos para el curso "${cursoSel.nombre}".`, { icon: '' });
+      return;
+    }
+
     try {
       setSubmitting(true);
       await matriculasAPI.create(formData);
-      toast.success('Matrícula registrada exitosamente');
+      toast.success('Matrícula registrada con éxito');
       setShowModal(false);
       setBuscadorDniModal('');
       cargarDatos();
     } catch (error) {
-      // Punto 13: Error visible
       toast.error(`❌ ${error.response?.data?.message || 'Error al matricular'}`, { icon: '' });
     } finally {
       setSubmitting(false);

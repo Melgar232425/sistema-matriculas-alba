@@ -270,7 +270,7 @@ const Cursos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones de Negocio
+    // 1. Validaciones Básicas de Negocio
     if (parseFloat(formData.precio) <= 0) {
       toast.error('❌ El precio del curso debe ser mayor a 0.', { icon: '' });
       return;
@@ -287,6 +287,33 @@ const Cursos = () => {
         return;
       }
     }
+
+    // 2. DETECCIÓN DE COLISIONES (Aulas y Docentes)
+    const conflicto = cursos.find(c => {
+        // Ignorar el mismo curso si estamos editando
+        if (modoEdicion && cursoActual && c.id === cursoActual.id) return false;
+        if (c.estado === 'inactivo') return false;
+
+        const mismoDia = c.horario.includes(formData.dias);
+        const mismaHora = c.horario.includes(formData.horas);
+        const mismoCiclo = c.ciclo_id === parseInt(formData.ciclo_id);
+
+        if (mismoDia && mismaHora && mismoCiclo) {
+            // Verificar Aula
+            if (formData.aula && c.aula === formData.aula) {
+                toast.error(`❌ ¡CONFLICTO DE AULA! El "${c.aula}" ya está ocupado por el curso: ${c.nombre}.`, { duration: 5000 });
+                return true;
+            }
+            // Verificar Docente
+            if (formData.docente_id && c.docente_id === parseInt(formData.docente_id)) {
+                toast.error(`❌ ¡CONFLICTO DE DOCENTE! El profesor ya dicta "${c.nombre}" en este horario.`, { duration: 5000 });
+                return true;
+            }
+        }
+        return false;
+    });
+
+    if (conflicto) return; // Detener si hay colisión
 
     try {
       // VALIDACIÓN ESTRICTA DE ESPECIALIDAD
