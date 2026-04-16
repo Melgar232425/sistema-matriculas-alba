@@ -15,6 +15,7 @@ const reportesRoutes = require('./routes/reportes.routes');
 const authRoutes = require('./routes/auth.routes');
 const docentesRoutes = require('./routes/docentes.routes');
 const ciclosRoutes = require('./routes/ciclos.routes');
+const portalRoutes = require('./routes/portal.routes');
 const { verifyToken } = require('./middleware/auth.middleware');
 
 const helmet = require('helmet');
@@ -68,6 +69,9 @@ app.use('/api/pagos', verifyToken, pagosRoutes);
 app.use('/api/reportes', verifyToken, reportesRoutes);
 app.use('/api/docentes', verifyToken, docentesRoutes);
 app.use('/api/ciclos', verifyToken, ciclosRoutes);
+
+// Portal de Estudiantes — sin verifyToken de admin (flujo independiente)
+app.use('/api/portal', portalRoutes);
 
 // Ruta temporal para corregir la base de datos (Error de estados de pago)
 app.get('/api/fix-db', async (req, res) => {

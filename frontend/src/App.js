@@ -13,6 +13,10 @@ import Ciclos from './pages/Ciclos';
 import './styles/App.css';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import Login from './pages/Login';
+import PortalLogin from './pages/PortalLogin';
+import PortalInicio from './pages/PortalInicio';
+import PortalPagos from './pages/PortalPagos';
+import PortalHorario from './pages/PortalHorario';
 import { Toaster } from 'react-hot-toast';
 
 // Componente para proteger rutas según rol
@@ -39,6 +43,13 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+// Guard para rutas del portal estudiantil
+const StudentRoute = ({ children }) => {
+  const token = localStorage.getItem('student_token');
+  if (!token) return <Navigate to="/portal" replace />;
+  return children;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -47,6 +58,12 @@ function App() {
         <Routes>
           {/* Ruta de Login independiente */}
           <Route path="/login" element={<Login />} />
+
+          {/* Rutas del Portal de Estudiantes — sin Sidebar del admin */}
+          <Route path="/portal" element={<PortalLogin />} />
+          <Route path="/portal/inicio" element={<StudentRoute><PortalInicio /></StudentRoute>} />
+          <Route path="/portal/pagos" element={<StudentRoute><PortalPagos /></StudentRoute>} />
+          <Route path="/portal/horario" element={<StudentRoute><PortalHorario /></StudentRoute>} />
 
           {/* Rutas Protegidas dentro del Layout General */}
           <Route path="*" element={

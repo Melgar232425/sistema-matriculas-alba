@@ -115,4 +115,41 @@ export const ciclosAPI = {
   delete: (id) => api.delete(`/ciclos/${id}`),
 };
 
+// ============ PORTAL DE ESTUDIANTES ============
+// Instancia separada que usa el token del estudiante (student_token)
+const portalApi = axios.create({
+  baseURL: API_URL,
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+portalApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('student_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+portalApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      localStorage.removeItem('student_token');
+      localStorage.removeItem('student_user');
+      window.location.href = '/portal';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const portalAPI = {
+  login: (credentials) => portalApi.post('/portal/login', credentials),
+  getPerfil: () => portalApi.get('/portal/perfil'),
+  getMatriculas: () => portalApi.get('/portal/matriculas'),
+  getPagos: () => portalApi.get('/portal/pagos'),
+  getHorario: () => portalApi.get('/portal/horario'),
+};
+
 export default api;
+
