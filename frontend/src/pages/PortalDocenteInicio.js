@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { docentePortalAPI } from '../services/api';
-import { FaUserTie, FaSignOutAlt, FaBookOpen, FaCheck, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
+import { FaUserTie, FaSignOutAlt, FaBookOpen, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 const PortalDocenteInicio = () => {
@@ -194,10 +194,40 @@ const PortalDocenteInicio = () => {
                             ) : <span style={{ color: '#64748b', fontSize: 12 }}>{e.total_faltas} faltas</span>}
                           </td>
                           <td style={{...styles.td, textAlign: 'right'}}>
-                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                              <button onClick={() => marcarAsistencia(e.matricula_id, 'presente')} style={{...styles.actionBtn, background: '#10b981', color: 'white'}}><FaCheck /> P</button>
-                              <button onClick={() => marcarAsistencia(e.matricula_id, 'tardanza')} style={{...styles.actionBtn, background: '#f59e0b', color: 'white'}}><FaClock /> T</button>
-                              <button onClick={() => marcarAsistencia(e.matricula_id, 'ausente')} style={{...styles.actionBtn, background: '#ef4444', color: 'white'}}><FaTimes /> F</button>
+                            <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                              {/* Botón de Check Rápido (Presente) */}
+                              <button 
+                                onClick={() => marcarAsistencia(e.matricula_id, e.estado_asistencia === 'presente' ? 'ausente' : 'presente')} 
+                                style={{
+                                  ...styles.quickCheck, 
+                                  background: e.estado_asistencia === 'presente' ? '#10b981' : '#f1f5f9',
+                                  color: e.estado_asistencia === 'presente' ? 'white' : '#94a3b8',
+                                  borderColor: e.estado_asistencia === 'presente' ? '#059669' : '#e2e8f0'
+                                }}
+                                title="Marcar como Presente / Ausente"
+                              >
+                                <FaCheck size={14} />
+                              </button>
+
+                              {/* Selector para otros estados */}
+                              <select 
+                                value={e.estado_asistencia} 
+                                onChange={(ev) => marcarAsistencia(e.matricula_id, ev.target.value)}
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  border: '1px solid #e2e8f0',
+                                  fontSize: '13px',
+                                  background: 'white',
+                                  cursor: 'pointer',
+                                  outline: 'none'
+                                }}
+                              >
+                                <option value="no_registrado">Sin marcar</option>
+                                <option value="presente">Presente</option>
+                                <option value="tardanza">Tardanza</option>
+                                <option value="ausente">Ausente</option>
+                              </select>
                             </div>
                           </td>
                         </tr>
@@ -214,7 +244,7 @@ const PortalDocenteInicio = () => {
   );
 };
 
-const FaClock = () => <span style={{fontSize: 12, fontWeight: 'bold'}}>T</span>;
+// Final UI Logic
 
 const styles = {
   center: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f8fafc' },
@@ -238,6 +268,17 @@ const styles = {
   tr: { transition: 'background 0.1s' },
   code: { background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, color: '#475569' },
   actionBtn: { width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', fontWeight: 700, transition: 'transform 0.1s' },
+  quickCheck: { 
+    width: 32, 
+    height: 32, 
+    borderRadius: 8, 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    border: '2px solid', 
+    cursor: 'pointer', 
+    transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+  },
   badgeSuccess: { background: '#d1fae5', color: '#059669', padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700 },
   badgeDanger: { background: '#fee2e2', color: '#dc2626', padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700 },
   badgeWarning: { background: '#fef3c7', color: '#d97706', padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700 },
