@@ -62,7 +62,7 @@ exports.getEstudiantesAsistencia = async (req, res) => {
        FROM matriculas m
        JOIN estudiantes e ON m.estudiante_id = e.id
        LEFT JOIN asistencias a ON a.matricula_id = m.id AND a.fecha = ?
-       WHERE m.curso_id = ? AND m.estado = 'activa'
+       WHERE m.curso_id = ? AND m.estado_matricula = 'activa'
        ORDER BY e.apellidos ASC`,
       [fecha, id]
     );
