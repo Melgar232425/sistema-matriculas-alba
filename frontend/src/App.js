@@ -17,6 +17,8 @@ import PortalLogin from './pages/PortalLogin';
 import PortalInicio from './pages/PortalInicio';
 import PortalPagos from './pages/PortalPagos';
 import PortalHorario from './pages/PortalHorario';
+import PortalDocenteLogin from './pages/PortalDocenteLogin';
+import PortalDocenteInicio from './pages/PortalDocenteInicio';
 import { Toaster } from 'react-hot-toast';
 
 // Componente para proteger rutas según rol
@@ -50,6 +52,13 @@ const StudentRoute = ({ children }) => {
   return children;
 };
 
+// Guard para rutas del portal docente
+const DocenteRoute = ({ children }) => {
+  const token = localStorage.getItem('docente_token');
+  if (!token) return <Navigate to="/portal-docente" replace />;
+  return children;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -64,6 +73,10 @@ function App() {
           <Route path="/portal/inicio" element={<StudentRoute><PortalInicio /></StudentRoute>} />
           <Route path="/portal/pagos" element={<StudentRoute><PortalPagos /></StudentRoute>} />
           <Route path="/portal/horario" element={<StudentRoute><PortalHorario /></StudentRoute>} />
+
+          {/* Rutas del Portal de Docentes */}
+          <Route path="/portal-docente" element={<PortalDocenteLogin />} />
+          <Route path="/portal-docente/inicio" element={<DocenteRoute><PortalDocenteInicio /></DocenteRoute>} />
 
           {/* Rutas Protegidas dentro del Layout General */}
           <Route path="*" element={

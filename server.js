@@ -73,6 +73,10 @@ app.use('/api/ciclos', verifyToken, ciclosRoutes);
 // Portal de Estudiantes — sin verifyToken de admin (flujo independiente)
 app.use('/api/portal', portalRoutes);
 
+// Portal de Docentes (Asistencia) — flujo independiente
+const docentePortalRoutes = require('./routes/docentePortal.routes');
+app.use('/api/portal-docente', docentePortalRoutes);
+
 // Ruta temporal para corregir la base de datos (Error de estados de pago)
 app.get('/api/fix-db', async (req, res) => {
   try {

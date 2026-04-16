@@ -160,5 +160,42 @@ export const portalAPI = {
   getHorario: () => portalApi.get('/portal/horario'),
 };
 
+// ============ PORTAL DE DOCENTES ============
+const docenteApi = axios.create({
+  baseURL: API_URL,
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+docenteApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('docente_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+docenteApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.config && error.config.url.includes('/portal-docente/login')) {
+      return Promise.reject(error);
+    }
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      localStorage.removeItem('docente_token');
+      localStorage.removeItem('docente_user');
+      window.location.href = '/portal-docente';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const docentePortalAPI = {
+  login: (credentials) => docenteApi.post('/portal-docente/login', credentials),
+  getCursos: () => docenteApi.get('/portal-docente/cursos'),
+  getEstudiantesAsistencia: (cursoId, fecha) => docenteApi.get(`/portal-docente/cursos/${cursoId}/estudiantes`, { params: { fecha } }),
+  marcarAsistencia: (cursoId, data) => docenteApi.post(`/portal-docente/cursos/${cursoId}/asistencias`, data),
+};
+
 export default api;
 
