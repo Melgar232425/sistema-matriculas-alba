@@ -17,7 +17,7 @@ const Tutores = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const [resEst, resPagos, resMat] = await Promise.all([
+      const [resEst, , resMat] = await Promise.all([
         estudiantesAPI.getAll(),
         pagosAPI.getAll(),
         matriculasAPI.getAll()
