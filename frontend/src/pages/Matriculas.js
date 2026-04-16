@@ -147,7 +147,7 @@ const Matriculas = () => {
       <Navbar title="Gestión de Matrículas" />
 
       <div className="card">
-        <div className="card-header">
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Lista de Estudiantes Matriculados</h2>
           <button className="btn btn-primary" onClick={() => {
             setFormData({
@@ -171,9 +171,10 @@ const Matriculas = () => {
           justifyContent: 'space-between',
           gap: '20px',
           borderBottom: '1px solid #f1f5f9',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          flexWrap: 'wrap'
         }}>
-          <div className="search-box" style={{ flex: 1, maxWidth: '400px', marginBottom: 0 }}>
+          <div className="search-box" style={{ flex: '1 1 300px', maxWidth: '100%', marginBottom: 0 }}>
             <FaSearch style={{ left: '14px', right: 'auto' }} />
             <input
               type="text"
@@ -379,7 +380,7 @@ const Matriculas = () => {
                     marginBottom: '20px',
                     borderLeft: '4px solid #0284c7',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
                     gap: '10px'
                   }}>
                     <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', gap: '6px' }}>

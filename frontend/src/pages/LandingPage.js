@@ -12,7 +12,8 @@ const LandingPage = () => {
       icon: <FaUserGraduate size={40} />,
       path: '/portal',
       color: '#4361ee',
-      bg: 'linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)'
+      bg: 'linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)',
+      roles: 'Alumno / Estudiante'
     },
     {
       title: 'Portal Docente',
@@ -20,7 +21,8 @@ const LandingPage = () => {
       icon: <FaUserTie size={40} />,
       path: '/portal-docente',
       color: '#0ea5e9',
-      bg: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
+      bg: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+      roles: 'Profesores / Tutores'
     },
     {
       title: 'Administración',
@@ -28,7 +30,8 @@ const LandingPage = () => {
       icon: <FaUserShield size={40} />,
       path: '/login',
       color: '#6366f1',
-      bg: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'
+      bg: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+      roles: 'Director / Admin / Personal'
     }
   ];
 
@@ -48,21 +51,26 @@ const LandingPage = () => {
               style={styles.card} 
               onClick={() => navigate(p.path)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-10px)';
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.12)';
+                e.currentTarget.style.transform = 'translateY(-15px) scale(1.02)';
+                e.currentTarget.style.boxShadow = '0 30px 60px rgba(0,0,0,0.15)';
+                e.currentTarget.style.borderColor = p.color;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
                 e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)';
+                e.currentTarget.style.borderColor = '#f1f5f9';
               }}
             >
               <div style={{ ...styles.iconWrap, background: p.bg }}>
                 {p.icon}
               </div>
               <h2 style={styles.cardTitle}>{p.title}</h2>
+              <div style={{ ...styles.roleBadge, background: `${p.color}10`, color: p.color }}>
+                {p.roles}
+              </div>
               <p style={styles.cardDesc}>{p.desc}</p>
-              <div style={{ ...styles.actionBtn, color: p.color }}>
-                Acceder ahora <FaArrowRight size={14} />
+              <div style={{ ...styles.actionBtn, background: p.bg, color: 'white' }}>
+                Ingresar al Portal <FaArrowRight size={14} />
               </div>
             </div>
           ))}
@@ -100,7 +108,7 @@ const styles = {
     textAlign: 'center'
   },
   header: {
-    marginBottom: 60
+    marginBottom: 80
   },
   logo: {
     width: '80%',
@@ -122,22 +130,33 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: 20,
-    marginBottom: 60
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: 30,
+    marginBottom: 80
   },
   card: {
     background: 'white',
-    borderRadius: 32,
-    padding: '40px 30px',
+    borderRadius: 40,
+    padding: '50px 40px',
     cursor: 'pointer',
     transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     boxShadow: '0 10px 25px rgba(0,0,0,0.06)',
-    border: '1px solid #f1f5f9',
+    border: '2px solid #f1f5f9',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    textAlign: 'center'
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  roleBadge: {
+    padding: '6px 14px',
+    borderRadius: 50,
+    fontSize: 11,
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.8px',
+    marginBottom: 20
   },
   iconWrap: {
     width: 100,
@@ -166,18 +185,21 @@ const styles = {
   actionBtn: {
     display: 'flex',
     alignItems: 'center',
-    gap: 10,
-    fontWeight: 700,
+    justifyContent: 'center',
+    gap: 12,
+    fontWeight: 800,
     fontSize: 16,
-    padding: '10px 20px',
-    borderRadius: 12,
-    background: '#f8fafc',
-    transition: 'all 0.2s'
+    padding: '16px 32px',
+    borderRadius: 18,
+    width: '100%',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
   },
   footer: {
     fontSize: 14,
     color: '#94a3b8',
-    fontWeight: 500
+    fontWeight: 500,
+    marginTop: 'auto'
   },
   circle: {
     position: 'absolute',

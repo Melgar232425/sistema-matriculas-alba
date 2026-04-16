@@ -129,7 +129,7 @@ const Ciclos = () => {
             <Navbar title="Ciclos Académicos" />
 
             <div className="card">
-                <div className="card-header">
+                <div className="card-header" style={{ flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h2 className="card-title">Configuración de Ciclos</h2>
                         <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>

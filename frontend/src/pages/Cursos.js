@@ -603,7 +603,7 @@ const Cursos = () => {
       <Navbar title="Gestión de Cursos" />
 
       <div className="card">
-        <div className="card-header">
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Lista de Cursos</h2>
           <button className="btn btn-primary" onClick={abrirModalNuevo}>
             <FaPlus /> Nuevo Curso
@@ -618,9 +618,10 @@ const Cursos = () => {
           justifyContent: 'space-between',
           gap: '20px',
           borderBottom: '1px solid #f1f5f9',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          flexWrap: 'wrap'
         }}>
-          <div className="search-box" style={{ flex: 1, maxWidth: '400px', marginBottom: 0 }}>
+          <div className="search-box" style={{ flex: '1 1 300px', maxWidth: '100%', marginBottom: 0 }}>
             <FaSearch style={{ left: '14px', right: 'auto' }} />
             <input
               type="text"

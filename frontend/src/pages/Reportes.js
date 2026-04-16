@@ -179,7 +179,7 @@ const Reportes = () => {
 
       {/* Reporte de Ingresos */}
       <div className="card">
-        <div className="card-header">
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Reporte de Ingresos</h2>
           <button
             className="btn btn-primary"
@@ -275,10 +275,10 @@ const Reportes = () => {
 
       {/* Reporte de Morosidad */}
       <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">
-            <FaExclamationTriangle style={{ color: '#f59e0b', marginRight: '10px' }} />
-            Reporte de Morosidad (Deudas Pendientes)
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
+          <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FaExclamationTriangle style={{ color: '#f59e0b', flexShrink: 0 }} />
+            Reporte de Morosidad
           </h2>
         </div>
 

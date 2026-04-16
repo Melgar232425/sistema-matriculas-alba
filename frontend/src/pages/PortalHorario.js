@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaCheckCircle } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaCheckCircle, FaBars, FaTimes } from 'react-icons/fa';
 
 const PortalHorario = () => {
   const [horario, setHorario] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +31,11 @@ const PortalHorario = () => {
 
   return (
     <div className="portal-page">
-      <aside className="portal-sidebar">
+      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
+        {sidebarActive ? <FaTimes /> : <FaBars />}
+      </button>
+
+      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto' }} />
         </div>
@@ -150,7 +155,7 @@ const styles = {
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 12 },
   emptyTitle: { fontSize: 18, fontWeight: 700, color: '#475569' },
   emptyText: { fontSize: 14, color: '#94a3b8', textAlign: 'center', maxWidth: 320 },
-  cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16, marginBottom: 28 },
+  cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 28 },
   cursoCard: { background: 'white', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', display: 'flex', gap: 16, alignItems: 'flex-start' },
   cursoIcon: { width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   cursoNombre: { fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 6 },

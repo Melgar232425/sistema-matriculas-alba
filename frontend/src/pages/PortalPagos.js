@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaMoneyBillWave, FaSignOutAlt, FaUserGraduate, FaCalendarAlt, FaCheckCircle } from 'react-icons/fa';
+import { 
+  FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
+  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes 
+} from 'react-icons/fa';
 
 const PortalPagos = () => {
   const [pagos, setPagos] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('');
+  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,7 +52,11 @@ const PortalPagos = () => {
 
   return (
     <div className="portal-page">
-      <aside className="portal-sidebar">
+      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
+        {sidebarActive ? <FaTimes /> : <FaBars />}
+      </button>
+
+      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto' }} />
         </div>

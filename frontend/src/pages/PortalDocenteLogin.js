@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { docentePortalAPI } from '../services/api';
-import { FaUserTie, FaEnvelope, FaIdCard, FaSignInAlt } from 'react-icons/fa';
+import { FaUserTie, FaEnvelope, FaIdCard, FaSignInAlt, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
+import '../styles/App.css';
 
 const PortalDocenteLogin = () => {
   const [email, setEmail] = useState('');
@@ -32,31 +33,53 @@ const PortalDocenteLogin = () => {
 
   return (
     <div className="responsive-split">
+      {/* Panel izquierdo decorativo */}
       <div className="hide-mobile" style={styles.leftPanel}>
         <div style={styles.leftContent}>
           <div style={styles.iconWrap}>
-            <FaUserTie size={50} color="white" />
+            <FaUserTie size={60} color="white" />
           </div>
-          <h1 style={styles.leftTitle}>Portal Docente</h1>
-          <p style={styles.leftSubtitle}>Registro rápido de Asistencia</p>
-          <div style={styles.featureItem}>
-            <span>✔️ Consulta tus cursos asignados</span>
-          </div>
-          <div style={styles.featureItem}>
-            <span>✔️ Pasa asistencia en segundos</span>
+          <h1 style={styles.leftTitle}>Área de Docentes</h1>
+          <p style={styles.leftSubtitle}>Academia Alba Perú</p>
+          
+          <div style={styles.featureList}>
+            {[
+              'Gestión de cursos asignados',
+              'Registro rápido de asistencia',
+              'Alertas de inasistencia (Riesgo)',
+              'Consulta de carga horaria semanales'
+            ].map((f, i) => (
+              <div key={i} style={styles.featureItem}>
+                <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                <span>{f}</span>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* Círculos decorativos */}
+        <div style={{ ...styles.circle, width: 350, height: 350, top: -50, right: -150 }} />
+        <div style={{ ...styles.circle, width: 200, height: 200, bottom: -50, left: -50 }} />
       </div>
 
+      {/* Panel derecho: formulario */}
       <div style={styles.rightPanel}>
         <div style={styles.formCard}>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-             <img src="/logo_oficial.png" alt="Logo" style={{ width: 120, marginBottom: 15 }} />
-             <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>Acceso Docente</h2>
-             <p style={{ color: '#64748b', fontSize: 14 }}>Ingresa con tu correo y DNI</p>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+             <img 
+               src="/logo_oficial.png" 
+               alt="Academia Alba" 
+               style={{ width: 170, marginBottom: 20, filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.1))' }} 
+             />
+             <h2 style={styles.formTitle}>Acceso Docente</h2>
+             <p style={styles.formSubtitle}>Ingresa con tu <strong>correo</strong> y <strong>DNI</strong> para gestionar tus clases</p>
           </div>
 
-          {error && <div style={styles.errorBox}>❌ {error}</div>}
+          {error && (
+            <div style={styles.errorBox}>
+              <span>❌</span> {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div style={styles.formGroup}>
@@ -75,7 +98,7 @@ const PortalDocenteLogin = () => {
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>DNI</label>
+              <label style={styles.label}>Número de DNI</label>
               <div style={styles.inputWrap}>
                 <FaIdCard style={styles.inputIcon} />
                 <input
@@ -93,8 +116,11 @@ const PortalDocenteLogin = () => {
               {loading ? 'Verificando...' : <><FaSignInAlt /> Ingresar al Sistema</>}
             </button>
           </form>
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <a href="/login" style={{ color: '#0ea5e9', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Ir a Administración</a>
+
+          <div style={{ textAlign: 'center', marginTop: 28 }}>
+            <a href="/" style={styles.backLink}>
+              <FaArrowLeft size={12} /> Regresar a Portales
+            </a>
           </div>
         </div>
       </div>
@@ -103,22 +129,79 @@ const PortalDocenteLogin = () => {
 };
 
 const styles = {
-  container: { display: 'flex', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  leftPanel: { background: 'linear-gradient(135deg, #0ea5e9, #0284c7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' },
-  leftContent: { maxWidth: 400, padding: 30 },
-  iconWrap: { width: 80, height: 80, background: 'rgba(255,255,255,0.2)', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-  leftTitle: { fontSize: 32, fontWeight: 800, marginBottom: 5 },
-  leftSubtitle: { fontSize: 16, opacity: 0.8, marginBottom: 30 },
-  featureItem: { fontSize: 15, fontWeight: 600, marginBottom: 15, display: 'flex', alignItems: 'center', gap: 10 },
-  rightPanel: { background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  formCard: { background: 'white', padding: 40, borderRadius: 24, width: '100%', maxWidth: 420, boxShadow: '0 10px 40px rgba(0,0,0,0.08)' },
-  errorBox: { background: '#fff1f2', color: '#e11d48', padding: 12, borderRadius: 10, fontSize: 13, fontWeight: 600, marginBottom: 20 },
-  formGroup: { marginBottom: 20 },
-  label: { display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 8, textTransform: 'uppercase' },
+  leftPanel: { 
+    flex: 1, 
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    color: 'white',
+    padding: '60px 50px',
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  leftContent: { maxWidth: 420, position: 'relative', zIndex: 2 },
+  iconWrap: { 
+    width: 90, 
+    height: 90, 
+    background: 'rgba(255,255,255,0.15)', 
+    borderRadius: 24, 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 24,
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.2)'
+  },
+  leftTitle: { fontSize: 34, fontWeight: 900, marginBottom: 8 },
+  leftSubtitle: { fontSize: 17, opacity: 0.8, marginBottom: 35 },
+  featureList: { display: 'flex', flexDirection: 'column', gap: 15, marginBottom: 30 },
+  featureItem: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 500 },
+  circle: { position: 'absolute', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' },
+  
+  rightPanel: { 
+    flex: 1, 
+    background: '#f8fafc', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: '40px 30px' 
+  },
+  formCard: { 
+    background: 'white', 
+    padding: '50px 45px', 
+    borderRadius: 32, 
+    width: '100%', 
+    maxWidth: 480, 
+    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)',
+    border: '1px solid #f1f5f9'
+  },
+  formTitle: { fontSize: 28, fontWeight: 900, color: '#0f172a', marginBottom: 8 },
+  formSubtitle: { fontSize: 14.5, color: '#64748b', lineHeight: 1.6 },
+  errorBox: { background: '#fff1f2', color: '#e11d48', padding: '14px 18px', borderRadius: 14, fontSize: 14, fontWeight: 600, marginBottom: 25, border: '1px solid #ffe4e6', display: 'flex', alignItems: 'center', gap: 10 },
+  formGroup: { marginBottom: 22 },
+  label: { display: 'block', fontSize: 12, fontWeight: 800, color: '#475569', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' },
   inputWrap: { position: 'relative', display: 'flex', alignItems: 'center' },
-  inputIcon: { position: 'absolute', left: 14, color: '#94a3b8' },
-  input: { width: '100%', height: 48, paddingLeft: 40, border: '2px solid #e2e8f0', borderRadius: 12, outline: 'none', fontSize: 15 },
-  submitBtn: { width: '100%', height: 50, background: '#0ea5e9', color: 'white', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }
+  inputIcon: { position: 'absolute', left: 16, color: '#94a3b8' },
+  input: { width: '100%', height: 52, paddingLeft: 46, border: '2px solid #e2e8f0', borderRadius: 14, outline: 'none', fontSize: 15, transition: 'all 0.2s', fontFamily: 'inherit' },
+  submitBtn: { 
+    width: '100%', 
+    height: 56, 
+    background: 'linear-gradient(135deg, #0ea5e9, #0284c7)', 
+    color: 'white', 
+    border: 'none', 
+    borderRadius: 14, 
+    fontWeight: 800, 
+    fontSize: 16, 
+    cursor: 'pointer', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    gap: 10,
+    marginTop: 10,
+    boxShadow: '0 8px 20px rgba(14,165,233,0.3)'
+  },
+  backLink: { display: 'inline-flex', alignItems: 'center', gap: 8, color: '#0ea5e9', textDecoration: 'none', fontSize: 14, fontWeight: 600 }
 };
 
 export default PortalDocenteLogin;

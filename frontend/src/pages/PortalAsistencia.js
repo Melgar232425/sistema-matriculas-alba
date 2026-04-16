@@ -3,12 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
   FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock 
+  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes 
 } from 'react-icons/fa';
 
 const PortalAsistencia = () => {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,7 +56,11 @@ const PortalAsistencia = () => {
 
   return (
     <div className="portal-page">
-      <aside className="portal-sidebar">
+      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
+        {sidebarActive ? <FaTimes /> : <FaBars />}
+      </button>
+
+      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120 }} />
         </div>

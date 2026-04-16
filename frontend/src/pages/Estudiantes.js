@@ -192,7 +192,7 @@ const Estudiantes = () => {
       <Navbar title="Gestión de Estudiantes" />
 
       <div className="card">
-        <div className="card-header">
+        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
           <h2 className="card-title">Lista de Estudiantes</h2>
           <button className="btn btn-primary" onClick={abrirModalNuevo}>
             <FaPlus /> Nuevo Estudiante
@@ -207,9 +207,10 @@ const Estudiantes = () => {
           justifyContent: 'space-between',
           gap: '20px',
           borderBottom: '1px solid #f1f5f9',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          flexWrap: 'wrap'
         }}>
-          <div className="search-box" style={{ flex: 1, maxWidth: '400px', marginBottom: 0 }}>
+          <div className="search-box" style={{ flex: '1 1 300px', maxWidth: '100%', marginBottom: 0 }}>
             <FaSearch style={{ left: '14px', right: 'auto' }} />
             <input
               type="text"
@@ -226,7 +227,7 @@ const Estudiantes = () => {
               />
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
             <span style={{
               width: '10px',
               height: '10px',
@@ -516,7 +517,7 @@ const Estudiantes = () => {
 
                 <div className="tab-content" style={{ minHeight: '300px' }}>
                   {tabActiva === 'datos' && (
-                    <div className="datos-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', marginBottom: '30px' }}>
                       <p><strong>DNI:</strong> {historialData.datosPersonales.dni}</p>
                       <p><strong>Código:</strong> {historialData.datosPersonales.codigo}</p>
                       <p><strong>Nombres:</strong> {historialData.datosPersonales.nombres}</p>

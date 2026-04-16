@@ -78,7 +78,7 @@ const PortalDocenteInicio = () => {
             <span style={{ fontWeight: 800, fontSize: 18 }}>Portal Docente | Hola, {user.nombres?.split(' ')[0]}</span>
           </div>
           <button onClick={handleLogout} style={styles.logoutBtn}>
-            <FaSignOutAlt /> Salir
+            <FaSignOutAlt /> <span className="hide-mobile">Salir</span>
           </button>
         </div>
       </header>

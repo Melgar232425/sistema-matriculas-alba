@@ -47,13 +47,13 @@ const Dashboard = () => {
       <Navbar title="Resumen Ejecutivo" />
 
       {/* Saludo y Acción Rápida */}
-      <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <h2 style={{ fontSize: '28px', fontWeight: '800' }}>¡Hola, Administrador!</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba.</p>
+          <h2 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: '800' }}>¡Hola, Administrador! 👋</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba Perú.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
-             <button className="btn btn-primary" onClick={() => window.location.href='/matriculas'}>
+             <button className="btn btn-primary" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
                 <FaUserPlus /> Nueva Matrícula
              </button>
         </div>
@@ -94,7 +94,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', marginBottom: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', marginBottom: '30px' }}>
         
         {/* Gráfico de Barras: Popularidad */}
         <div className="card">
@@ -157,7 +157,7 @@ const Dashboard = () => {
           <h2 className="card-title">Estado del Ciclo Académico</h2>
           <span className="badge badge-info">Año 2026</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
             <div style={{ textAlign: 'center', padding: '20px', background: '#f8fafc', borderRadius: '15px' }}>
                 <p style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: 'bold' }}>ESTUDIANTES</p>
                 <h4 style={{ fontSize: '24px', margin: '5px 0' }}>{stats?.totalEstudiantes}</h4>

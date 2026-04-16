@@ -819,23 +819,43 @@ textarea {
   padding: 32px;
   width: calc(100% - 240px);
   min-height: 100vh;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Toggle de Sidebar para mÃ³viles */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1100;
+  background: var(--grad-primary);
+  color: white;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 @media (max-width: 992px) {
+  .sidebar-toggle {
+    display: flex;
+  }
   .portal-sidebar {
-    transform: translateX(-100%); /* Ocultar en tablets/mobile por defecto */
+    transform: translateX(-100%);
+  }
+  .portal-sidebar.active {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.15);
   }
   .portal-main {
     margin-left: 0;
     width: 100%;
-    padding: 20px 15px;
-  }
-  
-  /* Mostrar sidebar si tiene clase 'active' */
-  .portal-sidebar.active {
-    transform: translateX(0);
-    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    padding: 70px 15px 20px;
   }
 }
 
