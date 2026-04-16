@@ -161,18 +161,9 @@ const Matriculas = () => {
         </div>
 
         {/* Buscador de Estudiantes con Estilo Premium */}
-        <div style={{
-          padding: '0 24px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '20px',
-          borderBottom: '1px solid #f1f5f9',
-          marginBottom: '20px',
-          flexWrap: 'wrap'
-        }}>
-          <div className="search-box" style={{ flex: '1 1 300px', maxWidth: '100%', marginBottom: 0 }}>
-            <FaSearch style={{ left: '14px', right: 'auto' }} />
+        <div style={{ padding: '0 32px 32px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div className="search-box" style={{ flex: '1' }}>
+            <FaSearch />
             <input
               type="text"
               placeholder="Buscar estudiante por DNI..."
@@ -180,25 +171,11 @@ const Matriculas = () => {
               onChange={(e) => setFiltroDni(e.target.value)}
               className="form-control"
               maxLength="8"
-              style={{ paddingLeft: '42px', borderRadius: '50px', backgroundColor: '#f8fafc' }}
+              style={{ paddingLeft: '45px', borderRadius: '50px', backgroundColor: '#f8fafc' }}
             />
-            {filtroDni && (
-              <FaTimes
-                onClick={() => setFiltroDni('')}
-                style={{ cursor: 'pointer', color: '#64748b' }}
-              />
-            )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: filtroDni ? '#4361ee' : '#cbd5e1'
-            }}></span>
-            <span style={{ fontSize: '13px', fontWeight: '500', color: '#64748b' }}>
-              {filtroDni ? `Resultado: ${matriculasAgrupadas.length} alumno(s)` : 'Todos los alumnos registrados'}
-            </span>
+          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+             Total: {matriculasAgrupadas.length} estudiantes
           </div>
         </div>
 
@@ -241,11 +218,11 @@ const Matriculas = () => {
                         </td>
                         <td>
                           <button
-                            className="btn btn-outline"
-                            style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', margin: '0' }}
+                            className="btn-icon btn-icon-view"
                             onClick={() => setEstudianteCursosModal(grupo)}
+                            title="Ver Cursos"
                           >
-                            <FaEye /> Ver {grupo.matriculas.length} curso{grupo.matriculas.length !== 1 ? 's' : ''}
+                            <FaEye />
                           </button>
                         </td>
                         <td>S/ {totalInversion.toFixed(2)}</td>

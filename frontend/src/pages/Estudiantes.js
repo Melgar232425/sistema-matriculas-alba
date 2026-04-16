@@ -174,16 +174,20 @@ const Estudiantes = () => {
           </button>
         </div>
 
-        <div style={{ padding: '0 24px 24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ padding: '0 32px 32px', display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div className="search-box" style={{ flex: '1' }}>
             <FaSearch />
             <input
               type="text"
-              placeholder="Buscar estudiante..."
+              placeholder="Buscar estudiante por nombre, DNI o código..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="form-control"
+              style={{ backgroundColor: '#f8fafc' }}
             />
+          </div>
+          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+             Total: {estudiantesFiltrados.length} estudiantes
           </div>
         </div>
 
@@ -210,10 +214,10 @@ const Estudiantes = () => {
                     <td>{estudiante.nombres}</td>
                     <td>{estudiante.apellidos}</td>
                     <td><span className={`badge ${estudiante.estado === 'activo' ? 'badge-success' : 'badge-danger'}`}>{estudiante.estado}</span></td>
-                    <td style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-icon" onClick={() => abrirModalHistorial(estudiante.id)}><FaEye /></button>
-                      <button className="btn-icon" onClick={() => abrirModalEditar(estudiante)}><FaEdit /></button>
-                      <button className="btn-icon" onClick={() => eliminarEstudiante(estudiante.id)}><FaTrash /></button>
+                    <td style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button className="btn-icon btn-icon-view" onClick={() => abrirModalHistorial(estudiante.id)} title="Ver Historial"><FaEye /></button>
+                      <button className="btn-icon btn-icon-edit" onClick={() => abrirModalEditar(estudiante)} title="Editar"><FaEdit /></button>
+                      <button className="btn-icon btn-icon-delete" onClick={() => eliminarEstudiante(estudiante.id)} title="Eliminar"><FaTrash /></button>
                     </td>
                   </tr>
                 ))}

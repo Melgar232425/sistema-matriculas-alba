@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { pagosAPI, matriculasAPI } from '../services/api';
+import { FaSearch, FaFilePdf } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import jsPDF from 'jspdf';
 
@@ -84,11 +85,24 @@ const Pagos = () => {
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>Registrar Pago</button>
         </div>
 
-        <div style={{ padding: '0 24px 24px' }}>
-             <input type="text" placeholder="Filtrar..." value={filtroCodigo} onChange={e => setFiltroCodigo(e.target.value)} />
+        <div style={{ padding: '0 32px 32px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div className="search-box" style={{ flex: '1' }}>
+            <FaSearch />
+            <input 
+              type="text" 
+              placeholder="Filtrar por código..." 
+              value={filtroCodigo} 
+              onChange={e => setFiltroCodigo(e.target.value)} 
+              className="form-control"
+              style={{ backgroundColor: '#f8fafc' }}
+            />
+          </div>
+          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+             Total: {pagos.filter(p => p.codigo.includes(filtroCodigo)).length} pagos
+          </div>
         </div>
 
-        {loading ? <div className="loading">Cargando...</div> : (
+        {loading ? <div className="loading"><div className="spinner"></div></div> : (
           <div className="table-container">
             <table>
               <thead>
@@ -96,18 +110,28 @@ const Pagos = () => {
                   <th>Código</th>
                   <th>Fecha</th>
                   <th>Estudiante</th>
-                  <th>Monto</th>
-                  <th>Acciones</th>
+                  <th style={{ textAlign: 'right' }}>Monto</th>
+                  <th style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {pagos.filter(p => p.codigo.includes(filtroCodigo)).map(p => (
                   <tr key={p.id}>
-                    <td>{p.codigo}</td>
+                    <td style={{ fontWeight: '700', color: 'var(--primary)' }}>{p.codigo}</td>
                     <td>{new Date(p.fecha_pago).toLocaleDateString()}</td>
-                    <td>{p.nombres} {p.apellidos}</td>
-                    <td>S/ {p.monto}</td>
-                    <td><button onClick={() => exportarReciboPDF(p)}>PDF</button></td>
+                    <td>
+                        <div style={{ fontWeight: '600' }}>{p.nombres} {p.apellidos}</div>
+                    </td>
+                    <td style={{ textAlign: 'right', fontWeight: '800' }}>S/ {p.monto}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button 
+                        className="btn-icon btn-icon-view" 
+                        onClick={() => exportarReciboPDF(p)}
+                        title="Descargar PDF"
+                      >
+                         <FaFilePdf />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
