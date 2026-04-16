@@ -137,104 +137,110 @@ const PortalDocenteInicio = () => {
                   if (!esDiaProgramado) {
                     return (
                       <div style={{
-                        background: '#fff7ed',
-                        border: '1px solid #ffedd5',
-                        borderRadius: '12px',
-                        padding: '12px 20px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        color: '#9a3412',
-                        fontSize: '14px',
-                        fontWeight: '600'
+                        textAlign: 'center',
+                        padding: '60px 20px',
+                        background: '#f8fafc',
+                        borderRadius: '16px',
+                        border: '2px dashed #e2e8f0',
+                        color: '#64748b'
                       }}>
-                        <FaExclamationTriangle color="#f97316" size={20} />
-                        <div>
-                          Nota: Hoy es <span style={{textDecoration: 'underline'}}>{nombreDia}</span>. 
-                          Este curso no parece estar programado para hoy según su horario: 
-                          <span style={{color: '#c2410c'}}> {cursoSeleccionado.horario}</span>
+                        <div style={{
+                          background: '#fff7ed',
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto 20px'
+                        }}>
+                          <FaExclamationTriangle color="#f97316" size={30} />
                         </div>
+                        <h3 style={{ color: '#0f172a', marginBottom: '8px' }}>No hay clases programadas</h3>
+                        <p style={{ maxWidth: '300px', margin: '0 auto', fontSize: '14px', lineHeight: '1.6' }}>
+                          Hoy es <strong>{nombreDia}</strong>. Según el horario (<em>{cursoSeleccionado.horario}</em>), este curso no se dicta hoy.
+                        </p>
+                        <p style={{ marginTop: '20px', fontSize: '13px', color: '#94a3b8' }}>
+                          Selecciona una fecha válida en el calendario de arriba para ver el control de asistencia.
+                        </p>
                       </div>
                     );
                   }
-                  return null;
+
+                  return (
+                    <div className="portal-table-wrap">
+                      <table style={styles.table}>
+                        <thead>
+                          <tr>
+                            <th style={styles.th}>Alumno</th>
+                            <th style={styles.th}>Código</th>
+                            <th style={styles.th}>Estado {fecha}</th>
+                            <th style={styles.th}>Alertas</th>
+                            <th style={{...styles.th, textAlign: 'right'}}>Acción Rápida</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {estudiantes.length === 0 ? (
+                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>No hay estudiantes matriculados.</td></tr>
+                          ) : null}
+                          {estudiantes.map(e => (
+                            <tr key={e.estudiante_id} style={styles.tr}>
+                              <td style={styles.td}><strong>{e.apellidos}</strong>, {e.nombres}</td>
+                              <td style={styles.td}><span style={styles.code}>{e.codigo}</span></td>
+                              <td style={styles.td}>
+                                {e.estado_asistencia === 'presente' && <span style={styles.badgeSuccess}>Presente</span>}
+                                {e.estado_asistencia === 'ausente' && <span style={styles.badgeDanger}>Ausente</span>}
+                                {e.estado_asistencia === 'tardanza' && <span style={styles.badgeWarning}>Tardanza</span>}
+                                {e.estado_asistencia === 'no_registrado' && <span style={styles.badgeNeutral}>Sin Registrar</span>}
+                              </td>
+                              <td style={styles.td}>
+                                {e.total_faltas >= 3 ? (
+                                  <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                    <FaExclamationTriangle /> {e.total_faltas} faltas
+                                  </span>
+                                ) : <span style={{ color: '#64748b', fontSize: 12 }}>{e.total_faltas} faltas</span>}
+                              </td>
+                              <td style={{...styles.td, textAlign: 'right'}}>
+                                <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                  <button 
+                                    onClick={() => marcarAsistencia(e.matricula_id, e.estado_asistencia === 'presente' ? 'ausente' : 'presente')} 
+                                    style={{
+                                      ...styles.quickCheck, 
+                                      background: e.estado_asistencia === 'presente' ? '#10b981' : '#f1f5f9',
+                                      color: e.estado_asistencia === 'presente' ? 'white' : '#94a3b8',
+                                      borderColor: e.estado_asistencia === 'presente' ? '#059669' : '#e2e8f0'
+                                    }}
+                                    title="Marcar como Presente / Ausente"
+                                  >
+                                    <FaCheck size={14} />
+                                  </button>
+                                  <select 
+                                    value={e.estado_asistencia} 
+                                    onChange={(ev) => marcarAsistencia(e.matricula_id, ev.target.value)}
+                                    style={{
+                                      padding: '6px 10px',
+                                      borderRadius: '8px',
+                                      border: '1px solid #e2e8f0',
+                                      fontSize: '13px',
+                                      background: 'white',
+                                      cursor: 'pointer',
+                                      outline: 'none'
+                                    }}
+                                  >
+                                    <option value="no_registrado">Sin marcar</option>
+                                    <option value="presente">Presente</option>
+                                    <option value="tardanza">Tardanza</option>
+                                    <option value="ausente">Ausente</option>
+                                  </select>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
                 })()}
-
-                  <div className="portal-table-wrap">
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>Alumno</th>
-                        <th style={styles.th}>Código</th>
-                        <th style={styles.th}>Estado {fecha}</th>
-                        <th style={styles.th}>Alertas</th>
-                        <th style={{...styles.th, textAlign: 'right'}}>Acción Rápida</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {estudiantes.length === 0 ? (
-                        <tr><td colSpan="5" style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>No hay estudiantes matriculados.</td></tr>
-                      ) : null}
-                      {estudiantes.map(e => (
-                        <tr key={e.estudiante_id} style={styles.tr}>
-                          <td style={styles.td}><strong>{e.apellidos}</strong>, {e.nombres}</td>
-                          <td style={styles.td}><span style={styles.code}>{e.codigo}</span></td>
-                          <td style={styles.td}>
-                            {e.estado_asistencia === 'presente' && <span style={styles.badgeSuccess}>Presente</span>}
-                            {e.estado_asistencia === 'ausente' && <span style={styles.badgeDanger}>Ausente</span>}
-                            {e.estado_asistencia === 'tardanza' && <span style={styles.badgeWarning}>Tardanza</span>}
-                            {e.estado_asistencia === 'no_registrado' && <span style={styles.badgeNeutral}>Sin Registrar</span>}
-                          </td>
-                          <td style={styles.td}>
-                            {e.total_faltas >= 3 ? (
-                              <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <FaExclamationTriangle /> {e.total_faltas} faltas
-                              </span>
-                            ) : <span style={{ color: '#64748b', fontSize: 12 }}>{e.total_faltas} faltas</span>}
-                          </td>
-                          <td style={{...styles.td, textAlign: 'right'}}>
-                            <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                              {/* Botón de Check Rápido (Presente) */}
-                              <button 
-                                onClick={() => marcarAsistencia(e.matricula_id, e.estado_asistencia === 'presente' ? 'ausente' : 'presente')} 
-                                style={{
-                                  ...styles.quickCheck, 
-                                  background: e.estado_asistencia === 'presente' ? '#10b981' : '#f1f5f9',
-                                  color: e.estado_asistencia === 'presente' ? 'white' : '#94a3b8',
-                                  borderColor: e.estado_asistencia === 'presente' ? '#059669' : '#e2e8f0'
-                                }}
-                                title="Marcar como Presente / Ausente"
-                              >
-                                <FaCheck size={14} />
-                              </button>
-
-                              {/* Selector para otros estados */}
-                              <select 
-                                value={e.estado_asistencia} 
-                                onChange={(ev) => marcarAsistencia(e.matricula_id, ev.target.value)}
-                                style={{
-                                  padding: '6px 10px',
-                                  borderRadius: '8px',
-                                  border: '1px solid #e2e8f0',
-                                  fontSize: '13px',
-                                  background: 'white',
-                                  cursor: 'pointer',
-                                  outline: 'none'
-                                }}
-                              >
-                                <option value="no_registrado">Sin marcar</option>
-                                <option value="presente">Presente</option>
-                                <option value="tardanza">Tardanza</option>
-                                <option value="ausente">Ausente</option>
-                              </select>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </>
             )}
           </div>
