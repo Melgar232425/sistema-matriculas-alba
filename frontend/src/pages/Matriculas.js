@@ -188,7 +188,7 @@ const Matriculas = () => {
                 <tr>
                   <th>DNI</th>
                   <th>Estudiante</th>
-                  <th>Cursos Matriculados</th>
+                  <th style={{ textAlign: 'center' }}>Cursos Matriculados</th>
                   <th>Total Inversión</th>
                   <th>Total Pagado</th>
                   <th>Estado Global</th>
@@ -216,7 +216,7 @@ const Matriculas = () => {
                           <br />
                           <small style={{ color: '#6b7280' }}>{grupo.codigo_estudiante}</small>
                         </td>
-                        <td>
+                        <td style={{ textAlign: 'center' }}>
                           <button
                             className="btn-icon btn-icon-view"
                             onClick={() => setEstudianteCursosModal(grupo)}
