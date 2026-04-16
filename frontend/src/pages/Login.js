@@ -55,6 +55,10 @@ const Login = () => {
                         <div style={styles.featureItem}>✔️ Configuración de Calendario</div>
                     </div>
                 </div>
+
+                {/* Círculos decorativos idénticos al portal estudiantil */}
+                <div style={{ ...styles.circle, width: 320, height: 320, top: -100, right: -100 }} />
+                <div style={{ ...styles.circle, width: 180, height: 180, bottom: 60, left: -60 }} />
             </div>
 
             {/* Panel Derecho: Formulario */}
@@ -143,20 +147,25 @@ const styles = {
     },
     leftContent: { maxWidth: 400 },
     iconWrap: {
-        width: 100,
-        height: 100,
-        background: 'rgba(255,255,255,0.05)',
+        width: 90,
+        height: 90,
+        background: 'rgba(255,255,255,0.15)',
         borderRadius: 24,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 24,
-        border: '1px solid rgba(255,255,255,0.1)'
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)'
     },
-    leftTitle: { fontSize: 36, fontWeight: 900, marginBottom: 10, letterSpacing: '-1px' },
-    leftSubtitle: { fontSize: 18, color: '#94a3b8', marginBottom: 40 },
-    features: { display: 'flex', flexDirection: 'column', gap: 15 },
-    featureItem: { fontSize: 15, fontWeight: 600, color: '#cbd5e1' },
+    leftTitle: { fontSize: 34, fontWeight: 900, marginBottom: 8, letterSpacing: '-1px' },
+    leftSubtitle: { fontSize: 17, color: 'rgba(255,255,255,0.7)', marginBottom: 40 },
+    features: { display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32 },
+    featureItem: { fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)' },
+    circle: {
+        position: 'absolute', background: 'rgba(255,255,255,0.06)',
+        borderRadius: '50%',
+    },
     rightPanel: {
         flex: 1,
         background: '#f8fafc',
