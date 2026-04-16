@@ -103,12 +103,13 @@ const styles = {
     marginBottom: 60
   },
   logo: {
-    width: 280,
+    width: '80%',
+    maxWidth: 280,
     marginBottom: 30,
     filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.08))'
   },
   title: {
-    fontSize: 42,
+    fontSize: 'clamp(28px, 5vw, 42px)',
     fontWeight: 900,
     color: '#0f172a',
     letterSpacing: '-1px',
@@ -121,8 +122,8 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: 30,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: 20,
     marginBottom: 60
   },
   card: {

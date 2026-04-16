@@ -73,7 +73,7 @@ const PortalDocenteInicio = () => {
     <div style={styles.page}>
       <header style={styles.header}>
         <div style={styles.headerInner}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 15, flexWrap: 'wrap' }}>
             <FaUserTie size={24} color="#0ea5e9" />
             <span style={{ fontWeight: 800, fontSize: 18 }}>Portal Docente | Hola, {user.nombres?.split(' ')[0]}</span>
           </div>
@@ -128,7 +128,7 @@ const PortalDocenteInicio = () => {
                   />
                 </div>
 
-                <div style={styles.tableWrap}>
+                  <div className="portal-table-wrap">
                   <table style={styles.table}>
                     <thead>
                       <tr>
@@ -190,11 +190,11 @@ const styles = {
   header: { background: 'white', borderBottom: '1px solid #e2e8f0', padding: '15px 30px' },
   headerInner: { maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   logoutBtn: { background: '#fef2f2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 },
-  main: { maxWidth: 1200, margin: '0 auto', padding: '30px', display: 'flex' },
-  sidebar: { width: 300, background: 'white', padding: 20, borderRadius: 16, border: '1px solid #e2e8f0' },
+  main: { maxWidth: 1200, margin: '0 auto', padding: '20px', display: 'flex', gap: 20, flexWrap: 'wrap' },
+  sidebar: { flex: '1 1 300px', background: 'white', padding: 20, borderRadius: 16, border: '1px solid #e2e8f0', minHeight: 'fit-content' },
   cursoCard: { padding: 15, borderRadius: 12, border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 15, transition: 'all 0.2s' },
   cursoActive: { background: '#0ea5e9', color: 'white', borderColor: '#0ea5e9', boxShadow: '0 4px 12px rgba(14,165,233,0.3)' },
-  content: { flex: 1, background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: 30 },
+  content: { flex: '2 1 600px', minWidth: 320, background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: '20px' },
   emptyState: { textAlign: 'center', padding: '100px 0', color: '#64748b', fontSize: 16 },
   contentHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   dateInput: { padding: '10px 15px', border: '2px solid #e2e8f0', borderRadius: 10, fontSize: 14, outline: 'none', fontWeight: 600, fontFamily: 'inherit' },

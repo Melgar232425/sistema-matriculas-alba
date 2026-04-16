@@ -70,9 +70,9 @@ const PortalInicio = () => {
   }
 
   return (
-    <div style={styles.page}>
+    <div className="portal-page">
       {/* SIDEBAR del portal */}
-      <aside style={styles.sidebar}>
+      <aside className="portal-sidebar">
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))' }} />
         </div>
@@ -101,7 +101,7 @@ const PortalInicio = () => {
       </aside>
 
       {/* CONTENIDO */}
-      <main style={styles.main}>
+      <main className="portal-main">
         {/* Bienvenida */}
         <div style={styles.welcomeBanner}>
           <div>
@@ -154,14 +154,14 @@ const PortalInicio = () => {
 
         {/* Matrículas recientes */}
         <div style={styles.card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
             <h2 style={styles.cardTitle}><FaClipboardList style={{ marginRight: 10, color: '#4361ee' }} />Mis Matrículas</h2>
             <Link to="/portal/horario" style={styles.viewAllLink}>Ver horario →</Link>
           </div>
           {matriculas.length === 0 ? (
             <p style={styles.emptyText}>No tienes matrículas registradas.</p>
           ) : (
-            <div style={styles.tableWrap}>
+            <div className="portal-table-wrap">
               <table style={styles.table}>
                 <thead>
                   <tr>
@@ -196,9 +196,9 @@ const styles = {
   loadingScreen: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8fafc' },
   spinner: { width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
   sidebar: {
-    width: 240, background: 'white', borderRight: '1px solid #e2e8f0',
-    position: 'fixed', height: '100vh', display: 'flex', flexDirection: 'column',
-    padding: '0 0 24px 0', zIndex: 100, boxShadow: '2px 0 12px rgba(0,0,0,0.04)',
+    background: 'white', borderRight: '1px solid #e2e8f0',
+    display: 'flex', flexDirection: 'column',
+    padding: '0 0 24px 0', boxShadow: '2px 0 12px rgba(0,0,0,0.04)',
   },
   sidebarHeader: {
     background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px',
@@ -217,7 +217,7 @@ const styles = {
     border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer',
     display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif",
   },
-  main: { marginLeft: 240, flex: 1, padding: '32px 36px', maxWidth: 'calc(100% - 240px)' },
+  main: { flex: 1, padding: '32px 36px' },
   welcomeBanner: {
     background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', borderRadius: 20,
     padding: '28px 32px', color: 'white', marginBottom: 28, display: 'flex',

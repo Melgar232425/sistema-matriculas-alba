@@ -37,10 +37,10 @@ const PortalLogin = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="responsive-split">
 
       {/* ── Panel izquierdo decorativo ── */}
-      <div style={styles.leftPanel}>
+      <div className="hide-mobile" style={styles.leftPanel}>
         <div style={styles.leftContent}>
           <div style={styles.iconWrap}>
             <FaGraduationCap size={60} color="white" />

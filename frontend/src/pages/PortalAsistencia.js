@@ -54,8 +54,8 @@ const PortalAsistencia = () => {
   if (loading) return <div style={styles.center}><div style={styles.spinner} /></div>;
 
   return (
-    <div style={styles.page}>
-      <aside style={styles.sidebar}>
+    <div className="portal-page">
+      <aside className="portal-sidebar">
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120 }} />
         </div>
@@ -68,7 +68,7 @@ const PortalAsistencia = () => {
         <button onClick={handleLogout} style={styles.logoutBtn}><FaSignOutAlt /> Salir</button>
       </aside>
 
-      <main style={styles.main}>
+      <main className="portal-main">
         <div style={styles.header}>
             <h1 style={{ fontSize: 24, fontWeight: 800 }}>Historial de Asistencia</h1>
             <p style={{ color: '#64748b' }}>Consulta tu puntualidad y asistencia por fecha</p>
@@ -78,7 +78,7 @@ const PortalAsistencia = () => {
           {asistencias.length === 0 ? (
             <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Aún no tienes registros de asistencia.</p>
           ) : (
-            <div style={styles.tableWrap}>
+            <div className="portal-table-wrap">
               <table style={styles.table}>
                 <thead>
                   <tr>
@@ -113,13 +113,13 @@ const styles = {
   page: { display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" },
   center: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
   spinner: { width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebar: { width: 240, background: 'white', borderRight: '1px solid #e2e8f0', position: 'fixed', height: '100vh', display: 'flex', flexDirection: 'column' },
+  sidebar: { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' },
   sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '24px', display: 'flex', justifyContent: 'center' },
   nav: { flex: 1, padding: '12px', display: 'flex', flexDirection: 'column', gap: 5 },
   navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
   navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white' },
   logoutBtn: { margin: '12px', padding: '12px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 },
-  main: { marginLeft: 240, flex: 1, padding: '32px' },
+  main: { flex: 1, padding: '32px' },
   header: { marginBottom: 28 },
   card: { background: 'white', borderRadius: 20, padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' },
   tableWrap: { overflowX: 'auto' },

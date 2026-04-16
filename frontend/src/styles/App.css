@@ -1,4 +1,4 @@
-﻿/* Estilos Globales - Academia Alba PerÃº (Premium UI COMPLETO) */
+/* Estilos Globales - Academia Alba PerÃº (Premium UI COMPLETO) */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
@@ -794,5 +794,79 @@ textarea {
 
   .modal-overlay {
     padding: 0;
+  }
+}
+/* --- Portal Responsivo (Estudiantes y Docentes) --- */
+.portal-page {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.portal-sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  position: fixed;
+  height: 100vh;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.portal-main {
+  flex: 1;
+  margin-left: 240px;
+  padding: 32px;
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 992px) {
+  .portal-sidebar {
+    transform: translateX(-100%); /* Ocultar en tablets/mobile por defecto */
+  }
+  .portal-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px 15px;
+  }
+  
+  /* Mostrar sidebar si tiene clase 'active' */
+  .portal-sidebar.active {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+  }
+}
+
+/* Tablas Responsivas en Portales */
+.portal-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.portal-table-wrap table {
+  min-width: 800px; /* Forzar scroll horizontal en mobile */
+}
+
+/* Login Responsivo */
+.responsive-split {
+  display: flex;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .responsive-split {
+    flex-direction: column;
+  }
+  .responsive-split > div {
+    flex: none !important;
+    width: 100% !important;
+  }
+  .hide-mobile {
+    display: none !important;
   }
 }

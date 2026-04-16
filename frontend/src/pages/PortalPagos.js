@@ -47,8 +47,8 @@ const PortalPagos = () => {
   if (loading) return <div style={styles.loading}><div style={styles.spinner} /></div>;
 
   return (
-    <div style={styles.page}>
-      <aside style={styles.sidebar}>
+    <div className="portal-page">
+      <aside className="portal-sidebar">
         <div style={styles.sidebarHeader}>
           <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto' }} />
         </div>
@@ -67,7 +67,7 @@ const PortalPagos = () => {
         <button onClick={handleLogout} style={styles.logoutBtn}><FaSignOutAlt /> Salir</button>
       </aside>
 
-      <main style={styles.main}>
+      <main className="portal-main">
         <div style={styles.header}>
           <div>
             <h1 style={styles.pageTitle}><FaMoneyBillWave style={{ marginRight: 12, color: '#4361ee' }} />Mis Pagos</h1>
@@ -104,7 +104,7 @@ const PortalPagos = () => {
           {pagosFiltrados.length === 0 ? (
             <p style={styles.emptyText}>No se encontraron pagos.</p>
           ) : (
-            <div style={styles.tableWrap}>
+            <div className="portal-table-wrap">
               <table style={styles.table}>
                 <thead>
                   <tr>
@@ -139,17 +139,17 @@ const styles = {
   page: { display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" },
   loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' },
   spinner: { width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebar: { width: 240, background: 'white', borderRight: '1px solid #e2e8f0', position: 'fixed', height: '100vh', display: 'flex', flexDirection: 'column', padding: '0 0 24px 0', zIndex: 100 },
+  sidebar: { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', padding: '0 0 24px 0', zIndex: 100 },
   sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   nav: { flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 },
   navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
   navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', boxShadow: '0 4px 12px rgba(67,97,238,0.3)' },
   logoutBtn: { margin: '0 12px', padding: '12px 16px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  main: { marginLeft: 240, flex: 1, padding: '32px 36px' },
+  main: { flex: 1, padding: '32px 36px' },
   header: { marginBottom: 28 },
   pageTitle: { fontSize: 24, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', marginBottom: 6 },
   pageSub: { color: '#64748b', fontSize: 14, fontWeight: 500 },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 28 },
   statCard: { background: 'white', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   statValue: { fontSize: 22, fontWeight: 800, marginBottom: 4 },
   statLabel: { fontSize: 12, color: '#64748b', fontWeight: 600 },

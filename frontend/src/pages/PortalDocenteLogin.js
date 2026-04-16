@@ -31,8 +31,8 @@ const PortalDocenteLogin = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.leftPanel}>
+    <div className="responsive-split">
+      <div className="hide-mobile" style={styles.leftPanel}>
         <div style={styles.leftContent}>
           <div style={styles.iconWrap}>
             <FaUserTie size={50} color="white" />
@@ -104,13 +104,13 @@ const PortalDocenteLogin = () => {
 
 const styles = {
   container: { display: 'flex', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  leftPanel: { flex: 1, background: 'linear-gradient(135deg, #0ea5e9, #0284c7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' },
+  leftPanel: { background: 'linear-gradient(135deg, #0ea5e9, #0284c7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' },
   leftContent: { maxWidth: 400, padding: 30 },
   iconWrap: { width: 80, height: 80, background: 'rgba(255,255,255,0.2)', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
   leftTitle: { fontSize: 32, fontWeight: 800, marginBottom: 5 },
   leftSubtitle: { fontSize: 16, opacity: 0.8, marginBottom: 30 },
   featureItem: { fontSize: 15, fontWeight: 600, marginBottom: 15, display: 'flex', alignItems: 'center', gap: 10 },
-  rightPanel: { flex: 1, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  rightPanel: { background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 },
   formCard: { background: 'white', padding: 40, borderRadius: 24, width: '100%', maxWidth: 420, boxShadow: '0 10px 40px rgba(0,0,0,0.08)' },
   errorBox: { background: '#fff1f2', color: '#e11d48', padding: 12, borderRadius: 10, fontSize: 13, fontWeight: 600, marginBottom: 20 },
   formGroup: { marginBottom: 20 },
