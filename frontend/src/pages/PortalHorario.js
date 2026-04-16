@@ -14,7 +14,7 @@ const PortalHorario = () => {
       .then(res => setHorario(res.data.data || []))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('student_token');

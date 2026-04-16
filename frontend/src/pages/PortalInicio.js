@@ -17,7 +17,8 @@ const PortalInicio = () => {
     const token = localStorage.getItem('student_token');
     if (!token) { navigate('/portal'); return; }
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
   const fetchData = async () => {
     try {

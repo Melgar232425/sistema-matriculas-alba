@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaMoneyBillWave, FaCheckCircle, FaSignOutAlt, FaUserGraduate, FaCalendarAlt } from 'react-icons/fa';
+import { FaMoneyBillWave, FaSignOutAlt, FaUserGraduate, FaCalendarAlt } from 'react-icons/fa';
 
 const PortalPagos = () => {
   const [pagos, setPagos] = useState([]);
@@ -13,7 +13,8 @@ const PortalPagos = () => {
   useEffect(() => {
     if (!localStorage.getItem('student_token')) { navigate('/portal'); return; }
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
   const fetchData = async () => {
     try {
