@@ -31,8 +31,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Si la petición era de login, NO redirigir ni cerrar sesión, solo dejar que el componente muestre el error
+    if (error.config && error.config.url.includes('/auth/login')) {
+      return Promise.reject(error);
+    }
+
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Si el error es 401 o 403 NO Autorizado (token expirado o inválido)
       console.warn("Token inválido o expirado. Cerrando sesión...");
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -134,6 +138,11 @@ portalApi.interceptors.request.use((config) => {
 portalApi.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Si la petición de fallo fue por credenciales incorrectas en el login, no recargar la página.
+    if (error.config && error.config.url.includes('/portal/login')) {
+      return Promise.reject(error);
+    }
+
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       localStorage.removeItem('student_token');
       localStorage.removeItem('student_user');
