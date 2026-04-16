@@ -128,6 +128,39 @@ const PortalDocenteInicio = () => {
                   />
                 </div>
 
+                {(() => {
+                  const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                  const fechaObj = new Date(fecha + 'T00:00:00');
+                  const nombreDia = diasSemana[fechaObj.getDay()];
+                  const esDiaProgramado = cursoSeleccionado.horario.toLowerCase().includes(nombreDia.toLowerCase());
+                  
+                  if (!esDiaProgramado) {
+                    return (
+                      <div style={{
+                        background: '#fff7ed',
+                        border: '1px solid #ffedd5',
+                        borderRadius: '12px',
+                        padding: '12px 20px',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        color: '#9a3412',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        <FaExclamationTriangle color="#f97316" size={20} />
+                        <div>
+                          Nota: Hoy es <span style={{textDecoration: 'underline'}}>{nombreDia}</span>. 
+                          Este curso no parece estar programado para hoy según su horario: 
+                          <span style={{color: '#c2410c'}}> {cursoSeleccionado.horario}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                   <div className="portal-table-wrap">
                   <table style={styles.table}>
                     <thead>
