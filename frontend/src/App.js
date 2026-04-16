@@ -35,8 +35,6 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Si no tiene el rol permitido, enviarlo a su vista predeterminada en lugar del Dashboard
-  // Si no tiene el rol permitido, enviarlo a su vista predeterminada
   if (allowedRoles && !allowedRoles.includes(user.rol)) {
     if (user.rol === 'matriculador') {
       return <Navigate to="/matriculas" replace />;
@@ -67,77 +65,84 @@ function App() {
       <Toaster position="top-right" />
       <Router>
         <Routes>
-          {/* Selección de Portal - Página principal pública */}
+          {/* 1. RUTAS PÚBLICAS Y DE LOGIN (Deben estar primero) */}
           <Route path="/" element={<LandingPage />} />
-
-          {/* Ruta de Login independiente */}
           <Route path="/login" element={<Login />} />
-
-          {/* Rutas del Portal de Estudiantes — sin Sidebar del admin */}
           <Route path="/portal" element={<PortalLogin />} />
+          <Route path="/portal-docente" element={<PortalDocenteLogin />} />
+
+          {/* 2. RUTAS DE PORTAL ESTUDIANTE (Protegidas) */}
           <Route path="/portal/inicio" element={<StudentRoute><PortalInicio /></StudentRoute>} />
           <Route path="/portal/asistencia" element={<StudentRoute><PortalAsistencia /></StudentRoute>} />
           <Route path="/portal/pagos" element={<StudentRoute><PortalPagos /></StudentRoute>} />
           <Route path="/portal/horario" element={<StudentRoute><PortalHorario /></StudentRoute>} />
 
-          {/* Rutas del Portal de Docentes */}
-          <Route path="/portal-docente" element={<PortalDocenteLogin />} />
+          {/* 3. RUTAS DE PORTAL DOCENTE (Protegidas) */}
           <Route path="/portal-docente/inicio" element={<DocenteRoute><PortalDocenteInicio /></DocenteRoute>} />
 
-          {/* Rutas Protegidas dentro del Layout General */}
-          <Route path="*" element={
-            <div className="app">
-              <Sidebar />
-              <Routes>
-                <Route path="/admin" element={
-                  <PrivateRoute allowedRoles={['director', 'admin']}>
-                    <Dashboard />
-                  </PrivateRoute>
-                } />
-                <Route path="/estudiantes" element={
-                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                    <Estudiantes />
-                  </PrivateRoute>
-                } />
-                <Route path="/docentes" element={
-                  <PrivateRoute allowedRoles={['director', 'admin']}>
-                    <Docentes />
-                  </PrivateRoute>
-                } />
-                <Route path="/cursos" element={
-                  <PrivateRoute allowedRoles={['director', 'admin']}>
-                    <Cursos />
-                  </PrivateRoute>
-                } />
-                <Route path="/ciclos" element={
-                  <PrivateRoute allowedRoles={['director', 'admin']}>
-                    <Ciclos />
-                  </PrivateRoute>
-                } />
-                <Route path="/matriculas" element={
-                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                    <Matriculas />
-                  </PrivateRoute>
-                } />
-                <Route path="/pagos" element={
-                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                    <Pagos />
-                  </PrivateRoute>
-                } />
-                <Route path="/reportes" element={
-                  <PrivateRoute allowedRoles={['director', 'admin']}>
-                    <Reportes />
-                  </PrivateRoute>
-                } />
-                <Route path="/calendario" element={
-                  <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
-                    <Calendario />
-                  </PrivateRoute>
-                } />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
-              </Routes>
-            </div>
+          {/* 4. RUTAS ADMINISTRATIVAS (Dentro de Layout con Sidebar) */}
+          <Route path="/admin/*" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app">
+                <Sidebar />
+                <Routes>
+                  <Route index element={<Dashboard />} />
+                  <Route path="*" element={<Navigate to="/admin" replace />} />
+                </Routes>
+              </div>
+            </PrivateRoute>
           } />
+
+          <Route path="/estudiantes" element={
+            <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+              <div className="app"><Sidebar /><Estudiantes /></div>
+            </PrivateRoute>
+          } />
+          
+          <Route path="/docentes" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app"><Sidebar /><Docentes /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/cursos" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app"><Sidebar /><Cursos /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/ciclos" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app"><Sidebar /><Ciclos /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/matriculas" element={
+            <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+              <div className="app"><Sidebar /><Matriculas /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/pagos" element={
+            <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+              <div className="app"><Sidebar /><Pagos /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/reportes" element={
+            <PrivateRoute allowedRoles={['director', 'admin']}>
+              <div className="app"><Sidebar /><Reportes /></div>
+            </PrivateRoute>
+          } />
+
+          <Route path="/calendario" element={
+            <PrivateRoute allowedRoles={['director', 'admin', 'matriculador']}>
+              <div className="app"><Sidebar /><Calendario /></div>
+            </PrivateRoute>
+          } />
+
+          {/* CATCH ALL - Redirigir a landing si nada coincide */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
