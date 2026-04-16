@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaCheckCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaCheckCircle, FaBars, FaTimes } from 'react-icons/fa';
 
 const PortalHorario = () => {
   const [horario, setHorario] = useState([]);

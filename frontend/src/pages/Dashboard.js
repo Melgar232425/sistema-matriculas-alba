@@ -34,7 +34,6 @@ const Dashboard = () => {
   if (loading && !stats) {
     return (
       <div className="main-content">
-        <Navbar title="Cargando..." />
         <div className="loading"><div className="spinner"></div></div>
       </div>
     );
@@ -42,7 +41,6 @@ const Dashboard = () => {
 
   return (
     <div className="main-content">
-      <Navbar title="Resumen Ejecutivo" />
 
       {/* Saludo y Acción Rápida */}
       <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
