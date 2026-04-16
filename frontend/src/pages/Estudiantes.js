@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { estudiantesAPI } from '../services/api';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaEye, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const Estudiantes = () => {
@@ -9,7 +9,6 @@ const Estudiantes = () => {
   const [showModal, setShowModal] = useState(false);
   const [showModalHistorial, setShowModalHistorial] = useState(false);
   const [historialData, setHistorialData] = useState(null);
-  const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [estudianteActual, setEstudianteActual] = useState(null);
   const [busqueda, setBusqueda] = useState('');
@@ -125,17 +124,13 @@ const Estudiantes = () => {
 
   const abrirModalHistorial = async (id) => {
     try {
-      setLoadingHistorial(true);
       setShowModalHistorial(true);
-      setTabActiva('datos');
       const response = await estudiantesAPI.getHistorial(id);
       setHistorialData(response.data.data);
     } catch (error) {
       console.error('Error al cargar historial:', error);
       toast.error('Error al cargar el historial del estudiante');
       setShowModalHistorial(false);
-    } finally {
-      setLoadingHistorial(false);
     }
   };
 
