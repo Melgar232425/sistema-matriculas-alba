@@ -1,6 +1,4 @@
-// Página Dashboard - Versión Premium 2026
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { reportesAPI } from '../services/api';
 import {
   FaUserGraduate,

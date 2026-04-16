@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
   FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes 
+  FaSignOutAlt, FaCheckCircle, FaBars, FaTimes 
 } from 'react-icons/fa';
 
 const PortalAsistencia = () => {
