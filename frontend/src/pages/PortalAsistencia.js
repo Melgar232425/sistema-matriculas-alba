@@ -5,7 +5,7 @@ import {
   FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
   FaSignOutAlt, FaBars, FaTimes, FaChartBar, FaFilePdf
 } from 'react-icons/fa';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 const PortalAsistencia = () => {
