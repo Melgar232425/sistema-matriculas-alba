@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { estudiantesAPI, pagosAPI, matriculasAPI } from '../services/api';
 import { FaSearch, FaUserShield, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const Tutores = () => {
   const [estudiantes, setEstudiantes] = useState([]);
@@ -143,23 +145,58 @@ const Tutores = () => {
                                  style={{ width: '28px', height: '28px', background: '#fee2e2', color: '#ef4444' }}
                                  onClick={() => {
                                    try {
-                                     const jsPDF = require('jspdf').default || require('jspdf');
                                      const doc = new jsPDF();
-                                     doc.text("ESTADO DE CUENTA", 105, 20, { align: "center" });
-                                     doc.text(`Alumno: ${selectedEstudiante.nombres} ${selectedEstudiante.apellidos}`, 20, 40);
-                                     doc.text(`DNI: ${selectedEstudiante.dni}`, 20, 50);
-                                     doc.text(`Curso: ${m.curso_nombre}`, 20, 60);
-                                     doc.text(`Monto Total: S/ ${m.monto_total}`, 20, 70);
-                                     doc.text(`Pagado: S/ ${m.monto_pagado}`, 20, 80);
-                                     doc.text(`Deuda Pendiente: S/ ${(m.monto_total - m.monto_pagado).toFixed(2)}`, 20, 90);
-                                     doc.setDrawColor(200);
-                                     doc.line(20, 100, 190, 100);
-                                     doc.text("Academia Alba Perú - Tutoría", 105, 110, { align: "center" });
-                                     doc.save(`Estado_Cuenta_${selectedEstudiante.dni}_${m.curso_id}.pdf`);
-                                     toast.success('PDF generado con éxito');
+                                     const pageWidth = doc.internal.pageSize.getWidth();
+
+                                     // Cabecera Premium
+                                     doc.setFillColor(67, 97, 238);
+                                     doc.rect(0, 0, pageWidth, 45, 'F');
+                                     doc.setTextColor(255, 255, 255);
+                                     doc.setFontSize(22);
+                                     doc.setFont('helvetica', 'bold');
+                                     doc.text('ESTADO DE CUENTA ACADÉMICO', 15, 25);
+                                     
+                                     doc.setFontSize(10);
+                                     doc.setFont('helvetica', 'normal');
+                                     doc.text('ACADEMIA ALBA PERÚ - ÁREA DE TUTORÍA', 15, 33);
+                                     doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString('es-PE')}`, 15, 38);
+
+                                     // Datos Alumno
+                                     doc.setTextColor(30, 41, 59);
+                                     doc.setFontSize(12);
+                                     doc.setFont('helvetica', 'bold');
+                                     doc.text('RESUMEN DE SITUACIÓN FINANCIERA', 15, 60);
+
+                                     const rows = [
+                                       ['ESTUDIANTE', `${selectedEstudiante.nombres} ${selectedEstudiante.apellidos}`.toUpperCase()],
+                                       ['DNI', selectedEstudiante.dni],
+                                       ['CURSO MATRICULADO', m.curso_nombre],
+                                       ['MONTO TOTAL DEL CURSO', `S/ ${parseFloat(m.monto_total).toFixed(2)}`],
+                                       ['MONTO PAGADO A LA FECHA', `S/ ${parseFloat(m.monto_pagado).toFixed(2)}`],
+                                       ['DEUDA PENDIENTE', `S/ ${(m.monto_total - m.monto_pagado).toFixed(2)}`]
+                                     ];
+
+                                     doc.autoTable({
+                                       startY: 70,
+                                       body: rows,
+                                       theme: 'grid',
+                                       styles: { fontSize: 10, cellPadding: 5 },
+                                       columnStyles: { 
+                                         0: { fontStyle: 'bold', fillColor: [241, 245, 249], cellWidth: 60 }
+                                       }
+                                     });
+
+                                     const finalY = doc.lastAutoTable.finalY + 15;
+                                     doc.setFontSize(9);
+                                     doc.setTextColor(148, 163, 184);
+                                     doc.text('Documento informativo para control interno del estudiante.', 15, finalY);
+                                     doc.text('Academia Alba Perú - www.albaperu.com', 15, finalY + 5);
+
+                                     doc.save(`Estado_Alba_${selectedEstudiante.dni}.pdf`);
+                                     toast.success('Reporte generado');
                                    } catch(err) {
                                      console.error(err);
-                                     toast.error('Error al generar PDF');
+                                     toast.error('Error al generar reporte');
                                    }
                                  }}
                                >

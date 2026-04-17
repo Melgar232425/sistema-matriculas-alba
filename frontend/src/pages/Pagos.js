@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { pagosAPI, matriculasAPI } from '../services/api';
-import { FaSearch, FaFilePdf } from 'react-icons/fa';
+import { FaSearch, FaFilePdf, FaHistory } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const Pagos = () => {
   const [pagos, setPagos] = useState([]);
@@ -88,11 +89,66 @@ const Pagos = () => {
   const cerrarModal = () => setShowModal(false);
 
   const exportarReciboPDF = (pago) => {
+    try {
       const doc = new jsPDF();
-      doc.text("RECIBO DE PAGO", 105, 20, { align: "center" });
-      doc.text(`Alumno: ${pago.nombres} ${pago.apellidos}`, 20, 40);
-      doc.text(`Monto: S/ ${pago.monto}`, 20, 50);
-      doc.save(`Recibo_${pago.codigo}.pdf`);
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Cabecera Institucional
+      doc.setFillColor(67, 97, 238);
+      doc.rect(0, 0, pageWidth, 45, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECIBO OFICIAL DE PAGO', 15, 25);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('ACADEMIA ALBA PERÚ - SEDE CENTRAL', 15, 33);
+      doc.text(`Comprobante N°: ${pago.codigo.toUpperCase()}`, 15, 38);
+
+      // Info Cliente/Pago
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALLE DEL MOVIMIENTO', 15, 60);
+
+      const tableData = [
+        ['CÓDIGO DE ALUMNO', pago.codigo_alumno || '—'],
+        ['ESTUDIANTE', `${pago.nombres} ${pago.apellidos}`.toUpperCase()],
+        ['CONCEPTO', pago.descripcion || 'PAGO DE MATRÍCULA / PENSIÓN'],
+        ['MONTO PAGADO', `S/ ${parseFloat(pago.monto).toFixed(2)}`],
+        ['FECHA DE PAGO', new Date(pago.fecha).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })],
+        ['MÉTODO', pago.metodo || 'DEPÓSITO / TRANSFERENCIA']
+      ];
+
+      doc.autoTable({
+        startY: 70,
+        body: tableData,
+        theme: 'striped',
+        styles: { fontSize: 10, cellPadding: 6 },
+        columnStyles: { 
+          0: { fontStyle: 'bold', fillColor: [241, 245, 249], cellWidth: 50 },
+          1: { cellWidth: 'auto' }
+        }
+      });
+
+      // Pie de página
+      const finalY = doc.lastAutoTable.finalY + 20;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, finalY, pageWidth - 15, finalY);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Este recibo es un comprobante válido de la operación realizada en nuestro sistema de matrículas.', 15, finalY + 10);
+      doc.text('Academia Alba Perú - Formando los futuros líderes del país.', 15, finalY + 15);
+
+      doc.save(`Recibo_Alba_${pago.codigo}.pdf`);
+      toast.success('Recibo generado con éxito');
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al generar el PDF');
+    }
   };
 
   return (
