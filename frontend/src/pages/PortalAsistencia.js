@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
   FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes, FaChartBar, FaFilePdf
+  FaSignOutAlt, FaBars, FaTimes, FaChartBar, FaFilePdf
 } from 'react-icons/fa';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -51,43 +51,33 @@ const PortalAsistencia = () => {
     }
   };
 
-  // Función de descarga PDF Reforzada
   const handleDescargarPDF = () => {
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
-
-      // Encabezado Azul Alba
       doc.setFillColor(67, 97, 238);
       doc.rect(0, 0, pageWidth, 45, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
       doc.text('REPORTE DETALLADO DE ASISTENCIAS', 15, 25);
-      
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.text('Academia Alba Perú - Gestión Académica Integral', 15, 33);
       doc.text(`Periodo Lectivo: ${new Date().getFullYear()} I-B`, 15, 38);
-
-      // Línea de separación decorativa
       doc.setDrawColor(255, 255, 255);
       doc.setLineWidth(0.5);
       doc.line(15, 41, 100, 41);
-
-      // Datos del Estudiante
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       doc.text('INFORMACIÓN GENERAL DEL ALUMNO', 15, 60);
-      
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text(`Nombres y Apellidos: ${user.nombres} ${user.apellidos}`, 15, 68);
       doc.text(`DNI / Código: ${user.codigo || '—'}`, 15, 74);
-      doc.text(`Fecha de Impresión: ${new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 15, 80);
+      doc.text(`Fecha de Impresión: ${new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}`, 15, 80);
 
-      // Tabla de Datos
       const tableData = [...asistencias].reverse().map(a => [
         formatearFechaStr(a.fecha).toUpperCase(),
         a.curso_nombre,
@@ -102,33 +92,22 @@ const PortalAsistencia = () => {
         theme: 'grid',
         headStyles: { fillColor: [67, 97, 238], textColor: 255, fontStyle: 'bold', fontSize: 9 },
         styles: { fontSize: 8, cellPadding: 4, valign: 'middle' },
-        columnStyles: { 
-          0: { cellWidth: 50 },
-          2: { fontStyle: 'bold' } 
-        },
+        columnStyles: { 0: { cellWidth: 50 }, 2: { fontStyle: 'bold' } },
         alternateRowStyles: { fillColor: [248, 250, 252] }
       });
 
-      // Pie de Página
       const finalY = doc.lastAutoTable.finalY + 15;
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.text('Este documento es un reporte digital generado desde el Portal Académico de Academia Alba Perú.', 15, finalY);
-      doc.text('Cualquier modificación anula la validez de este reporte.', 15, finalY + 5);
-
       doc.save(`Alba_Reporte_Asistencia_${user.apellidos}.pdf`);
-    } catch (err) {
-      console.error("Error al generar PDF:", err);
-      alert("Hubo un error al generar el PDF. Por favor, intente de nuevo.");
-    }
+    } catch (err) { alert("Error al generar el PDF."); }
   };
 
   const resumenPorCurso = useMemo(() => {
     const resumen = {};
     asistencias.forEach(a => {
-      if (!resumen[a.curso_nombre]) {
-        resumen[a.curso_nombre] = { total: 0, asistencias: 0, faltas: 0, tardanzas: 0 };
-      }
+      if (!resumen[a.curso_nombre]) { resumen[a.curso_nombre] = { total: 0, asistencias: 0, faltas: 0, tardanzas: 0 }; }
       resumen[a.curso_nombre].total += 1;
       if (a.estado === 'presente') resumen[a.curso_nombre].asistencias += 1;
       else if (a.estado === 'ausente') resumen[a.curso_nombre].faltas += 1;
@@ -167,14 +146,12 @@ const PortalAsistencia = () => {
             <p style={{ color: '#64748b' }}>Consulta tu estado de cumplimiento por periodo</p>
         </div>
 
-        {/* 1. RESUMEN VISUAL (LO QUE SE VE EN PANTALLA) */}
         <div style={styles.card}>
           <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
             <FaChartBar color="#4361ee" /> CURSOS MATRICULADOS EN EL PERIODO - MIS ASISTENCIAS
           </h2>
-          
           {resumenPorCurso.length === 0 ? (
-            <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>No hay registros de asistencia para este periodo.</p>
+            <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>No hay registros de asistencia.</p>
           ) : (
             <div className="portal-table-wrap">
               <table style={styles.table}>
@@ -198,9 +175,7 @@ const PortalAsistencia = () => {
                           fontWeight: 800, 
                           color: item.porcFaltas > 20 ? '#ef4444' : '#1e293b',
                           background: item.porcFaltas > 20 ? '#fef2f2' : '#f8fafc',
-                          padding: '4px 12px',
-                          borderRadius: '8px',
-                          fontSize: '13px'
+                          padding: '4px 12px', borderRadius: '8px', fontSize: '13px'
                         }}>
                           {item.porcFaltas}%
                         </span>
@@ -222,18 +197,11 @@ const PortalAsistencia = () => {
           )}
         </div>
 
-        {/* 2. AREA DE REPORTE (SOLO BOTÓN, SIN TABLA FUERA) */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40, paddingBottom: 40 }}>
-           <button 
-             onClick={handleDescargarPDF} 
-             style={styles.pdfFullBtn}
-             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-           >
+           <button onClick={handleDescargarPDF} style={styles.pdfFullBtn}>
              <FaFilePdf size={20} /> REPORTE DETALLADO DE ASISTENCIAS DEL PERIODO
            </button>
         </div>
-
       </main>
     </div>
   );
@@ -242,7 +210,7 @@ const PortalAsistencia = () => {
 const styles = {
   center: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' },
   spinner: { width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '24px', display: 'flex', justifyContent: 'center' },
+  sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   nav: { flex: 1, padding: '12px', display: 'flex', flexDirection: 'column', gap: 5 },
   navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
   navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white' },
@@ -253,28 +221,10 @@ const styles = {
   th: { textAlign: 'left', padding: '15px 20px', fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '2px solid #f1f5f9' },
   td: { padding: '18px 20px', borderBottom: '1px solid #f8fafc', fontSize: 13 },
   tr: { transition: 'background 0.2s' },
-  
   countBadge: { background: '#f1f5f9', color: '#334155', padding: '6px 14px', borderRadius: '30px', fontSize: '13px', fontWeight: 700, display: 'inline-block' },
   progressBarBg: { width: '100%', height: '10px', background: '#f1f5f9', borderRadius: '10px', overflow: 'hidden' },
   progressBarFill: { height: '100%', borderRadius: '10px', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' },
-  
-  pdfFullBtn: { 
-    background: '#f87171', 
-    color: 'white', 
-    border: 'none', 
-    padding: '18px 40px', 
-    borderRadius: '12px', 
-    fontWeight: '800', 
-    fontSize: '14px', 
-    cursor: 'pointer', 
-    display: 'flex', 
-    alignItems: 'center', 
-    gap: '15px',
-    boxShadow: '0 10px 20px rgba(248, 113, 113, 0.3)',
-    transition: 'all 0.3s ease',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  }
+  pdfFullBtn: { background: '#f87171', color: 'white', border: 'none', padding: '18px 40px', borderRadius: '12px', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', boxShadow: '0 10px 20px rgba(248, 113, 113, 0.3)', transition: 'transform 0.2s', textTransform: 'uppercase' }
 };
 
 export default PortalAsistencia;
