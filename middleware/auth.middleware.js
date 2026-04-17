@@ -20,7 +20,7 @@ const verifyToken = (req, res, next) => {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     
     // Punto S9: Validar roles permitidos
-    const rolesPermitidos = ['admin', 'director', 'matriculador'];
+    const rolesPermitidos = ['admin', 'director', 'matriculador', 'tutor'];
     if (!rolesPermitidos.includes(verified.rol)) {
         return res.status(403).json({ success: false, message: 'Rol de usuario no válido.' });
     }
