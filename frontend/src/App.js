@@ -86,7 +86,7 @@ function App() {
 
           {/* 4. RUTAS ADMINISTRATIVAS (Dentro de Layout con Sidebar) */}
           <Route path="/admin/*" element={
-            <PrivateRoute allowedRoles={['director', 'admin']}>
+            <PrivateRoute allowedRoles={['director', 'admin', 'tutor']}>
               <div className="app">
                 <Sidebar />
                 <Routes>

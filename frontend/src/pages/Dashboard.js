@@ -45,10 +45,13 @@ const Dashboard = () => {
       {/* Saludo y Acción Rápida */}
       <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <h2 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: '800' }}>¡Hola, Administrador! 👋</h2>
+          <h2 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: '800' }}>¡Hola! 👋</h2>
           <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba Perú.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
+             <button className="btn btn-primary" onClick={() => window.location.href='/tutores'} style={{ whiteSpace: 'nowrap', background: 'var(--success)' }}>
+                <FaUserGraduate /> Ver Alumnos del Ciclo
+             </button>
              <button className="btn btn-primary" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
                 <FaUserPlus /> Nueva Matrícula
              </button>
