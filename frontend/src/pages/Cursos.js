@@ -787,12 +787,12 @@ const Cursos = () => {
                           }}>
                             {(() => {
                               if (!curso.horario) return '-';
-                              const partes = curso.horario.split(/ y /i);
-                              if (partes.length > 1) {
+                              const match = curso.horario.match(/(.*)(\s[yY]\s)(.*)/);
+                              if (match) {
                                 return (
                                   <>
-                                    {partes[0]}<br />
-                                    y {partes[1]}
+                                    {match[1]}<br />
+                                    {match[2].trim()} {match[3]}
                                   </>
                                 );
                               }
