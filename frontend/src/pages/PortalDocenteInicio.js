@@ -8,11 +8,8 @@ const PortalDocenteInicio = () => {
   const [cursos, setCursos] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
-  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  const user = JSON.parse(localStorage.getItem('docente_user') || '{}');
+  const [cambiosPendientes, setCambiosPendientes] = useState({});
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('docente_token');
@@ -23,6 +20,7 @@ const PortalDocenteInicio = () => {
 
   useEffect(() => {
     if (cursoSeleccionado && fecha) {
+      setCambiosPendientes({}); // Resetear cambios al cambiar de curso o fecha
       fetchEstudiantes(cursoSeleccionado.id, fecha);
     }
   }, [cursoSeleccionado, fecha]);
@@ -53,17 +51,40 @@ const PortalDocenteInicio = () => {
     navigate('/portal-docente');
   };
 
-  const marcarAsistencia = async (matricula_id, estado) => {
+  const marcarAsistenciaLocal = (matricula_id, estado) => {
+    setCambiosPendientes(prev => ({
+      ...prev,
+      [matricula_id]: estado
+    }));
+  };
+
+  const guardarCambios = async () => {
+    if (Object.keys(cambiosPendientes).length === 0) return;
+    
+    setGuardando(true);
+    const loadingToast = toast.loading('Guardando asistencia...');
+    
     try {
-      await docentePortalAPI.marcarAsistencia(cursoSeleccionado.id, { matricula_id, fecha, estado });
+      const promesas = Object.entries(cambiosPendientes).map(([matricula_id, estado]) => 
+        docentePortalAPI.marcarAsistencia(cursoSeleccionado.id, { 
+          matricula_id: parseInt(matricula_id), 
+          fecha, 
+          estado 
+        })
+      );
       
-      // Actualizar localmente para no hacer otra request
-      setEstudiantes(prev => prev.map(e => 
-        e.matricula_id === matricula_id ? { ...e, estado_asistencia: estado } : e
-      ));
-      toast.success(`Asistencia marcada como: ${estado}`, { duration: 1500 });
+      await Promise.all(promesas);
+      
+      toast.dismiss(loadingToast);
+      toast.success('Asistencia guardada correctamente');
+      setCambiosPendientes({});
+      fetchEstudiantes(cursoSeleccionado.id, fecha);
     } catch (err) {
-      toast.error('Error al guardar asistencia');
+      toast.dismiss(loadingToast);
+      toast.error('Error al guardar la asistencia');
+      console.error(err);
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -94,7 +115,12 @@ const PortalDocenteInicio = () => {
               {cursos.map(c => (
                 <div 
                   key={c.id} 
-                  onClick={() => setCursoSeleccionado(c)}
+                  onClick={() => {
+                    if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('Tienes cambios sin guardar. ¿Deseas cambiar de curso y perder los cambios?')) {
+                      return;
+                    }
+                    setCursoSeleccionado(c);
+                  }}
                   style={{...styles.cursoCard, ...(cursoSeleccionado?.id === c.id ? styles.cursoActive : {})}}
                 >
                   <FaBookOpen color={cursoSeleccionado?.id === c.id ? '#fff' : '#0ea5e9'} />
@@ -120,14 +146,43 @@ const PortalDocenteInicio = () => {
                     <h2 style={{ fontSize: 22, fontWeight: 800 }}>Control de Asistencia</h2>
                     <p style={{ color: '#64748b', fontSize: 14 }}>{cursoSeleccionado.nombre} ({cursoSeleccionado.horario})</p>
                   </div>
-                  <input 
-                    type="date" 
-                    value={fecha} 
-                    onChange={e => setFecha(e.target.value)} 
-                    max={new Date().toISOString().split('T')[0]}
-                    style={styles.dateInput}
-                    title="No puedes registrar asistencia para fechas futuras"
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {Object.keys(cambiosPendientes).length > 0 && (
+                      <button 
+                        onClick={guardarCambios}
+                        disabled={guardando}
+                        style={{
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          padding: '10px 20px',
+                          borderRadius: '10px',
+                          fontWeight: '800',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                          animation: 'pulse 2s infinite'
+                        }}
+                      >
+                        <FaCheck /> GUARDAR CAMBIOS ({Object.keys(cambiosPendientes).length})
+                      </button>
+                    )}
+                    <input 
+                      type="date" 
+                      value={fecha} 
+                      onChange={e => {
+                        if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('Tienes cambios sin guardar. ¿Deseas cambiar la fecha y perder los cambios?')) {
+                          return;
+                        }
+                        setFecha(e.target.value);
+                      }} 
+                      max={new Date().toISOString().split('T')[0]}
+                      style={styles.dateInput}
+                    />
+                  </div>
                 </div>
 
                 {(() => {
@@ -192,59 +247,69 @@ const PortalDocenteInicio = () => {
                           {estudiantes.length === 0 ? (
                             <tr><td colSpan="5" style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>No hay estudiantes matriculados.</td></tr>
                           ) : null}
-                          {estudiantes.map(e => (
-                            <tr key={e.estudiante_id} style={styles.tr}>
-                              <td style={styles.td}><strong>{e.apellidos}</strong>, {e.nombres}</td>
-                              <td style={styles.td}><span style={styles.code}>{e.codigo}</span></td>
-                              <td style={styles.td}>
-                                {e.estado_asistencia === 'presente' && <span style={styles.badgeSuccess}>Presente</span>}
-                                {e.estado_asistencia === 'ausente' && <span style={styles.badgeDanger}>Ausente</span>}
-                                {e.estado_asistencia === 'tardanza' && <span style={styles.badgeWarning}>Tardanza</span>}
-                                {e.estado_asistencia === 'no_registrado' && <span style={styles.badgeNeutral}>Sin Registrar</span>}
-                              </td>
-                              <td style={styles.td}>
-                                {e.total_faltas >= 3 ? (
-                                  <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-                                    <FaExclamationTriangle /> {e.total_faltas} faltas
-                                  </span>
-                                ) : <span style={{ color: '#64748b', fontSize: 12 }}>{e.total_faltas} faltas</span>}
-                              </td>
-                              <td style={{...styles.td, textAlign: 'right'}}>
-                                <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                  <button 
-                                    onClick={() => marcarAsistencia(e.matricula_id, e.estado_asistencia === 'presente' ? 'ausente' : 'presente')} 
-                                    style={{
-                                      ...styles.quickCheck, 
-                                      background: e.estado_asistencia === 'presente' ? '#10b981' : '#f1f5f9',
-                                      color: e.estado_asistencia === 'presente' ? 'white' : '#94a3b8',
-                                      borderColor: e.estado_asistencia === 'presente' ? '#059669' : '#e2e8f0'
-                                    }}
-                                    title="Marcar como Presente / Ausente"
-                                  >
-                                    <FaCheck size={14} />
-                                  </button>
-                                  <select 
-                                    value={e.estado_asistencia} 
-                                    onChange={(ev) => marcarAsistencia(e.matricula_id, ev.target.value)}
-                                    style={{
-                                      padding: '6px 10px',
-                                      borderRadius: '8px',
-                                      border: '1px solid #e2e8f0',
-                                      fontSize: '13px',
-                                      background: 'white',
-                                      cursor: 'pointer',
-                                      outline: 'none'
-                                    }}
-                                  >
-                                    <option value="no_registrado">Sin marcar</option>
-                                    <option value="presente">Presente</option>
-                                    <option value="tardanza">Tardanza</option>
-                                    <option value="ausente">Ausente</option>
-                                  </select>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {estudiantes.map(e => {
+                            const estadoFinal = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
+                            const tieneCambio = !!cambiosPendientes[e.matricula_id];
+
+                            return (
+                              <tr key={e.estudiante_id} style={{
+                                ...styles.tr,
+                                backgroundColor: tieneCambio ? '#f0f9ff' : 'transparent'
+                              }}>
+                                <td style={styles.td}><strong>{e.apellidos}</strong>, {e.nombres}</td>
+                                <td style={styles.td}><span style={styles.code}>{e.codigo}</span></td>
+                                <td style={styles.td}>
+                                  {estadoFinal === 'presente' && <span style={styles.badgeSuccess}>Presente</span>}
+                                  {estadoFinal === 'ausente' && <span style={styles.badgeDanger}>Ausente</span>}
+                                  {estadoFinal === 'tardanza' && <span style={styles.badgeWarning}>Tardanza</span>}
+                                  {estadoFinal === 'no_registrado' && <span style={styles.badgeNeutral}>Sin Registrar</span>}
+                                  {tieneCambio && <span style={{ fontSize: 10, display: 'block', color: '#0ea5e9', fontWeight: 700 }}>Pendiente guardar</span>}
+                                </td>
+                                <td style={styles.td}>
+                                  {e.total_faltas >= 3 ? (
+                                    <span style={{ color: '#ef4444', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                      <FaExclamationTriangle /> {e.total_faltas} faltas
+                                    </span>
+                                  ) : <span style={{ color: '#64748b', fontSize: 12 }}>{e.total_faltas} faltas</span>}
+                                </td>
+                                <td style={{...styles.td, textAlign: 'right'}}>
+                                  <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                    <button 
+                                      onClick={() => marcarAsistenciaLocal(e.matricula_id, estadoFinal === 'presente' ? 'ausente' : 'presente')} 
+                                      style={{
+                                        ...styles.quickCheck, 
+                                        background: estadoFinal === 'presente' ? '#10b981' : '#f1f5f9',
+                                        color: estadoFinal === 'presente' ? 'white' : '#94a3b8',
+                                        borderColor: estadoFinal === 'presente' ? '#059669' : '#e2e8f0'
+                                      }}
+                                      title="Marcar como Presente / Ausente"
+                                    >
+                                      <FaCheck size={14} />
+                                    </button>
+                                    <select 
+                                      value={estadoFinal} 
+                                      onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
+                                      style={{
+                                        padding: '6px 10px',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0',
+                                        fontSize: '13px',
+                                        background: 'white',
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                        fontWeight: tieneCambio ? 'bold' : 'normal'
+                                      }}
+                                    >
+                                      <option value="no_registrado">Sin marcar</option>
+                                      <option value="presente">Presente</option>
+                                      <option value="tardanza">Tardanza</option>
+                                      <option value="ausente">Ausente</option>
+                                    </select>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
