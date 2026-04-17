@@ -215,6 +215,12 @@ const Matriculas = () => {
               className="form-control"
               style={{ paddingLeft: '45px', borderRadius: '50px', backgroundColor: '#f8fafc', height: '42px' }}
             />
+            {filtroDni && (
+              <FaTimes
+                onClick={() => setFiltroDni('')}
+                style={{ cursor: 'pointer', color: '#ef4444', position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)' }}
+              />
+            )}
           </div>
           <div style={{ 
             display: 'flex', 
