@@ -31,25 +31,37 @@ const PortalHorario = () => {
   ];
   const COLORES = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
-  // Función para parsear el horario (Ej: "Lunes, Miercoles y Viernes 7:00 AM - 9:00 AM")
+  // Función para normalizar horas (Ej: "9:00 AM" -> "09:00 AM")
+  const normalizarHora = (h) => {
+    if (!h) return '';
+    let [time, meridiem] = h.trim().toUpperCase().split(/\s+/);
+    if (!meridiem && time.includes('AM')) meridiem = 'AM';
+    if (!meridiem && time.includes('PM')) meridiem = 'PM';
+    let [hh, mm] = (time.replace('AM', '').replace('PM', '')).split(':');
+    return `${hh.padStart(2, '0')}:${mm} ${meridiem}`;
+  };
+
+  // Función para parsear el horario (Ej: "Lunes, Miercoles y Viernes 9:00 AM - 11:00 AM")
   const parseHorario = (str) => {
     if (!str) return [];
     try {
       const normalizar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       
-      // Separar días de horas
-      const match = str.match(/(.*)\s+(\d{1,2}:\d{2}\s+(?:AM|PM))\s*-\s*(\d{1,2}:\d{2}\s+(?:AM|PM))/i);
-      if (!match) return [];
+      const parts = str.split(/\s+/);
+      const endStr = normalizarHora(parts.pop() + ' ' + parts.pop()); // AM/PM + HH:MM
+      parts.pop(); // quitar "-"
+      const startStr = normalizarHora(parts.pop() + ' ' + parts.pop()); // AM/PM + HH:MM
+      const diasStr = parts.join(' ');
 
-      const [, diasStr, startStr, endStr] = match;
       const diasDetectados = DIAS.filter(d => normalizar(diasStr).includes(normalizar(d)));
 
       return diasDetectados.map(dia => ({
         dia,
-        inicio: startStr.trim().toUpperCase(),
-        fin: endStr.trim().toUpperCase()
+        inicio: startStr,
+        fin: endStr
       }));
     } catch (e) {
+      console.error("Error parseando horario:", str, e);
       return [];
     }
   };
