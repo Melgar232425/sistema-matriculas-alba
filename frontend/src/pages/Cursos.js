@@ -649,77 +649,98 @@ const Cursos = () => {
           </button>
         </div>
 
-        {/* Buscador Premium de Cursos */}
+        {/* Buscador Premium de Cursos - Responsivo */}
         <div style={{
           padding: '0 24px 24px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '20px',
+          gap: '12px',
           borderBottom: '1px solid #f1f5f9',
           marginBottom: '20px',
           flexWrap: 'wrap'
         }}>
+          {/* 1. Buscador */}
           <div className="search-box" style={{ flex: '1 1 300px', maxWidth: '100%', marginBottom: 0 }}>
             <FaSearch style={{ left: '14px', right: 'auto' }} />
             <input
               type="text"
-              placeholder="Buscar curso por nombre, sección o docente..."
+              placeholder="Buscar curso, sección o docente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-control"
               style={{ paddingLeft: '42px', borderRadius: '50px', backgroundColor: '#f8fafc' }}
             />
-            {searchTerm && (
-              <FaTimes
-                onClick={() => setSearchTerm('')}
-                style={{ cursor: 'pointer', color: '#ef4444' }}
-              />
-            )}
           </div>
 
-          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* 2. Filtro de Ciclos */}
+          <div className="filter-group" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            flex: '1 1 200px',
+            maxWidth: '100%'
+          }}>
             <FaSync color="#64748b" />
             <select
               value={filtroCiclo}
               onChange={e => setFiltroCiclo(e.target.value)}
               className="form-control"
-              style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', minWidth: '180px' }}
+              style={{ 
+                padding: '8px 12px', 
+                fontSize: '13px', 
+                borderRadius: '8px', 
+                width: '100%',
+                backgroundColor: '#fff'
+              }}
             >
               <option value="">Todos los Ciclos</option>
               {ciclos.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.nombre} ({c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '-'} al {c.fecha_fin ? new Date(c.fecha_fin).toLocaleDateString() : '-'}) {c.estado === 'inactivo' ? '(Cerrado)' : ''}
+                  {c.nombre} {c.estado === 'inactivo' ? '(Cerrado)' : ''}
                 </option>
               ))}
             </select>
           </div>
 
-          <button 
-            className="btn" 
-            onClick={exportarExcel}
-            style={{ 
-              background: '#f0fdf4', 
-              color: '#16a34a', 
-              border: '1px solid #dcfce7',
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontWeight: '700'
-            }}
-          >
-            <FaFileExcel size={14} /> Descargar Reporte
-          </button>
+          {/* 3. Acciones y Contador */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '15px',
+            flexWrap: 'wrap',
+            width: '100%',
+            justifyContent: 'space-between',
+            marginTop: '5px'
+          }}>
+            <button 
+              className="btn" 
+              onClick={exportarExcel}
+              style={{ 
+                background: '#f0fdf4', 
+                color: '#16a34a', 
+                border: '1px solid #dcfce7',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <FaFileExcel size={14} /> Reporte Excel
+            </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: searchTerm ? '#4361ee' : '#cbd5e1'
-            }}></span>
-            <span style={{ fontSize: '13px', fontWeight: '500', color: '#64748b' }}>
-              {searchTerm ? `Resultado: ${countActivos} curso(s)` : `Mostrando ${countActivos} curso(s) activos`}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: searchTerm ? '#4361ee' : '#cbd5e1'
+              }}></span>
+              <span style={{ fontSize: '13px', fontWeight: '500', color: '#64748b' }}>
+                {searchTerm ? `${countActivos} curso(s)` : `${countActivos} cursos activos`}
+              </span>
+            </div>
           </div>
         </div>
 
