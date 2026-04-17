@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { reportesAPI } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import {
+  FaUserGraduate,
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
