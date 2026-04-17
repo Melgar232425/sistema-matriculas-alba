@@ -1,7 +1,9 @@
 // Página de Matrículas
 import React, { useState, useEffect } from 'react';
 import { matriculasAPI, estudiantesAPI, cursosAPI } from '../services/api';
-import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye, FaFilePdf } from 'react-icons/fa';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import toast from 'react-hot-toast';
 
 const Matriculas = () => {
@@ -297,7 +299,65 @@ const Matriculas = () => {
                           </span>
                         </td>
                         <td style={{ verticalAlign: 'middle' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                            <button
+                              className="btn-icon"
+                              onClick={() => {
+                                try {
+                                  const doc = new jsPDF();
+                                  const pageWidth = doc.internal.pageSize.getWidth();
+                                  
+                                  // Cabecera Alba
+                                  doc.setFillColor(67, 97, 238);
+                                  doc.rect(0, 0, pageWidth, 45, 'F');
+                                  doc.setTextColor(255, 255, 255);
+                                  doc.setFontSize(22);
+                                  doc.setFont('helvetica', 'bold');
+                                  doc.text('CONSTANCIA DE MATRÍCULA', 15, 25);
+                                  
+                                  doc.setFontSize(10);
+                                  doc.setFont('helvetica', 'normal');
+                                  doc.text('ACADEMIA ALBA PERÚ - GESTIÓN ACADÉMICA', 15, 33);
+                                  doc.text(`Expedido el: ${new Date().toLocaleDateString('es-PE')}`, 15, 38);
+
+                                  // Datos del Alumno
+                                  doc.setTextColor(30, 41, 59);
+                                  doc.setFontSize(12);
+                                  doc.setFont('helvetica', 'bold');
+                                  doc.text('DATOS OFICIALES DEL REGISTRO', 15, 60);
+
+                                  const data = [
+                                    ['CÓDIGO ALUMNO', grupo.codigo_estudiante],
+                                    ['DNI', grupo.dni],
+                                    ['NOMBRES Y APELLIDOS', `${grupo.nombres} ${grupo.apellidos}`.toUpperCase()],
+                                    ['FECHA DE REGISTRO', new Date().toLocaleDateString('es-PE')],
+                                    ['CURSOS INSCRITOS', grupo.matriculas.length + ' curso(s)'],
+                                    ['INVERSIÓN TOTAL', `S/ ${parseFloat(grupo.matriculas.reduce((s, m) => s + parseFloat(m.monto_total), 0)).toFixed(2)}`]
+                                  ];
+
+                                  doc.autoTable({
+                                    startY: 70,
+                                    body: data,
+                                    theme: 'striped',
+                                    styles: { fontSize: 10, cellPadding: 5 },
+                                    columnStyles: { 0: { fontStyle: 'bold', fillColor: [241, 245, 249], cellWidth: 50 } }
+                                  });
+
+                                  const finalY = doc.lastAutoTable.finalY + 15;
+                                  doc.setFontSize(9);
+                                  doc.setTextColor(100, 116, 139);
+                                  doc.text('Este documento certifica su inscripción oficial en nuestra institución.', 15, finalY);
+                                  doc.text('Academia Alba Perú - Sede Central', 15, finalY + 5);
+
+                                  doc.save(`Ficha_Matricula_${grupo.dni}.pdf`);
+                                  toast.success('Constancia generada');
+                                } catch(e) { toast.error('Error al generar PDF'); }
+                              }}
+                              title="Descargar Constancia de Matrícula (PDF)"
+                              style={{ width: '28px', height: '28px', background: '#e0f2fe', color: '#0369a1', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <FaFilePdf size={12} />
+                            </button>
                             <button
                               className="btn-icon btn-icon-edit"
                               onClick={() => abrirNuevaMatriculaParaEstudiante(grupo)}

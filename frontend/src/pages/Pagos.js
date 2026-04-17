@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { pagosAPI, matriculasAPI } from '../services/api';
-import { FaSearch, FaFilePdf, FaHistory } from 'react-icons/fa';
+import { FaSearch, FaFilePdf } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
