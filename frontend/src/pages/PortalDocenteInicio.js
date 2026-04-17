@@ -131,10 +131,17 @@ const PortalDocenteInicio = () => {
                 </div>
 
                 {(() => {
-                  const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                  // Normalizar para ignorar tildes al comparar
+                  const normalizar = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                  
+                  const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
                   const fechaObj = new Date(fecha + 'T00:00:00');
                   const nombreDia = diasSemana[fechaObj.getDay()];
-                  const esDiaProgramado = cursoSeleccionado.horario.toLowerCase().includes(nombreDia.toLowerCase());
+                  
+                  const horarioNormalizado = normalizar(cursoSeleccionado.horario);
+                  const diaNormalizado = normalizar(nombreDia);
+                  
+                  const esDiaProgramado = horarioNormalizado.includes(diaNormalizado);
                   
                   if (!esDiaProgramado) {
                     return (
