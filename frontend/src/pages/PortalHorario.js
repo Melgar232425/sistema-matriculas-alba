@@ -149,34 +149,7 @@ const PortalHorario = () => {
               </div>
             </div>
 
-            <div style={{ marginTop: 40, marginBottom: 20 }}>
-               <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b' }}>Resumen Detallado por Materia</h2>
-            </div>
-            <div style={styles.cursosGrid}>
-              {horario.map((c, i) => {
-                const cp = COLORES_PREMIUM[i % COLORES_PREMIUM.length];
-                return (
-                  <div key={c.curso_id} style={{ ...styles.cursoCard, borderTop: `4px solid ${cp.border}` }}>
-                    <div style={{ ...styles.cursoIcon, background: cp.bg, color: cp.border }}>
-                      <FaChalkboardTeacher size={18} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={styles.cursoNombre}>{c.curso_nombre}</h3>
-                      <div style={styles.cursoMeta}>
-                        <div style={styles.metaItem}>
-                          <FaUserGraduate size={12} />
-                          <span>{c.docente_nombre}</span>
-                        </div>
-                        <div style={styles.metaItem}>
-                          <FaClock size={12} color={cp.border} />
-                          <span style={{ fontWeight: 700, color: cp.border }}>{c.horario}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+
           </>
         )}
       </main>
@@ -208,13 +181,7 @@ const styles = {
   eventBlock: { position: 'absolute', top: 2, left: 2, right: 2, borderRadius: '8px', padding: '10px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '3px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box' },
   eventTitle: { fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   eventDocente: { fontSize: '9px', fontWeight: '500', opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  eventTimeRange: { fontSize: '9px', fontWeight: '700', marginTop: 'auto' },
-  cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' },
-  cursoCard: { background: 'white', borderRadius: '16px', padding: '20px', display: 'flex', gap: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', transition: 'transform 0.2s' },
-  cursoIcon: { width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  cursoNombre: { fontSize: '16px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' },
-  cursoMeta: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  metaItem: { display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '12px', fontWeight: '500' }
+  eventTimeRange: { fontSize: '9px', fontWeight: '700', marginTop: 'auto' }
 };
 
 export default PortalHorario;
