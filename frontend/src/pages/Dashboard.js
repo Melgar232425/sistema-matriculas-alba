@@ -6,7 +6,6 @@ import {
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
-  FaUserPlus,
   FaSignOutAlt
 } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
