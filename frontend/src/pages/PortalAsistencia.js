@@ -3,14 +3,18 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
   FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes, FaChartBar
+  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes, FaChartBar, FaFilePdf
 } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const PortalAsistencia = () => {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem('student_user') || '{}');
 
   useEffect(() => {
     if (!localStorage.getItem('student_token')) { navigate('/portal'); return; }
@@ -35,7 +39,72 @@ const PortalAsistencia = () => {
     navigate('/portal');
   };
 
-  // Calcular resumen por curso usando useMemo para eficiencia
+  const formatearFechaStr = (fechaRaw) => {
+    try {
+      if (!fechaRaw) return '—';
+      const dateStr = fechaRaw.includes('T') ? fechaRaw.split('T')[0] : fechaRaw;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const d = new Date(year, month - 1, day);
+      return d.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
+    } catch (e) {
+      return 'Fecha no disponible';
+    }
+  };
+
+  const descargarPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Encabezado Premium
+    doc.setFillColor(67, 97, 238);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REPORTE DE ASISTENCIAS', 15, 25);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Academia Alba Perú - Sistema de Gestión Académica', 15, 32);
+
+    // Info del Alumno
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('INFORMACIÓN DEL ESTUDIANTE', 15, 55);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Nombre Completo: ${user.nombres} ${user.apellidos}`, 15, 62);
+    doc.text(`Código de Alumno: ${user.codigo || '—'}`, 15, 67);
+    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}`, 15, 72);
+
+    // Tabla de Datos
+    const tableData = asistencias.map(a => [
+      formatearFechaStr(a.fecha),
+      a.curso_nombre,
+      a.estado.toUpperCase(),
+      a.estado === 'ausente' ? 'Falta Injustificada' : 'Registro de Asistencia'
+    ]);
+
+    doc.autoTable({
+      startY: 85,
+      head: [['FECHA', 'CURSO', 'ESTADO', 'OBSERVACIÓN']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [67, 97, 238], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 8, cellPadding: 3 },
+      columnStyles: { 0: { cellWidth: 50 }, 2: { fontStyle: 'bold' } }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 15;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Este documento es un comprobante oficial de asistencia emitido por el Portal del Estudiante de Academia Alba Perú.', 15, finalY);
+
+    doc.save(`Reporte_Asistencia_${user.apellidos}.pdf`);
+  };
+
   const resumenPorCurso = useMemo(() => {
     const resumen = {};
     asistencias.forEach(a => {
@@ -94,10 +163,9 @@ const PortalAsistencia = () => {
       <main className="portal-main">
         <div style={styles.header}>
             <h1 style={{ fontSize: 24, fontWeight: 800 }}>Mi Asistencia Académica</h1>
-            <p style={{ color: '#64748b' }}>Resumen de puntualidad y registro detallado</p>
+            <p style={{ color: '#64748b' }}>Resumen de puntualidad y reporte descargable</p>
         </div>
 
-        {/* 1. RESUMEN POR CURSO (VISTA TIPO UNIVERSIDAD) */}
         <div style={styles.card}>
           <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10 }}>
             <FaChartBar color="#4361ee" /> CUADRO RESUMEN DE ASISTENCIAS
@@ -150,9 +218,14 @@ const PortalAsistencia = () => {
           )}
         </div>
 
-        {/* 2. HISTORIAL DETALLADO */}
         <div style={{...styles.card, marginTop: 30}}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, color: '#1e293b' }}>Registro Histórico Detallado</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 15 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#1e293b' }}>Registro Histórico Detallado</h2>
+            <button onClick={descargarPDF} style={styles.pdfBtn}>
+              <FaFilePdf /> REPORTE DETALLADO (PDF)
+            </button>
+          </div>
+          
           {asistencias.length === 0 ? (
             <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Aún no tienes registros de asistencia.</p>
           ) : (
@@ -171,10 +244,7 @@ const PortalAsistencia = () => {
                     <tr key={a.id} style={styles.tr}>
                       <td style={styles.td}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <strong>{new Date(a.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: 'numeric', month: 'long' })}</strong>
-                          <span style={{ fontSize: 11, color: '#94a3b8', textTransform: 'capitalize' }}>
-                            {new Date(a.fecha + 'T00:00:00').toLocaleDateString('es-PE', { weekday: 'long' })}
-                          </span>
+                          <strong style={{ textTransform: 'capitalize' }}>{formatearFechaStr(a.fecha)}</strong>
                         </div>
                       </td>
                       <td style={styles.td}>{a.curso_nombre}</td>
@@ -206,15 +276,28 @@ const styles = {
   logoutBtn: { margin: '12px', padding: '12px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 },
   header: { marginBottom: 20 },
   card: { background: 'white', borderRadius: 20, padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' },
-  tableWrap: { overflowX: 'auto' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', borderBottom: '2px solid #f1f5f9' },
   td: { padding: '16px', borderBottom: '1px solid #f8fafc', fontSize: 14 },
   tr: { transition: 'background 0.1s' },
-  
   countBadge: { background: '#f1f5f9', color: '#475569', padding: '4px 12px', borderRadius: '20px', fontSize: 12, fontWeight: 700 },
   progressBarBg: { width: '100%', height: '8px', background: '#f1f5f9', borderRadius: '10px', overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: '10px', transition: 'width 0.5s ease-out' }
+  progressBarFill: { height: '100%', borderRadius: '10px', transition: 'width 0.5s ease-out' },
+  pdfBtn: { 
+    background: '#f97316', 
+    color: 'white', 
+    border: 'none', 
+    padding: '10px 18px', 
+    borderRadius: '12px', 
+    fontWeight: '800', 
+    fontSize: '11px', 
+    cursor: 'pointer', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '8px',
+    boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)',
+    transition: 'all 0.2s'
+  }
 };
 
 export default PortalAsistencia;
