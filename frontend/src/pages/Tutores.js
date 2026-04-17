@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { estudiantesAPI, pagosAPI, matriculasAPI } from '../services/api';
-import { FaSearch, FaUserShield, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots } from 'react-icons/fa';
+import { FaSearch, FaUserShield, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -25,7 +25,6 @@ const Tutores = () => {
         matriculasAPI.getAll()
       ]);
 
-      // Enriquecer datos de estudiantes con estado de pagos y matrícula
       const dataEnriquecida = resEst.data.data.map(est => {
         const misMatriculas = resMat.data.data.filter(m => m.estudiante_id === est.id);
         const tieneDeuda = misMatriculas.some(m => (m.monto_total - m.monto_pagado) > 0);
@@ -49,10 +48,10 @@ const Tutores = () => {
   const handlesaveSeguimiento = (e) => {
     e.preventDefault();
     if (seguimiento.comentario.length < 10) {
-      toast.error('❌ El comentario de seguimiento debe ser más descriptivo (mín. 10 carac.).');
+      toast.error('❌ El comentario debe ser más descriptivo.');
       return;
     }
-    toast.success(`Seguimiento registrado para ${selectedEstudiante.nombres}`);
+    toast.success(`Seguimiento registrado con éxito`);
     setSeguimiento({ comentario: '', contacto_padre: '' });
     setSelectedEstudiante(null);
   };
@@ -63,165 +62,166 @@ const Tutores = () => {
     est.dni.includes(busqueda)
   );
 
+  const generarPDF = (est, mat) => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Header Azul Alba
+      doc.setFillColor(67, 97, 238);
+      doc.rect(0, 0, pageWidth, 50, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ESTADO DE CUENTA', 15, 30);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('SISTEMA DE TUTORÍA - ACADEMIA ALBA PERÚ', 15, 40);
+
+      // Cuerpo
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(14);
+      doc.text('DETALLE DEL ESTUDIANTE', 15, 65);
+
+      const rows = [
+        ['ESTUDIANTE', `${est.nombres} ${est.apellidos}`.toUpperCase()],
+        ['DNI', est.dni],
+        ['CURSO', mat.curso_nombre],
+        ['SITUACIÓN', (mat.monto_total - mat.monto_pagado) > 0 ? 'DEUDA PENDIENTE' : 'CANCELADO'],
+        ['TOTAL CURSO', `S/ ${parseFloat(mat.monto_total).toFixed(2)}`],
+        ['PAGADO', `S/ ${parseFloat(mat.monto_pagado).toFixed(2)}`],
+        ['PENDIENTE', `S/ ${(mat.monto_total - mat.monto_pagado).toFixed(2)}`]
+      ];
+
+      doc.autoTable({
+        startY: 75,
+        body: rows,
+        theme: 'striped',
+        styles: { fontSize: 11, cellPadding: 8 },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } }
+      });
+
+      doc.save(`Alba_Seguimiento_${est.dni}.pdf`);
+      toast.success('Estado de cuenta generado');
+    } catch (err) {
+      toast.error('Error al generar PDF');
+    }
+  };
+
   return (
-    <div className="main-content">
-      <div className="card">
-        <div className="card-header">
-           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div className="stat-icon primary" style={{ width: '40px', height: '40px', fontSize: '18px' }}>
-                <FaUserShield />
-              </div>
-              <h2 className="card-title">Módulo de Seguimiento y Tutoría</h2>
-           </div>
-        </div>
-
-        <div style={{ padding: '0 32px 32px' }}>
-          <div className="search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Buscar estudiante por nombre o DNI..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="form-control"
-              style={{ paddingLeft: '45px', borderRadius: '50px', backgroundColor: '#f8fafc' }}
-            />
+    <div className="main-content" style={{ padding: '30px' }}>
+      {/* Header del Módulo */}
+      <div style={styles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={styles.headerIcon}><FaUserShield /></div>
+          <div>
+            <h1 style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', margin: 0 }}>Área de Tutoría</h1>
+            <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Monitoreo académico y financiero de estudiantes</p>
           </div>
         </div>
-
-        {loading ? (
-          <div className="loading"><div className="spinner"></div></div>
-        ) : (
-          <div style={{ padding: '0 32px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-            {estudiantesFiltrados.map(est => (
-              <div key={est.id} className="card" style={{ padding: '20px', border: est.tieneDeuda ? '1px solid #fecaca' : '1px solid #e2e8f0', cursor: 'pointer', transition: 'transform 0.2s' }} onClick={() => setSelectedEstudiante(est)}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                   <div style={{ fontWeight: '800', fontSize: '16px' }}>{est.nombres} {est.apellidos}</div>
-                   {est.tieneDeuda ? <FaExclamationTriangle color="#ef4444" title="Deuda Pendiente" /> : <FaCheckCircle color="#10b981" title="Al día" />}
-                </div>
-                
-                <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FaClipboardList /> {est.totalCursos} Cursos Matriculados
-                   </div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FaPhone /> {est.telefono_apoderado || 'Sin tel. apoderado'}
-                   </div>
-                </div>
-
-                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className={`badge ${est.tieneDeuda ? 'badge-danger' : 'badge-success'}`}>
-                        {est.tieneDeuda ? 'Moroso' : 'Al día'}
-                    </span>
-                    <button className="btn-icon btn-icon-view"><FaCommentDots /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        
+        {/* Buscador Integrado */}
+        <div style={styles.searchContainer}>
+          <FaSearch style={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre o DNI..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={styles.searchInput}
+          />
+        </div>
       </div>
 
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '100px' }}>
+          <div className="spinner"></div>
+          <p style={{ marginTop: '20px', fontWeight: 'bold', color: '#64748b' }}>Cargando Estudiantes...</p>
+        </div>
+      ) : (
+        <div style={styles.grid}>
+          {estudiantesFiltrados.map(est => (
+            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => setSelectedEstudiante(est)}>
+              <div style={styles.cardTop}>
+                <div style={styles.userAvatar}><FaUserGraduate /></div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', margin: 0 }}>{est.apellidos}, {est.nombres}</h3>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>DNI: {est.dni}</span>
+                </div>
+                {est.tieneDeuda ? (
+                  <div style={styles.debtTag}><FaExclamationTriangle /> DEUDA</div>
+                ) : (
+                  <div style={styles.paidTag}><FaCheckCircle /> AL DÍA</div>
+                )}
+              </div>
+
+              <div style={styles.cardBody}>
+                <div style={styles.infoRow}><FaClipboardList color="#3b82f6" /> <span>{est.totalCursos} Cursos Inscritos</span></div>
+                <div style={styles.infoRow}><FaPhone color="#10b981" /> <span>{est.telefono_apoderado || 'Sin apoderado'}</span></div>
+              </div>
+
+              <div style={styles.cardFooter}>
+                <button style={styles.trackBtn}>
+                   <FaCommentDots /> REGISTRAR SEGUIMIENTO
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal de Tutoría Premium */}
       {selectedEstudiante && (
         <div className="modal-overlay" onClick={() => setSelectedEstudiante(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-               <h2>Seguimiento: {selectedEstudiante.nombres}</h2>
-               <button onClick={() => setSelectedEstudiante(null)}>×</button>
+          <div className="modal" style={styles.modal} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                 <div style={styles.modalAvatar}><FaIdCard /></div>
+                 <div>
+                    <h2 style={{ fontSize: '20px', fontWeight: '900', margin: 0 }}>{selectedEstudiante.nombres} {selectedEstudiante.apellidos}</h2>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Historial Académico y Tutoría</p>
+                 </div>
+               </div>
+               <button style={styles.closeModal} onClick={() => setSelectedEstudiante(null)}>×</button>
             </div>
-            <div className="modal-body">
-               <div style={{ marginBottom: '20px', padding: '15px', background: '#f8fafc', borderRadius: '12px' }}>
-                   <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>Resumen de Matrículas</h4>
-                   {selectedEstudiante.matriculas.length === 0 ? <p style={{ fontSize: '13px', color: '#64748b' }}>Sin matrículas</p> : null}
-                   {selectedEstudiante.matriculas.map(m => (
-                       <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                           <span>{m.curso_nombre}</span>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                               <span style={{ fontWeight: 'bold', color: (m.monto_total - m.monto_pagado) > 0 ? '#ef4444' : '#10b981' }}>
-                                   S/ {(m.monto_total - m.monto_pagado).toFixed(2)} pendiente
-                               </span>
-                               <button 
-                                 title="Descargar Estado de Cuenta (PDF)"
-                                 className="btn-icon" 
-                                 style={{ width: '28px', height: '28px', background: '#fee2e2', color: '#ef4444' }}
-                                 onClick={() => {
-                                   try {
-                                     const doc = new jsPDF();
-                                     const pageWidth = doc.internal.pageSize.getWidth();
 
-                                     // Cabecera Premium
-                                     doc.setFillColor(67, 97, 238);
-                                     doc.rect(0, 0, pageWidth, 45, 'F');
-                                     doc.setTextColor(255, 255, 255);
-                                     doc.setFontSize(22);
-                                     doc.setFont('helvetica', 'bold');
-                                     doc.text('ESTADO DE CUENTA ACADÉMICO', 15, 25);
-                                     
-                                     doc.setFontSize(10);
-                                     doc.setFont('helvetica', 'normal');
-                                     doc.text('ACADEMIA ALBA PERÚ - ÁREA DE TUTORÍA', 15, 33);
-                                     doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString('es-PE')}`, 15, 38);
-
-                                     // Datos Alumno
-                                     doc.setTextColor(30, 41, 59);
-                                     doc.setFontSize(12);
-                                     doc.setFont('helvetica', 'bold');
-                                     doc.text('RESUMEN DE SITUACIÓN FINANCIERA', 15, 60);
-
-                                     const rows = [
-                                       ['ESTUDIANTE', `${selectedEstudiante.nombres} ${selectedEstudiante.apellidos}`.toUpperCase()],
-                                       ['DNI', selectedEstudiante.dni],
-                                       ['CURSO MATRICULADO', m.curso_nombre],
-                                       ['MONTO TOTAL DEL CURSO', `S/ ${parseFloat(m.monto_total).toFixed(2)}`],
-                                       ['MONTO PAGADO A LA FECHA', `S/ ${parseFloat(m.monto_pagado).toFixed(2)}`],
-                                       ['DEUDA PENDIENTE', `S/ ${(m.monto_total - m.monto_pagado).toFixed(2)}`]
-                                     ];
-
-                                     doc.autoTable({
-                                       startY: 70,
-                                       body: rows,
-                                       theme: 'grid',
-                                       styles: { fontSize: 10, cellPadding: 5 },
-                                       columnStyles: { 
-                                         0: { fontStyle: 'bold', fillColor: [241, 245, 249], cellWidth: 60 }
-                                       }
-                                     });
-
-                                     const finalY = doc.lastAutoTable.finalY + 15;
-                                     doc.setFontSize(9);
-                                     doc.setTextColor(148, 163, 184);
-                                     doc.text('Documento informativo para control interno del estudiante.', 15, finalY);
-                                     doc.text('Academia Alba Perú - www.albaperu.com', 15, finalY + 5);
-
-                                     doc.save(`Estado_Alba_${selectedEstudiante.dni}.pdf`);
-                                     toast.success('Reporte generado');
-                                   } catch(err) {
-                                     console.error(err);
-                                     toast.error('Error al generar reporte');
-                                   }
-                                 }}
-                               >
-                                 PDF
-                               </button>
-                           </div>
-                       </div>
-                   ))}
+            <div style={{ padding: '25px' }}>
+               <h4 style={styles.sectionTitle}>SITUACIÓN FINANCIERA X CURSO</h4>
+               <div style={styles.matList}>
+                 {selectedEstudiante.matriculas.map(m => (
+                   <div key={m.id} style={styles.matRow}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '800', fontSize: '14px' }}>{m.curso_nombre}</div>
+                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>Estado: {m.estado_pago.toUpperCase()}</div>
+                      </div>
+                      <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{ fontWeight: '900', color: (m.monto_total - m.monto_pagado) > 0 ? '#ef4444' : '#10b981' }}>
+                           S/ {(m.monto_total - m.monto_pagado).toFixed(2)}
+                        </div>
+                        <button onClick={() => generarPDF(selectedEstudiante, m)} style={styles.pdfBtn}>
+                          <FaFilePdf /> PDF
+                        </button>
+                      </div>
+                   </div>
+                 ))}
                </div>
 
-               <form onSubmit={handlesaveSeguimiento}>
-                  <div className="form-group">
-                      <label>Comentario del Tutor (Llamada / Entrevista)</label>
-                      <textarea 
-                        className="form-control" 
-                        rows="4" 
-                        value={seguimiento.comentario}
-                        onChange={e => setSeguimiento({...seguimiento, comentario: e.target.value})}
-                        placeholder="Ej: Se llamó al padre por tardanzas constantes. Refiere problemas de transporte..."
-                        required
-                      ></textarea>
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                      <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setSelectedEstudiante(null)}>Cerrar</button>
-                      <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Guardar Nota</button>
+               <form style={{ marginTop: '30px' }} onSubmit={handlesaveSeguimiento}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '900', color: '#475569', marginBottom: '8px' }}>
+                    OBSERVACIONES / SEGUIMIENTO DEL TUTOR
+                  </label>
+                  <textarea 
+                    style={styles.textarea}
+                    placeholder="Escribe aquí las incidencias, llamadas a padres o acuerdos con el alumno..."
+                    value={seguimiento.comentario}
+                    onChange={e => setSeguimiento({...seguimiento, comentario: e.target.value})}
+                    required
+                  />
+                  <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
+                    <button type="button" onClick={() => setSelectedEstudiante(null)} style={styles.cancelBtn}>Cancelar</button>
+                    <button type="submit" style={styles.saveModalBtn}>Guardar Seguimiento</button>
                   </div>
                </form>
             </div>
@@ -230,6 +230,43 @@ const Tutores = () => {
       )}
     </div>
   );
+};
+
+const styles = {
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' },
+  headerIcon: { width: '55px', height: '55px', background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 10px 15px -3px rgba(67, 97, 238, 0.3)' },
+  searchContainer: { position: 'relative', flex: '1', maxWidth: '450px' },
+  searchIcon: { position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' },
+  searchInput: { width: '100%', padding: '15px 15px 15px 55px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '14px', outline: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', transition: 'all 0.3s' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' },
+  estCard: (debt) => ({
+    background: 'white',
+    padding: '24px',
+    borderRadius: '24px',
+    border: `1px solid ${debt ? '#fecada' : '#e2e8f0'}`,
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  }),
+  cardTop: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' },
+  userAvatar: { width: '45px', height: '45px', background: '#f1f5f9', color: '#6366f1', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
+  debtTag: { background: '#fff1f2', color: '#e11d48', fontWeight: '900', fontSize: '10px', padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '5px' },
+  paidTag: { background: '#f0fdf4', color: '#16a34a', fontWeight: '900', fontSize: '10px', padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '5px' },
+  cardBody: { display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' },
+  infoRow: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#475569', fontWeight: '600' },
+  cardFooter: { borderTop: '1px solid #f1f5f9', paddingTop: '20px' },
+  trackBtn: { width: '100%', background: '#f8fafc', border: '1.5px dashed #e2e8f0', padding: '12px', borderRadius: '15px', color: '#6366f1', fontWeight: '900', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' },
+  modal: { maxWidth: '650px', borderRadius: '28px' },
+  modalHeader: { padding: '25px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  modalAvatar: { width: '50px', height: '50px', background: '#eef2ff', color: '#4361ee', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' },
+  closeModal: { background: '#f1f5f9', border: 'none', width: '35px', height: '35px', borderRadius: '10px', cursor: 'pointer', fontWeight: '900', fontSize: '20px' },
+  sectionTitle: { fontSize: '11px', fontWeight: '900', color: '#94a3b8', letterSpacing: '0.05em', marginBottom: '15px' },
+  matList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  matRow: { background: '#f8fafc', padding: '15px 20px', borderRadius: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #f1f5f9' },
+  pdfBtn: { background: 'white', color: '#ef4444', border: '1px solid #fee2e2', padding: '6px 15px', borderRadius: '10px', fontSize: '11px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' },
+  textarea: { width: '100%', padding: '18px', borderRadius: '18px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', minHeight: '120px', fontFamily: 'inherit', background: '#fcfcfc' },
+  saveModalBtn: { flex: 2, background: 'linear-gradient(135deg, #4361ee, #2563eb)', color: 'white', border: 'none', padding: '15px', borderRadius: '16px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(37,99,235,0.3)' },
+  cancelBtn: { flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', padding: '15px', borderRadius: '16px', fontWeight: '900', cursor: 'pointer' }
 };
 
 export default Tutores;
