@@ -129,12 +129,43 @@ const Tutores = () => {
             <div className="modal-body">
                <div style={{ marginBottom: '20px', padding: '15px', background: '#f8fafc', borderRadius: '12px' }}>
                    <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>Resumen de Matrículas</h4>
+                   {selectedEstudiante.matriculas.length === 0 ? <p style={{ fontSize: '13px', color: '#64748b' }}>Sin matrículas</p> : null}
                    {selectedEstudiante.matriculas.map(m => (
-                       <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '5px' }}>
+                       <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
                            <span>{m.curso_nombre}</span>
-                           <span style={{ fontWeight: 'bold', color: (m.monto_total - m.monto_pagado) > 0 ? '#ef4444' : '#10b981' }}>
-                               S/ {(m.monto_total - m.monto_pagado).toFixed(2)} pendiente
-                           </span>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                               <span style={{ fontWeight: 'bold', color: (m.monto_total - m.monto_pagado) > 0 ? '#ef4444' : '#10b981' }}>
+                                   S/ {(m.monto_total - m.monto_pagado).toFixed(2)} pendiente
+                               </span>
+                               <button 
+                                 title="Descargar Estado de Cuenta (PDF)"
+                                 className="btn-icon" 
+                                 style={{ width: '28px', height: '28px', background: '#fee2e2', color: '#ef4444' }}
+                                 onClick={() => {
+                                   try {
+                                     const jsPDF = require('jspdf').default || require('jspdf');
+                                     const doc = new jsPDF();
+                                     doc.text("ESTADO DE CUENTA", 105, 20, { align: "center" });
+                                     doc.text(`Alumno: ${selectedEstudiante.nombres} ${selectedEstudiante.apellidos}`, 20, 40);
+                                     doc.text(`DNI: ${selectedEstudiante.dni}`, 20, 50);
+                                     doc.text(`Curso: ${m.curso_nombre}`, 20, 60);
+                                     doc.text(`Monto Total: S/ ${m.monto_total}`, 20, 70);
+                                     doc.text(`Pagado: S/ ${m.monto_pagado}`, 20, 80);
+                                     doc.text(`Deuda Pendiente: S/ ${(m.monto_total - m.monto_pagado).toFixed(2)}`, 20, 90);
+                                     doc.setDrawColor(200);
+                                     doc.line(20, 100, 190, 100);
+                                     doc.text("Academia Alba Perú - Tutoría", 105, 110, { align: "center" });
+                                     doc.save(`Estado_Cuenta_${selectedEstudiante.dni}_${m.curso_id}.pdf`);
+                                     toast.success('PDF generado con éxito');
+                                   } catch(err) {
+                                     console.error(err);
+                                     toast.error('Error al generar PDF');
+                                   }
+                                 }}
+                               >
+                                 PDF
+                               </button>
+                           </div>
                        </div>
                    ))}
                </div>

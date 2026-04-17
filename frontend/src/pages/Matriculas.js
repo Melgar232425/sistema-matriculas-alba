@@ -79,6 +79,17 @@ const Matriculas = () => {
       return;
     }
 
+    // 3. Validar Restricción Financiera (Deuda Pendiente)
+    const estudianteDeudas = matriculas.filter(m => 
+        m.estudiante_id.toString() === formData.estudiante_id.toString() &&
+        (m.monto_total - m.monto_pagado) > 0.01 // Margen para decimales
+    );
+
+    if (estudianteDeudas.length > 0) {
+        toast.error(`❌ REGISTRO BLOQUEADO: El estudiante mantiene deuda(s) pendiente(s). Regularice los pagos anteriores antes de registrar una nueva matrícula.`, { duration: 6000 });
+        return;
+    }
+
     try {
       setSubmitting(true);
       await matriculasAPI.create(formData);

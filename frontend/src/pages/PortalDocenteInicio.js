@@ -124,7 +124,9 @@ const PortalDocenteInicio = () => {
                     type="date" 
                     value={fecha} 
                     onChange={e => setFecha(e.target.value)} 
+                    max={new Date().toISOString().split('T')[0]}
                     style={styles.dateInput}
+                    title="No puedes registrar asistencia para fechas futuras"
                   />
                 </div>
 
