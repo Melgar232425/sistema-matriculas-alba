@@ -27,10 +27,12 @@ async function seedUsers() {
             ['tutor_alba', 'tutor2026', 'Tutor Académico', 'tutoria@academiaalba.com', 'tutor']
         ];
 
+        const bcrypt = require('bcrypt');
         for (const user of users) {
+            const hashedPassword = await bcrypt.hash(user[1], 10);
             await promisePool.query(
                 'INSERT IGNORE INTO usuarios (username, password, nombre_completo, email, rol) VALUES (?, ?, ?, ?, ?)',
-                user
+                [user[0], hashedPassword, user[2], user[3], user[4]]
             );
         }
 

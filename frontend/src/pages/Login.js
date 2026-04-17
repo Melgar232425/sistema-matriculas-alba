@@ -28,6 +28,8 @@ const Login = () => {
             const rol = result.user?.rol;
             if (rol === 'matriculador') {
                 navigate('/matriculas');
+            } else if (rol === 'tutor') {
+                navigate('/tutores');
             } else {
                 navigate('/admin');
             }

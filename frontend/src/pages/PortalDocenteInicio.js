@@ -8,8 +8,13 @@ const PortalDocenteInicio = () => {
   const [cursos, setCursos] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
+  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
+  const [loading, setLoading] = useState(true);
   const [cambiosPendientes, setCambiosPendientes] = useState({});
   const [guardando, setGuardando] = useState(false);
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem('docente_user') || '{}');
 
   useEffect(() => {
     const token = localStorage.getItem('docente_token');
