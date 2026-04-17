@@ -774,9 +774,30 @@ const Cursos = () => {
                         <td style={{ fontSize: '0.95em' }}>
                           {curso.docente_nombres ? `${curso.docente_nombres} ${curso.docente_apellidos}` : <em>Por asignar</em>}
                         </td>
-                        <td style={{ whiteSpace: 'nowrap' }}>
-                          <span className="badge badge-light" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '2px 6px', fontSize: '11px' }}>
-                            {curso.horario || '-'}
+                        <td style={{ maxWidth: '150px' }}>
+                          <span className="badge badge-light" style={{ 
+                            display: 'inline-block', 
+                            background: '#f8fafc', 
+                            border: '1px solid #e2e8f0', 
+                            padding: '4px 8px', 
+                            fontSize: '10px',
+                            lineHeight: '1.4',
+                            textAlign: 'left',
+                            whiteSpace: 'normal'
+                          }}>
+                            {(() => {
+                              if (!curso.horario) return '-';
+                              const partes = curso.horario.split(/ y /i);
+                              if (partes.length > 1) {
+                                return (
+                                  <>
+                                    {partes[0]}<br />
+                                    y {partes[1]}
+                                  </>
+                                );
+                              }
+                              return curso.horario;
+                            })()}
                           </span>
                         </td>
                         <td style={{ textAlign: 'center' }}>
