@@ -197,7 +197,8 @@ const Calendario = () => {
                 ciclosAPI.getAll()
             ]);
             setCursos(cursosRes.data.data);
-            setCiclos(ciclosRes.data.data);
+            // Solo mostrar ciclos activos en el filtro
+            setCiclos((ciclosRes.data.data || []).filter(c => c.estado === 'activo'));
         } catch (error) {
             console.error('Error al cargar datos:', error);
         } finally {
