@@ -110,7 +110,7 @@ function App() {
           } />
           
           <Route path="/tutores" element={
-            <PrivateRoute allowedRoles={['director', 'admin', 'tutor']}>
+            <PrivateRoute allowedRoles={['tutor']}>
               <div className="app"><Sidebar /><Tutores /></div>
             </PrivateRoute>
           } />
