@@ -2,11 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { reportesAPI } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import {
-  FaUserGraduate,
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
-  FaUserPlus,
   FaSignOutAlt
 } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -16,7 +14,7 @@ const COLORS = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     cargarDashboard();
@@ -74,17 +72,6 @@ const Dashboard = () => {
              >
                 <FaSignOutAlt />
              </button>
-
-             {user && user.rol === 'tutor' && (
-                  <button className="btn btn-primary only-desktop" onClick={() => window.location.href='/tutores'} style={{ whiteSpace: 'nowrap', background: 'var(--success)' }}>
-                     <FaUserGraduate /> Ver Alumnos del Ciclo
-                  </button>
-             )}
-             {user && ['admin', 'director', 'matriculador'].includes(user.rol) && (
-                  <button className="btn btn-primary only-desktop" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
-                     <FaUserPlus /> Nueva Matrícula
-                  </button>
-             )}
         </div>
       </div>
 
