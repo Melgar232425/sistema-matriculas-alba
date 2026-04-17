@@ -6,7 +6,7 @@ import {
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
-  FaSignOutAlt
+  FaUserPlus
 } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -15,7 +15,7 @@ const COLORS = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     cargarDashboard();
@@ -51,22 +51,16 @@ const Dashboard = () => {
           <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba Perú.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
-             <button 
-                className="btn btn-primary" 
-                onClick={logout} 
-                style={{ 
-                    whiteSpace: 'nowrap', 
-                    background: '#fef2f2', 
-                    color: '#ef4444', 
-                    border: '1px solid #fee2e2',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontWeight: 'bold'
-                }}
-             >
-                <FaSignOutAlt /> Cerrar Sesión
-             </button>
+             {user && user.rol === 'tutor' && (
+                  <button className="btn btn-primary" onClick={() => window.location.href='/tutores'} style={{ whiteSpace: 'nowrap', background: 'var(--success)' }}>
+                     <FaUserGraduate /> Ver Alumnos del Ciclo
+                  </button>
+             )}
+             {user && ['admin', 'director', 'matriculador'].includes(user.rol) && (
+                  <button className="btn btn-primary" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
+                     <FaUserPlus /> Nueva Matrícula
+                  </button>
+             )}
         </div>
       </div>
 

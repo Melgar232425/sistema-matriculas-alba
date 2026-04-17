@@ -907,3 +907,16 @@ textarea {
     display: none !important;
   }
 }
+
+/* Utilidades Responsivas */
+@media (min-width: 993px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .only-desktop {
+    display: none !important;
+  }
+}
