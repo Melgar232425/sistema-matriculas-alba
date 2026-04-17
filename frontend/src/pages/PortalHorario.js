@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaCheckCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaChalkboardTeacher, FaLayerGroup, FaBars, FaTimes, FaClock } from 'react-icons/fa';
 
 const PortalHorario = () => {
   const [horario, setHorario] = useState([]);
@@ -23,9 +23,36 @@ const PortalHorario = () => {
     navigate('/portal');
   };
 
-  // Mapeo de días para el grid visual
   const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const HORAS = [
+    '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
+    '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM', 
+    '07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM'
+  ];
   const COLORES = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+  // Función para parsear el horario (Ej: "Lunes, Miercoles y Viernes 7:00 AM - 9:00 AM")
+  const parseHorario = (str) => {
+    if (!str) return [];
+    try {
+      const normalizar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      
+      // Separar días de horas
+      const match = str.match(/(.*)\s+(\d{1,2}:\d{2}\s+(?:AM|PM))\s*-\s*(\d{1,2}:\d{2}\s+(?:AM|PM))/i);
+      if (!match) return [];
+
+      const [, diasStr, startStr, endStr] = match;
+      const diasDetectados = DIAS.filter(d => normalizar(diasStr).includes(normalizar(d)));
+
+      return diasDetectados.map(dia => ({
+        dia,
+        inicio: startStr.trim().toUpperCase(),
+        fin: endStr.trim().toUpperCase()
+      }));
+    } catch (e) {
+      return [];
+    }
+  };
 
   if (loading) return <div style={styles.loading}><div style={styles.spinner} /></div>;
 
@@ -56,81 +83,100 @@ const PortalHorario = () => {
 
       <main className="portal-main">
         <div style={{ marginBottom: 28 }}>
-          <h1 style={styles.pageTitle}><FaCalendarAlt style={{ marginRight: 12, color: '#4361ee' }} />Mi Horario</h1>
-          <p style={styles.pageSub}>Cursos activos en los que estás matriculado</p>
+          <h1 style={styles.pageTitle}><FaCalendarAlt style={{ marginRight: 12, color: '#4361ee' }} />Mi Horario Semanal</h1>
+          <p style={styles.pageSub}>Vista interactiva de tus clases programadas</p>
         </div>
 
         {horario.length === 0 ? (
           <div style={styles.emptyState}>
             <FaCalendarAlt size={48} color="#cbd5e1" />
             <p style={styles.emptyTitle}>Sin cursos matriculados</p>
-            <p style={styles.emptyText}>Cuando te matricules en un curso activo, aparecerá aquí tu horario.</p>
+            <p style={styles.emptyText}>Cuando te matricules en un curso activo, aparecerá aquí tu horario semanal.</p>
           </div>
         ) : (
           <>
-            {/* Cards de cursos */}
+            {/* GRID DE CALENDARIO SEMANAL */}
+            <div style={styles.calendarCard}>
+              <div className="calendar-grid-header" style={styles.calendarHeader}>
+                <div style={{...styles.headerCell, width: '80px'}}>Hora</div>
+                {DIAS.map(dia => (
+                  <div key={dia} style={styles.headerCell}>{dia}</div>
+                ))}
+              </div>
+
+              <div style={styles.calendarBody}>
+                {HORAS.map((hora, hIdx) => (
+                  <div key={hora} style={styles.calendarRow}>
+                    <div style={styles.timeLabel}>{hora}</div>
+                    {DIAS.map(dia => {
+                      // Buscar si hay algún curso en este día y esta hora
+                      const cursoEnSlot = horario.find(c => {
+                        const slots = parseHorario(c.horario);
+                        return slots.some(s => {
+                          if (s.dia !== dia) return false;
+                          // Simplificación: si la hora de inicio coincide con el slot
+                          return s.inicio === hora;
+                        });
+                      });
+
+                      // Si coincide con la hora de inicio, calculamos duración
+                      let duration = 0;
+                      if (cursoEnSlot) {
+                        const slot = parseHorario(cursoEnSlot.horario).find(s => s.dia === dia && s.inicio === hora);
+                        const startH = parseInt(slot.inicio.split(':')[0]) + (slot.inicio.includes('PM') && !slot.inicio.startsWith('12') ? 12 : 0);
+                        const endH = parseInt(slot.fin.split(':')[0]) + (slot.fin.includes('PM') && !slot.fin.startsWith('12') ? 12 : 0);
+                        duration = endH - startH;
+                      }
+
+                      return (
+                        <div key={dia} style={styles.calendarCell}>
+                          {cursoEnSlot && (
+                            <div style={{
+                              ...styles.eventBlock,
+                              height: `calc(${duration * 100}% + ${duration * 2}px)`,
+                              background: COLORES[horario.indexOf(cursoEnSlot) % COLORES.length],
+                              zIndex: 10
+                            }}>
+                              <span style={styles.eventTitle}>{cursoEnSlot.curso_nombre}</span>
+                              <span style={styles.eventTime}>{cursoEnSlot.horario.split(' ').slice(-3).join(' ')}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Listado de cursos para detalle (Cards compactos) */}
+            <div style={{ marginTop: 40, marginBottom: 20 }}>
+               <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b' }}>Detalle de Cursos</h2>
+            </div>
             <div style={styles.cursosGrid}>
               {horario.map((c, i) => {
                 const color = COLORES[i % COLORES.length];
                 return (
                   <div key={c.curso_id} style={{ ...styles.cursoCard, borderTop: `4px solid ${color}` }}>
                     <div style={{ ...styles.cursoIcon, background: `${color}18`, color }}>
-                      <FaChalkboardTeacher size={22} />
+                      <FaChalkboardTeacher size={18} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <h3 style={styles.cursoNombre}>{c.curso_nombre}</h3>
-                      <span style={{ ...styles.nivelBadge, background: `${color}18`, color }}>
-                        {c.nivel}
-                      </span>
                       <div style={styles.cursoMeta}>
                         <div style={styles.metaItem}>
-                          <FaLayerGroup style={{ color: '#94a3b8' }} />
-                          <span>{c.ciclo_nombre || 'Sin ciclo'}</span>
+                          <FaUserGraduate size={12} />
+                          <span>{c.docente_nombre}</span>
                         </div>
                         <div style={styles.metaItem}>
-                          <FaUserGraduate style={{ color: '#94a3b8' }} />
-                          <span>{c.docente_nombre || 'Sin asignar'}</span>
-                        </div>
-                        <div style={styles.metaItem}>
-                          <FaCalendarAlt style={{ color: '#94a3b8' }} />
-                          <span style={{ fontWeight: 700, color: '#4361ee' }}>{c.horario || 'Sin horario'}</span>
+                          <FaClock size={12} color={color} />
+                          <span style={{ fontWeight: 700, color: color }}>{c.horario}</span>
                         </div>
                       </div>
-                    </div>
-                    <div style={styles.estadoPago}>
-                      {c.estado_pago === 'pagado'
-                        ? <span style={{ ...styles.estadoBadge, background: '#f0fdf4', color: '#10b981' }}>✓ Pagado</span>
-                        : c.estado_pago === 'parcial'
-                          ? <span style={{ ...styles.estadoBadge, background: '#fffbeb', color: '#f59e0b' }}>Parcial</span>
-                          : <span style={{ ...styles.estadoBadge, background: '#fef2f2', color: '#ef4444' }}>Pendiente</span>
-                      }
                     </div>
                   </div>
                 );
               })}
-            </div>
-
-            {/* Vista de días */}
-            <div style={styles.card}>
-              <h2 style={styles.cardTitle}>Resumen por Días</h2>
-              <div style={styles.diasGrid}>
-                {DIAS.map(dia => {
-                  const cursosDia = horario.filter(c => c.horario?.toLowerCase().includes(dia.toLowerCase()));
-                  return (
-                    <div key={dia} style={{ ...styles.diaCol, ...(cursosDia.length > 0 ? styles.diaColActivo : {}) }}>
-                      <p style={styles.diaLabel}>{dia}</p>
-                      {cursosDia.length === 0
-                        ? <p style={styles.diaVacio}>Libre</p>
-                        : cursosDia.map((c, i) => (
-                          <div key={i} style={{ ...styles.diaEvento, background: `${COLORES[horario.indexOf(c) % COLORES.length]}18`, color: COLORES[horario.indexOf(c) % COLORES.length] }}>
-                            <strong style={{ fontSize: 12 }}>{c.curso_nombre}</strong>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </>
         )}
@@ -140,38 +186,101 @@ const PortalHorario = () => {
 };
 
 const styles = {
-  page: { display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" },
   loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' },
   spinner: { width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebar: { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', padding: '0 0 24px 0', zIndex: 100 },
   sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   nav: { flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 },
   navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
   navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', boxShadow: '0 4px 12px rgba(67,97,238,0.3)' },
   logoutBtn: { margin: '0 12px', padding: '12px 16px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  main: { flex: 1, padding: '32px 36px' },
   pageTitle: { fontSize: 24, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', marginBottom: 6 },
-  pageSub: { color: '#64748b', fontSize: 14, fontWeight: 500 },
+  pageSub: { color: '#64748b', fontSize: 14, fontWeight: 500, marginBottom: 20 },
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 12 },
   emptyTitle: { fontSize: 18, fontWeight: 700, color: '#475569' },
   emptyText: { fontSize: 14, color: '#94a3b8', textAlign: 'center', maxWidth: 320 },
+  
+  calendarCard: { 
+    background: 'white', 
+    borderRadius: 20, 
+    border: '1px solid #e2e8f0', 
+    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)',
+    overflow: 'hidden',
+    overflowX: 'auto' // Crucial para móviles
+  },
+  calendarHeader: {
+    display: 'grid',
+    gridTemplateColumns: '80px repeat(6, 1fr)',
+    background: '#f8fafc',
+    borderBottom: '1px solid #e2e8f0'
+  },
+  headerCell: {
+    padding: '16px 8px',
+    textAlign: 'center',
+    fontSize: '12px',
+    fontWeight: '800',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  calendarBody: {
+    minWidth: '800px' // Asegura que las columnas no se aplasten
+  },
+  calendarRow: {
+    display: 'grid',
+    gridTemplateColumns: '80px repeat(6, 1fr)',
+    height: '60px', // Altura de 1 hora
+    borderBottom: '1px solid #f1f5f9'
+  },
+  timeLabel: {
+    fontSize: '11px',
+    fontWeight: '700',
+    color: '#94a3b8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRight: '1px solid #f1f5f9',
+    background: '#fcfcfc'
+  },
+  calendarCell: {
+    position: 'relative',
+    borderRight: '1px solid #f8fafc',
+    padding: '2px'
+  },
+  eventBlock: {
+    position: 'absolute',
+    top: '2px',
+    left: '2px',
+    right: '2px',
+    borderRadius: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white',
+    padding: '6px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    transition: 'transform 0.2s',
+    cursor: 'pointer'
+  },
+  eventTitle: {
+    fontSize: '11px',
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: '1.2',
+    marginBottom: '2px'
+  },
+  eventTime: {
+    fontSize: '9px',
+    opacity: 0.9,
+    fontWeight: '600'
+  },
+  
   cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 28 },
-  cursoCard: { background: 'white', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', display: 'flex', gap: 16, alignItems: 'flex-start' },
-  cursoIcon: { width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  cursoNombre: { fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 6 },
-  nivelBadge: { padding: '3px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase' },
-  cursoMeta: { marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 },
-  metaItem: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#475569', fontWeight: 500 },
-  estadoPago: { flexShrink: 0 },
-  estadoBadge: { padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700, display: 'inline-block' },
-  card: { background: 'white', borderRadius: 20, padding: '28px 32px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' },
-  cardTitle: { fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 20 },
-  diasGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 },
-  diaCol: { background: '#f8fafc', borderRadius: 12, padding: 14, minHeight: 120, border: '1px solid #f1f5f9' },
-  diaColActivo: { background: '#f0f4ff', border: '1px solid #c7d2fe' },
-  diaLabel: { fontSize: 12, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.3px' },
-  diaVacio: { fontSize: 12, color: '#cbd5e1', fontWeight: 500, textAlign: 'center', marginTop: 12 },
-  diaEvento: { padding: '6px 10px', borderRadius: 8, marginBottom: 6, textAlign: 'center' },
+  cursoCard: { background: 'white', borderRadius: 16, padding: '16px 20px', border: '1px solid #e2e8f0', display: 'flex', gap: 12, alignItems: 'center' },
+  cursoIcon: { width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  cursoNombre: { fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 2 },
+  cursoMeta: { display: 'flex', flexDirection: 'column', gap: 2 },
+  metaItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#64748b', fontWeight: 600 },
 };
 
 export default PortalHorario;
