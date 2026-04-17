@@ -3,8 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
   FaUserGraduate, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaBars, FaTimes 
+  FaSignOutAlt, FaCheckCircle, FaBars, FaTimes, FaFilePdf
 } from 'react-icons/fa';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import toast from 'react-hot-toast';
 
 const PortalPagos = () => {
   const [pagos, setPagos] = useState([]);
@@ -116,7 +119,7 @@ const PortalPagos = () => {
               <table style={styles.table}>
                 <thead>
                   <tr>
-                    {['Código Pago', 'Curso', 'Monto', 'Fecha', 'Método', 'N° Recibo', 'Matrícula'].map(h => (
+                    {['Código Pago', 'Curso', 'Monto', 'Fecha', 'Método', 'N° Recibo', 'Acciones'].map(h => (
                       <th key={h} style={styles.th}>{h}</th>
                     ))}
                   </tr>
@@ -130,7 +133,70 @@ const PortalPagos = () => {
                       <td style={styles.td}>{p.fecha_pago ? new Date(p.fecha_pago).toLocaleDateString('es-PE') : '—'}</td>
                       <td style={styles.td}>{metodoBadge(p.metodo_pago)}</td>
                       <td style={styles.td}><span style={{ color: '#64748b' }}>{p.numero_recibo || '—'}</span></td>
-                      <td style={styles.td}><code style={{ ...styles.code, color: '#8b5cf6', background: '#f5f3ff' }}>{p.matricula_codigo}</code></td>
+                      <td style={styles.td}>
+                        <button
+                          onClick={() => {
+                            try {
+                              const doc = new jsPDF();
+                              const pageWidth = doc.internal.pageSize.getWidth();
+                              
+                              // Cabecera Alba
+                              doc.setFillColor(67, 97, 238);
+                              doc.rect(0, 0, pageWidth, 45, 'F');
+                              doc.setTextColor(255, 255, 255);
+                              doc.setFontSize(22);
+                              doc.setFont('helvetica', 'bold');
+                              doc.text('RECIBO DE PAGO OFICIAL', 15, 25);
+                              
+                              doc.setFontSize(10);
+                              doc.setFont('helvetica', 'normal');
+                              doc.text('ACADEMIA ALBA PERÚ - ÁREA DE FINANZAS', 15, 33);
+                              doc.text(`Fecha de Impresión: ${new Date().toLocaleDateString('es-PE')}`, 15, 38);
+
+                              // Cuerpo
+                              doc.setTextColor(30, 41, 59);
+                              doc.setFontSize(12);
+                              doc.setFont('helvetica', 'bold');
+                              doc.text('DETALLES DEL ABONO', 15, 60);
+
+                              const tableData = [
+                                ['CÓDIGO DE OPERACIÓN', p.codigo],
+                                ['CONCEPTO / CURSO', p.curso_nombre.toUpperCase()],
+                                ['MONTO ABONADO', `S/ ${parseFloat(p.monto).toFixed(2)}`],
+                                ['FECHA DE PAGO', new Date(p.fecha_pago).toLocaleDateString('es-PE')],
+                                ['MÉTODO DE PAGO', p.metodo_pago.toUpperCase()],
+                                ['NÚMERO DE COMPROBANTE', p.numero_recibo || 'N/A']
+                              ];
+
+                              doc.autoTable({
+                                startY: 70,
+                                body: tableData,
+                                theme: 'grid',
+                                styles: { fontSize: 10, cellPadding: 6 },
+                                columnStyles: { 0: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 60 } }
+                              });
+
+                              const finalY = doc.lastAutoTable.finalY + 20;
+                              doc.setFontSize(9);
+                              doc.setTextColor(148, 163, 184);
+                              doc.text('Este documento es una constancia digital de pago realizada en nuestro portal.', 15, finalY);
+                              doc.text('Gracias por su confianza en Academia Alba Perú.', 15, finalY + 5);
+
+                              doc.save(`Recibo_Alba_${p.numero_recibo || p.codigo}.pdf`);
+                              toast.success('Recibo descargado');
+                            } catch(e) { toast.error('Error al generar PDF'); }
+                          }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            background: '#eff6ff', color: '#4361ee', border: 'none',
+                            padding: '6px 12px', borderRadius: 8, fontSize: 12,
+                            fontWeight: 700, cursor: 'pointer'
+                          }}
+                          title="Descargar PDF"
+                        >
+                          <FaFilePdf size={14} /> PDF
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
