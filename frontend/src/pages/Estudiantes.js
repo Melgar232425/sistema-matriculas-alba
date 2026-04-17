@@ -250,20 +250,45 @@ const Estudiantes = () => {
           </button>
         </div>
 
-        <div style={{ padding: '0 32px 32px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div className="search-box" style={{ flex: '1' }}>
-            <FaSearch />
+        <div style={{
+          padding: '0 15px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          borderBottom: '1px solid #f1f5f9',
+          marginBottom: '20px',
+          flexWrap: 'wrap'
+        }}>
+          <div className="search-box" style={{ flex: '1 1 250px', maxWidth: '100%', marginBottom: 0 }}>
+            <FaSearch style={{ left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              placeholder="Buscar estudiante por nombre, DNI o código..."
+              placeholder="Buscar estudiante o código..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="form-control"
-              style={{ backgroundColor: '#f8fafc' }}
+              style={{ paddingLeft: '45px', borderRadius: '50px', backgroundColor: '#f8fafc', height: '42px' }}
             />
           </div>
-          <div style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
-             Total: {estudiantesFiltrados.length} estudiantes
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            backgroundColor: '#f1f5f9', 
+            padding: '4px 12px', 
+            borderRadius: '20px',
+            flexShrink: 0
+          }}>
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: busqueda ? '#4361ee' : '#cbd5e1'
+            }}></span>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>
+               {estudiantesFiltrados.length} Registrados
+            </span>
           </div>
         </div>
 
