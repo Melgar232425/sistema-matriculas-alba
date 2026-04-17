@@ -51,58 +51,76 @@ const PortalAsistencia = () => {
     }
   };
 
-  const descargarPDF = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+  // Función de descarga PDF Reforzada
+  const handleDescargarPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Encabezado Premium
-    doc.setFillColor(67, 97, 238);
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REPORTE DE ASISTENCIAS', 15, 25);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Academia Alba Perú - Sistema de Gestión Académica', 15, 32);
+      // Encabezado Azul Alba
+      doc.setFillColor(67, 97, 238);
+      doc.rect(0, 0, pageWidth, 45, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('REPORTE DETALLADO DE ASISTENCIAS', 15, 25);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Academia Alba Perú - Gestión Académica Integral', 15, 33);
+      doc.text(`Periodo Lectivo: ${new Date().getFullYear()} I-B`, 15, 38);
 
-    // Info del Alumno
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('INFORMACIÓN DEL ESTUDIANTE', 15, 55);
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text(`Nombre Completo: ${user.nombres} ${user.apellidos}`, 15, 62);
-    doc.text(`Código de Alumno: ${user.codigo || '—'}`, 15, 67);
-    doc.text(`Fecha de Reporte: ${new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}`, 15, 72);
+      // Línea de separación decorativa
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.5);
+      doc.line(15, 41, 100, 41);
 
-    // Tabla de Datos
-    const tableData = asistencias.map(a => [
-      formatearFechaStr(a.fecha),
-      a.curso_nombre,
-      a.estado.toUpperCase(),
-      a.estado === 'ausente' ? 'Falta Injustificada' : 'Registro de Asistencia'
-    ]);
+      // Datos del Estudiante
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INFORMACIÓN GENERAL DEL ALUMNO', 15, 60);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Nombres y Apellidos: ${user.nombres} ${user.apellidos}`, 15, 68);
+      doc.text(`DNI / Código: ${user.codigo || '—'}`, 15, 74);
+      doc.text(`Fecha de Impresión: ${new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 15, 80);
 
-    doc.autoTable({
-      startY: 85,
-      head: [['FECHA', 'CURSO', 'ESTADO', 'OBSERVACIÓN']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [67, 97, 238], textColor: 255, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3 },
-      columnStyles: { 0: { cellWidth: 50 }, 2: { fontStyle: 'bold' } }
-    });
+      // Tabla de Datos
+      const tableData = [...asistencias].reverse().map(a => [
+        formatearFechaStr(a.fecha).toUpperCase(),
+        a.curso_nombre,
+        a.estado.toUpperCase(),
+        a.estado === 'ausente' ? 'FALTA INJUSTIFICADA' : 'REGISTRO OK'
+      ]);
 
-    const finalY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text('Este documento es un comprobante oficial de asistencia emitido por el Portal del Estudiante de Academia Alba Perú.', 15, finalY);
+      doc.autoTable({
+        startY: 90,
+        head: [['FECHA DE CLASE', 'CURSO / MATERIA', 'ESTADO', 'OBSERVACIÓN']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [67, 97, 238], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        styles: { fontSize: 8, cellPadding: 4, valign: 'middle' },
+        columnStyles: { 
+          0: { cellWidth: 50 },
+          2: { fontStyle: 'bold' } 
+        },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
+      });
 
-    doc.save(`Reporte_Asistencia_${user.apellidos}.pdf`);
+      // Pie de Página
+      const finalY = doc.lastAutoTable.finalY + 15;
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Este documento es un reporte digital generado desde el Portal Académico de Academia Alba Perú.', 15, finalY);
+      doc.text('Cualquier modificación anula la validez de este reporte.', 15, finalY + 5);
+
+      doc.save(`Alba_Reporte_Asistencia_${user.apellidos}.pdf`);
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      alert("Hubo un error al generar el PDF. Por favor, intente de nuevo.");
+    }
   };
 
   const resumenPorCurso = useMemo(() => {
@@ -121,23 +139,6 @@ const PortalAsistencia = () => {
       return { nombre, ...stats, porcFaltas };
     });
   }, [asistencias]);
-
-  const statusBadge = (estado) => {
-    const map = {
-      presente: { color: '#10b981', bg: '#f0fdf4', label: 'Presente', icon: <FaCheckCircle /> },
-      ausente:  { color: '#ef4444', bg: '#fef2f2', label: 'Falta', icon: <FaExclamationCircle /> },
-      tardanza: { color: '#f59e0b', bg: '#fffbeb', label: 'Tardanza', icon: <FaClock /> },
-    };
-    const s = map[estado] || { color: '#64748b', bg: '#f1f5f9', label: estado, icon: null };
-    return (
-      <span style={{ 
-        background: s.bg, color: s.color, padding: '4px 10px', borderRadius: 8, 
-        fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 
-      }}>
-        {s.icon} {s.label}
-      </span>
-    );
-  };
 
   if (loading) return <div style={styles.center}><div style={styles.spinner} /></div>;
 
@@ -163,40 +164,43 @@ const PortalAsistencia = () => {
       <main className="portal-main">
         <div style={styles.header}>
             <h1 style={{ fontSize: 24, fontWeight: 800 }}>Mi Asistencia Académica</h1>
-            <p style={{ color: '#64748b' }}>Resumen de puntualidad y reporte descargable</p>
+            <p style={{ color: '#64748b' }}>Consulta tu estado de cumplimiento por periodo</p>
         </div>
 
+        {/* 1. RESUMEN VISUAL (LO QUE SE VE EN PANTALLA) */}
         <div style={styles.card}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 20, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <FaChartBar color="#4361ee" /> CUADRO RESUMEN DE ASISTENCIAS
+          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
+            <FaChartBar color="#4361ee" /> CURSOS MATRICULADOS EN EL PERIODO - MIS ASISTENCIAS
           </h2>
+          
           {resumenPorCurso.length === 0 ? (
-            <p style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>No hay estadísticas disponibles todavía.</p>
+            <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>No hay registros de asistencia para este periodo.</p>
           ) : (
             <div className="portal-table-wrap">
               <table style={styles.table}>
                 <thead>
                   <tr>
-                    <th style={styles.th}>Curso</th>
-                    <th style={{...styles.th, textAlign: 'center'}}>Conteo</th>
+                    <th style={styles.th}>Materia / Curso</th>
+                    <th style={{...styles.th, textAlign: 'center'}}>Conteo Asist.</th>
                     <th style={{...styles.th, textAlign: 'center'}}>% Inasistencias</th>
-                    <th style={styles.th}>Indicador Visual</th>
+                    <th style={{...styles.th, width: '30%'}}>Estado Visual</th>
                   </tr>
                 </thead>
                 <tbody>
                   {resumenPorCurso.map((item, idx) => (
                     <tr key={idx} style={styles.tr}>
-                      <td style={{...styles.td, fontWeight: 700}}>{item.nombre}</td>
+                      <td style={{...styles.td, fontWeight: 700, color: '#1e293b'}}>{item.nombre}</td>
                       <td style={{...styles.td, textAlign: 'center'}}>
-                        <span style={styles.countBadge}>{item.asistencias + item.tardanzas} de {item.total}</span>
+                        <div style={styles.countBadge}>{item.asistencias + item.tardanzas} de {item.total}</div>
                       </td>
                       <td style={{...styles.td, textAlign: 'center'}}>
                         <span style={{ 
                           fontWeight: 800, 
                           color: item.porcFaltas > 20 ? '#ef4444' : '#1e293b',
-                          background: item.porcFaltas > 20 ? '#fef2f2' : 'transparent',
-                          padding: '2px 8px',
-                          borderRadius: '6px'
+                          background: item.porcFaltas > 20 ? '#fef2f2' : '#f8fafc',
+                          padding: '4px 12px',
+                          borderRadius: '8px',
+                          fontSize: '13px'
                         }}>
                           {item.porcFaltas}%
                         </span>
@@ -218,49 +222,18 @@ const PortalAsistencia = () => {
           )}
         </div>
 
-        <div style={{...styles.card, marginTop: 30}}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 15 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#1e293b' }}>Registro Histórico Detallado</h2>
-            <button onClick={descargarPDF} style={styles.pdfBtn}>
-              <FaFilePdf /> REPORTE DETALLADO (PDF)
-            </button>
-          </div>
-          
-          {asistencias.length === 0 ? (
-            <p style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Aún no tienes registros de asistencia.</p>
-          ) : (
-            <div className="portal-table-wrap">
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Fecha de Clase</th>
-                    <th style={styles.th}>Curso</th>
-                    <th style={styles.th}>Estado</th>
-                    <th style={styles.th}>Sustento</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...asistencias].reverse().map(a => (
-                    <tr key={a.id} style={styles.tr}>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <strong style={{ textTransform: 'capitalize' }}>{formatearFechaStr(a.fecha)}</strong>
-                        </div>
-                      </td>
-                      <td style={styles.td}>{a.curso_nombre}</td>
-                      <td style={styles.td}>{statusBadge(a.estado)}</td>
-                      <td style={styles.td}>
-                        {a.estado === 'ausente' ? (
-                          <span style={{ fontSize: 12, color: '#ef4444', fontStyle: 'italic' }}>⚠️ Requiere justificación</span>
-                        ) : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        {/* 2. AREA DE REPORTE (SOLO BOTÓN, SIN TABLA FUERA) */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40, paddingBottom: 40 }}>
+           <button 
+             onClick={handleDescargarPDF} 
+             style={styles.pdfFullBtn}
+             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+           >
+             <FaFilePdf size={20} /> REPORTE DETALLADO DE ASISTENCIAS DEL PERIODO
+           </button>
         </div>
+
       </main>
     </div>
   );
@@ -274,29 +247,33 @@ const styles = {
   navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
   navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white' },
   logoutBtn: { margin: '12px', padding: '12px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 },
-  header: { marginBottom: 20 },
-  card: { background: 'white', borderRadius: 20, padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' },
+  header: { marginBottom: 25 },
+  card: { background: 'white', borderRadius: 20, padding: '35px', border: '1px solid #e2e8f0', boxShadow: '0 10px 25px rgba(0,0,0,0.02)' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', borderBottom: '2px solid #f1f5f9' },
-  td: { padding: '16px', borderBottom: '1px solid #f8fafc', fontSize: 14 },
-  tr: { transition: 'background 0.1s' },
-  countBadge: { background: '#f1f5f9', color: '#475569', padding: '4px 12px', borderRadius: '20px', fontSize: 12, fontWeight: 700 },
-  progressBarBg: { width: '100%', height: '8px', background: '#f1f5f9', borderRadius: '10px', overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: '10px', transition: 'width 0.5s ease-out' },
-  pdfBtn: { 
-    background: '#f97316', 
+  th: { textAlign: 'left', padding: '15px 20px', fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', borderBottom: '2px solid #f1f5f9' },
+  td: { padding: '18px 20px', borderBottom: '1px solid #f8fafc', fontSize: 13 },
+  tr: { transition: 'background 0.2s' },
+  
+  countBadge: { background: '#f1f5f9', color: '#334155', padding: '6px 14px', borderRadius: '30px', fontSize: '13px', fontWeight: 700, display: 'inline-block' },
+  progressBarBg: { width: '100%', height: '10px', background: '#f1f5f9', borderRadius: '10px', overflow: 'hidden' },
+  progressBarFill: { height: '100%', borderRadius: '10px', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' },
+  
+  pdfFullBtn: { 
+    background: '#f87171', 
     color: 'white', 
     border: 'none', 
-    padding: '10px 18px', 
+    padding: '18px 40px', 
     borderRadius: '12px', 
     fontWeight: '800', 
-    fontSize: '11px', 
+    fontSize: '14px', 
     cursor: 'pointer', 
     display: 'flex', 
     alignItems: 'center', 
-    gap: '8px',
-    boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)',
-    transition: 'all 0.2s'
+    gap: '15px',
+    boxShadow: '0 10px 20px rgba(248, 113, 113, 0.3)',
+    transition: 'all 0.3s ease',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
   }
 };
 
