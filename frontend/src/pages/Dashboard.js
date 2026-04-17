@@ -6,7 +6,8 @@ import {
   FaBook,
   FaClipboardList,
   FaMoneyBillWave,
-  FaUserPlus
+  FaUserPlus,
+  FaSignOutAlt
 } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -15,7 +16,7 @@ const COLORS = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   useEffect(() => {
     cargarDashboard();
@@ -50,14 +51,37 @@ const Dashboard = () => {
           <h2 style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: '800' }}>¡Hola! 👋</h2>
           <p style={{ color: 'var(--text-muted)' }}>Esto es lo que está pasando hoy en la Academia Alba Perú.</p>
         </div>
-        <div style={{ display: 'flex', gap: '15px' }}>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+             {/* Botón de Salida Minimalista solo para MÓVIL */}
+             <button 
+                className="only-mobile"
+                onClick={logout}
+                style={{
+                    background: '#fef2f2',
+                    color: '#ef4444',
+                    border: '1px solid #fee2e2',
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.1)'
+                }}
+                title="Cerrar Sesión"
+             >
+                <FaSignOutAlt />
+             </button>
+
              {user && user.rol === 'tutor' && (
-                  <button className="btn btn-primary" onClick={() => window.location.href='/tutores'} style={{ whiteSpace: 'nowrap', background: 'var(--success)' }}>
+                  <button className="btn btn-primary only-desktop" onClick={() => window.location.href='/tutores'} style={{ whiteSpace: 'nowrap', background: 'var(--success)' }}>
                      <FaUserGraduate /> Ver Alumnos del Ciclo
                   </button>
              )}
              {user && ['admin', 'director', 'matriculador'].includes(user.rol) && (
-                  <button className="btn btn-primary" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
+                  <button className="btn btn-primary only-desktop" onClick={() => window.location.href='/admin/matriculas'} style={{ whiteSpace: 'nowrap' }}>
                      <FaUserPlus /> Nueva Matrícula
                   </button>
              )}

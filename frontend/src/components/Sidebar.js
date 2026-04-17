@@ -49,26 +49,6 @@ const Sidebar = () => {
       </div>
 
       <ul className="sidebar-menu">
-        <li className="only-mobile" style={{ marginBottom: '15px' }}>
-          <button 
-            onClick={logout} 
-            style={{ 
-              width: '100%', 
-              background: '#fef2f2', 
-              color: '#ef4444', 
-              border: 'none', 
-              padding: '12px 16px', 
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            <FaSignOutAlt /> Cerrar Sesión
-          </button>
-        </li>
         {menuItems
           .filter(item => item.roles.includes(user.rol))
           .map((item) => (
