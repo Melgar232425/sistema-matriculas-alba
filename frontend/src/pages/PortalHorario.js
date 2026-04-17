@@ -32,13 +32,9 @@ const PortalHorario = () => {
   const COLORES = ['#4361ee', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
   // Función para normalizar horas (Ej: "9:00 AM" -> "09:00 AM")
-  const normalizarHora = (h) => {
-    if (!h) return '';
-    let [time, meridiem] = h.trim().toUpperCase().split(/\s+/);
-    if (!meridiem && time.includes('AM')) meridiem = 'AM';
-    if (!meridiem && time.includes('PM')) meridiem = 'PM';
-    let [hh, mm] = (time.replace('AM', '').replace('PM', '')).split(':');
-    return `${hh.padStart(2, '0')}:${mm} ${meridiem}`;
+  const normalizarHora = (timeStr, meridiem) => {
+    let [hh, mm] = timeStr.split(':');
+    return `${hh.padStart(2, '0')}:${mm} ${meridiem.toUpperCase()}`;
   };
 
   // Función para parsear el horario (Ej: "Lunes, Miercoles y Viernes 9:00 AM - 11:00 AM")
@@ -47,18 +43,21 @@ const PortalHorario = () => {
     try {
       const normalizar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       
-      const parts = str.split(/\s+/);
-      const endStr = normalizarHora(parts.pop() + ' ' + parts.pop()); // AM/PM + HH:MM
-      parts.pop(); // quitar "-"
-      const startStr = normalizarHora(parts.pop() + ' ' + parts.pop()); // AM/PM + HH:MM
-      const diasStr = parts.join(' ');
+      // Regex robusto para capturar: [Días] [Hora Inicio] [AM/PM] - [Hora Fin] [AM/PM]
+      const regex = /^(.*?)\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)$/i;
+      const match = str.trim().match(regex);
+      
+      if (!match) return [];
+      const [, diasStr, hInicio, mInicio, hFin, mFin] = match;
 
+      const startFormatted = normalizarHora(hInicio, mInicio);
+      const endFormatted = normalizarHora(hFin, mFin);
       const diasDetectados = DIAS.filter(d => normalizar(diasStr).includes(normalizar(d)));
 
       return diasDetectados.map(dia => ({
         dia,
-        inicio: startStr,
-        fin: endStr
+        inicio: startFormatted,
+        fin: endFormatted
       }));
     } catch (e) {
       console.error("Error parseando horario:", str, e);
