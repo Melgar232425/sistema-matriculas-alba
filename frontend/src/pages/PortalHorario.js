@@ -178,29 +178,34 @@ const PortalHorario = () => {
                <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b' }}>Resumen Detallado de Matrícula</h2>
             </div>
             <div style={styles.cursosGrid}>
-              {horario.map((c, i) => {
-                const cp = COLORES_PREMIUM[i % COLORES_PREMIUM.length];
-                return (
-                  <div key={c.curso_id} style={{ ...styles.cursoCard, borderTop: `4px solid ${cp.border}` }}>
-                    <div style={{ ...styles.cursoIcon, background: cp.bg, color: cp.border }}>
-                      <FaUserGraduate size={18} />
+          {horario.map((c, i) => {
+            const cp = COLORES_PREMIUM[i % COLORES_PREMIUM.length];
+            return (
+              <div key={c.curso_id + '-' + i} style={{ ...styles.cursoCard, borderTop: `4px solid ${cp.border}` }}>
+                <div style={{ ...styles.cursoIcon, background: cp.bg, color: cp.border }}>
+                  <FaUserGraduate size={18} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h3 style={styles.cursoNombre}>{c.curso_nombre}</h3>
+                    <span style={{ fontSize: '10px', background: '#f1f5f9', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold', color: '#64748b' }}>
+                      {c.ciclo_nombre || 'Ciclo Activo'}
+                    </span>
+                  </div>
+                  <div style={styles.cursoMeta}>
+                    <div style={styles.metaItem}>
+                      <span>Cod: {c.estudiante_codigo} | Prof: {c.docente_nombre}</span>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={styles.cursoNombre}>{c.curso_nombre}</h3>
-                      <div style={styles.cursoMeta}>
-                        <div style={styles.metaItem}>
-                          <span>Profesor: {c.docente_nombre}</span>
-                        </div>
-                        <div style={{ ...styles.metaItem, color: cp.border, fontWeight: '700' }}>
-                          <FaClock size={12} style={{ marginRight: 5 }} />
-                          {c.horario}
-                        </div>
-                      </div>
+                    <div style={{ ...styles.metaItem, color: cp.border, fontWeight: '700' }}>
+                      <FaClock size={12} style={{ marginRight: 5 }} />
+                      {c.horario}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
           </>
         )}
       </main>
