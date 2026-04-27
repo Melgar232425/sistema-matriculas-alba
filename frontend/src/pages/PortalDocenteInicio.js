@@ -174,9 +174,9 @@ const PortalDocenteInicio = () => {
           </div>
         </div>
 
-        <div style={styles.layout}>
+        <div style={styles.layout} className="docente-layout">
           {/* Sidebar Minimalista */}
-          <div style={styles.sidebar}>
+          <div style={styles.sidebar} className="docente-sidebar">
             <div style={styles.sectionHeader}>AULAS ASIGNADAS</div>
             <div style={styles.cursoList}>
               {cursos.map(c => (

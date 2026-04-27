@@ -985,4 +985,16 @@ textarea {
     overflow-x: auto !important;
     white-space: nowrap !important;
   }
+
+  /* Portal Docente Layout Específico */
+  .premium-dashboard .docente-layout {
+    flex-direction: column !important;
+  }
+  .premium-dashboard .docente-sidebar {
+    width: 100% !important;
+  }
+  .premium-dashboard div[style*="gap: 40px"] {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
 }
