@@ -2,16 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import {
-  FaUserGraduate, FaClipboardList, FaMoneyBillWave, FaCalendarAlt,
-  FaSignOutAlt, FaCheckCircle, FaExclamationCircle, FaClock, FaBars, FaTimes
+  FaUserGraduate, FaClipboardList, FaMoneyBillWave,
+  FaSignOutAlt, FaExclamationCircle
 } from 'react-icons/fa';
+
+const Skeleton = ({ width, height, borderRadius }) => (
+  <div style={{ 
+    width, height, borderRadius, 
+    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'skeleton-loading 1.5s infinite linear'
+  }} />
+);
 
 const PortalInicio = () => {
   const [perfil, setPerfil] = useState(null);
   const [matriculas, setMatriculas] = useState([]);
   const [pagos, setPagos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {

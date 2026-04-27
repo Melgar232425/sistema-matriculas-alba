@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { docentePortalAPI } from '../services/api';
-import { FaEnvelope, FaIdCard, FaSignInAlt, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
+import { FaEnvelope, FaIdCard, FaSignInAlt, FaCheckCircle } from 'react-icons/fa';
 import '../styles/App.css';
 
 const PortalDocenteLogin = () => {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import {
-  FaGraduationCap, FaEnvelope, FaIdCard,
+  FaEnvelope, FaIdCard,
   FaSignInAlt, FaEye, FaEyeSlash, FaCheckCircle
 } from 'react-icons/fa';
 import '../styles/App.css';

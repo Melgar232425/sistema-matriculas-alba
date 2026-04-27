@@ -5,6 +5,15 @@ import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
+const Skeleton = ({ width, height, borderRadius }) => (
+  <div style={{ 
+    width, height, borderRadius, 
+    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'skeleton-loading 1.5s infinite linear'
+  }} />
+);
+
 const Tutores = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [loading, setLoading] = useState(true);

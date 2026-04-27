@@ -2,8 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
-  FaUserGraduate, FaCalendarCheck, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaBars, FaTimes, FaChartBar, FaFilePdf
+  FaSignOutAlt, FaChartBar, FaFilePdf
 } from 'react-icons/fa';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -11,7 +10,6 @@ import 'jspdf-autotable';
 const PortalAsistencia = () => {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('student_user') || '{}');

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import { 
-  FaUserGraduate, FaMoneyBillWave, FaCalendarAlt, 
-  FaSignOutAlt, FaCheckCircle, FaBars, FaTimes, FaFilePdf
+  FaMoneyBillWave, FaSignOutAlt, FaFilePdf
 } from 'react-icons/fa';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -14,7 +13,6 @@ const PortalPagos = () => {
   const [matriculas, setMatriculas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('');
-  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {

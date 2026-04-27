@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
-import { FaCalendarAlt, FaCalendarCheck, FaUserGraduate, FaMoneyBillWave, FaSignOutAlt, FaBars, FaTimes, FaClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserGraduate, FaSignOutAlt, FaClock } from 'react-icons/fa';
 
 const PortalHorario = () => {
   const [horario, setHorario] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarActive, setSidebarActive] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
