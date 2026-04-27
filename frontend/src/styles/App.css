@@ -957,8 +957,7 @@ textarea {
   }
 
   .premium-dashboard .stat-card,
-  .premium-dashboard .calendarCard,
-  .premium-dashboard [style*="grid-template-columns"] {
+  .premium-dashboard div[style*="grid-template-columns"]:not([style*="80px"]) {
     grid-template-columns: 1fr !important;
     gap: 15px !important;
   }
