@@ -99,14 +99,23 @@ app.get('/api/fix-db', async (req, res) => {
 
     await promisePool.query("UPDATE matriculas SET estado_pago = 'pagado' WHERE CAST(monto_pagado AS DECIMAL(10,2)) >= CAST(monto_total AS DECIMAL(10,2))");
     await promisePool.query("UPDATE matriculas SET estado_pago = 'parcial' WHERE CAST(monto_pagado AS DECIMAL(10,2)) > 0 AND CAST(monto_pagado AS DECIMAL(10,2)) < CAST(monto_total AS DECIMAL(10,2))");
-    // Asegurar índice único en asistencias para evitar errores de sincronización
+    // 1. Limpiar duplicados en asistencias antes de crear el índice
+    await promisePool.query(`
+      DELETE a1 FROM asistencias a1
+      INNER JOIN asistencias a2 
+      WHERE a1.id < a2.id 
+      AND a1.matricula_id = a2.matricula_id 
+      AND a1.fecha = a2.fecha
+    `);
+
+    // 2. Asegurar índice único en asistencias para evitar errores de sincronización
     try {
       await promisePool.query("ALTER TABLE asistencias ADD UNIQUE INDEX idx_matricula_fecha (matricula_id, fecha)");
     } catch (e) {
       // Ignorar si ya existe
     }
     
-    res.json({ success: true, message: "Base de datos, tabla de seguimientos e índices actualizados correctamente" });
+    res.json({ success: true, message: "Limpieza profunda completada: Base de datos, tabla de seguimientos e índices actualizados" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
