@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import StudentNavbar from '../components/StudentNavbar';
 import { 
