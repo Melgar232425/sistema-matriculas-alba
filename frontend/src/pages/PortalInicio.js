@@ -211,16 +211,6 @@ const PortalInicio = () => {
   );
 };
 
-// Componente de Carga Elegante (Skeleton)
-const Skeleton = ({ width, height, borderRadius = '10px' }) => (
-  <div style={{
-    width, height, borderRadius,
-    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
-    backgroundSize: '200% 100%',
-    animation: 'skeleton-loading 1.5s infinite linear'
-  }} />
-);
-
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
   header: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
