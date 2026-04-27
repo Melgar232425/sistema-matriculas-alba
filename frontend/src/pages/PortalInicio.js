@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
+import StudentNavbar from '../components/StudentNavbar';
 import {
   FaUserGraduate, FaClipboardList, FaMoneyBillWave,
   FaSignOutAlt, FaExclamationCircle, FaCheckCircle, FaClock
@@ -115,6 +116,7 @@ const PortalInicio = () => {
           </div>
         </div>
       </header>
+      <StudentNavbar />
 
       <main style={styles.main} className="fade-in">
         {/* Banner con Glassmorphism */}

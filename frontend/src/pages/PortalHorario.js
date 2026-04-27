@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
+import StudentNavbar from '../components/StudentNavbar';
 import { FaCalendarAlt, FaUserGraduate, FaSignOutAlt, FaClock } from 'react-icons/fa';
 
 const PortalHorario = () => {
@@ -102,13 +103,13 @@ const PortalHorario = () => {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
-            <Link to="/portal/inicio" style={styles.backBtn}>← Volver al Inicio</Link>
             <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
               <FaSignOutAlt />
             </button>
           </div>
         </div>
       </header>
+      <StudentNavbar />
 
       <main style={styles.mainContent}>
         <div style={styles.pageHeader}>
