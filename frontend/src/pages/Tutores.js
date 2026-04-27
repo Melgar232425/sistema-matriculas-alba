@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { estudiantesAPI, pagosAPI, matriculasAPI } from '../services/api';
-import { FaSearch, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard, FaUsers } from 'react-icons/fa';
+import { estudiantesAPI, pagosAPI, matriculasAPI, seguimientosAPI } from '../services/api';
+import { FaSearch, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard, FaUsers, FaHistory } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -10,8 +10,10 @@ const Tutores = () => {
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
+  const [historialSeguimiento, setHistorialSeguimiento] = useState([]);
   const [seguimiento, setSeguimiento] = useState({ comentario: '', contacto_padre: '' });
   const [filtroEstado, setFiltroEstado] = useState('Todos');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -56,15 +58,43 @@ const Tutores = () => {
     }} />
   );
 
-  const handlesaveSeguimiento = (e) => {
+  const handlesaveSeguimiento = async (e) => {
     e.preventDefault();
-    if (seguimiento.comentario.length < 10) {
-      toast.error('❌ El comentario debe ser más descriptivo.');
+    if (seguimiento.comentario.length < 5) {
+      toast.error('❌ El comentario es muy corto.');
       return;
     }
-    toast.success(`Seguimiento registrado con éxito`);
-    setSeguimiento({ comentario: '', contacto_padre: '' });
-    setSelectedEstudiante(null);
+    
+    try {
+      setSaving(true);
+      await seguimientosAPI.create({
+        estudiante_id: selectedEstudiante.id,
+        comentario: seguimiento.comentario,
+        contacto_padre: seguimiento.contacto_padre
+      });
+      
+      toast.success(`Seguimiento registrado con éxito`);
+      setSeguimiento({ comentario: '', contacto_padre: '' });
+      
+      // Recargar historial
+      const res = await seguimientosAPI.getPorEstudiante(selectedEstudiante.id);
+      setHistorialSeguimiento(res.data.data);
+    } catch (err) {
+      toast.error('Error al guardar el seguimiento');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const abrirPerfil = async (est) => {
+    setSelectedEstudiante(est);
+    setHistorialSeguimiento([]);
+    try {
+      const res = await seguimientosAPI.getPorEstudiante(est.id);
+      setHistorialSeguimiento(res.data.data);
+    } catch (err) {
+      console.error("Error al cargar historial", err);
+    }
   };
 
   const estudiantesFiltrados = estudiantes.filter(est =>
@@ -200,7 +230,7 @@ const Tutores = () => {
               return true;
             })
             .map(est => (
-            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => setSelectedEstudiante(est)} className="student-card">
+            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => abrirPerfil(est)} className="student-card">
               <div style={styles.cardTop}>
                 <div style={styles.userAvatar}><FaUserGraduate /></div>
                 <div style={{ flex: 1 }}>
@@ -265,7 +295,24 @@ const Tutores = () => {
                  ))}
                </div>
 
-               <form style={{ marginTop: '30px' }} onSubmit={handlesaveSeguimiento}>
+                {/* Historial de Seguimiento */}
+                <h4 style={{ ...styles.sectionTitle, marginTop: '30px' }}><FaHistory /> HISTORIAL DE TUTORÍA</h4>
+                <div style={styles.historyContainer}>
+                  {historialSeguimiento.length === 0 ? (
+                    <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>No hay registros previos para este estudiante.</p>
+                  ) : (
+                    historialSeguimiento.map(item => (
+                      <div key={item.id} style={styles.historyItem}>
+                        <div style={styles.historyMeta}>
+                          <span style={styles.historyDate}>{new Date(item.fecha).toLocaleString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div style={styles.historyContent}>{item.comentario}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <form style={{ marginTop: '30px' }} onSubmit={handlesaveSeguimiento}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '900', color: '#475569', marginBottom: '8px' }}>
                     OBSERVACIONES / SEGUIMIENTO DEL TUTOR
                   </label>
@@ -358,7 +405,12 @@ const styles = {
   pdfBtn: { background: 'white', color: '#ef4444', border: '1.5px solid #fee2e2', padding: '8px 18px', borderRadius: '12px', fontSize: '11px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' },
   textarea: { width: '100%', padding: '22px', borderRadius: '20px', border: '2px solid #f1f5f9', fontSize: '14px', fontWeight: '600', outline: 'none', minHeight: '140px', fontFamily: 'inherit', background: '#fcfcfc', transition: 'all 0.3s' },
   saveModalBtn: { flex: 2, background: 'linear-gradient(135deg, #4361ee, #2563eb)', color: 'white', border: 'none', padding: '16px', borderRadius: '18px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(67, 97, 238, 0.4)', transition: 'all 0.3s' },
-  cancelBtn: { flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', padding: '16px', borderRadius: '18px', fontWeight: '900', cursor: 'pointer', transition: 'all 0.3s' }
+  cancelBtn: { flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', padding: '16px', borderRadius: '18px', fontWeight: '900', cursor: 'pointer', transition: 'all 0.3s' },
+  historyContainer: { display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '250px', overflowY: 'auto', paddingRight: '10px' },
+  historyItem: { background: '#f8fafc', padding: '15px', borderRadius: '16px', borderLeft: '4px solid #4361ee' },
+  historyMeta: { display: 'flex', justifyContent: 'space-between', marginBottom: '5px' },
+  historyDate: { fontSize: '11px', fontWeight: '800', color: '#4361ee' },
+  historyContent: { fontSize: '13px', color: '#1e293b', fontWeight: '500', lineHeight: '1.5' }
 };
 
 export default Tutores;

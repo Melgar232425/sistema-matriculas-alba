@@ -119,6 +119,12 @@ export const ciclosAPI = {
   delete: (id) => api.delete(`/ciclos/${id}`),
 };
 
+// ============ SEGUIMIENTOS ============
+export const seguimientosAPI = {
+  getPorEstudiante: (estudianteId) => api.get(`/seguimientos/estudiante/${estudianteId}`),
+  create: (data) => api.post('/seguimientos', data),
+};
+
 // ============ PORTAL DE ESTUDIANTES ============
 // Instancia separada que usa el token del estudiante (student_token)
 const portalApi = axios.create({

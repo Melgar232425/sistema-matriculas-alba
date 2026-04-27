@@ -16,6 +16,7 @@ const authRoutes = require('./routes/auth.routes');
 const docentesRoutes = require('./routes/docentes.routes');
 const ciclosRoutes = require('./routes/ciclos.routes');
 const portalRoutes = require('./routes/portal.routes');
+const seguimientosRoutes = require('./routes/seguimientos.routes');
 const { verifyToken } = require('./middleware/auth.middleware');
 
 const helmet = require('helmet');
@@ -69,6 +70,7 @@ app.use('/api/pagos', verifyToken, pagosRoutes);
 app.use('/api/reportes', verifyToken, reportesRoutes);
 app.use('/api/docentes', verifyToken, docentesRoutes);
 app.use('/api/ciclos', verifyToken, ciclosRoutes);
+app.use('/api/seguimientos', verifyToken, seguimientosRoutes);
 
 // Portal de Estudiantes — sin verifyToken de admin (flujo independiente)
 app.use('/api/portal', portalRoutes);
