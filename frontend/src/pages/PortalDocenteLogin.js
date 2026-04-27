@@ -36,21 +36,21 @@ const PortalDocenteLogin = () => {
       {/* Panel izquierdo decorativo */}
       <div className="hide-mobile" style={styles.leftPanel}>
         <div style={styles.leftContent}>
-          <div style={styles.iconWrap}>
-            <FaUserTie size={60} color="white" />
+          <div style={styles.logoBadgeWrap}>
+            <img src="/logo_oficial.png" alt="Alba" style={{ width: '80%' }} />
           </div>
           <h1 style={styles.leftTitle}>Área de Docentes</h1>
-          <p style={styles.leftSubtitle}>Academia Alba Perú</p>
+          <p style={styles.leftSubtitle}>Gestión académica de alto rendimiento</p>
           
           <div style={styles.featureList}>
             {[
-              'Gestión de cursos asignados',
-              'Registro rápido de asistencia',
-              'Alertas de inasistencia (Riesgo)',
-              'Consulta de carga horaria semanales'
+              'Panel de control de asistencia',
+              'Monitoreo de riesgo estudiantil',
+              'Reportes de carga horaria',
+              'Sincronización en tiempo real'
             ].map((f, i) => (
               <div key={i} style={styles.featureItem}>
-                <FaCheckCircle style={{ color: 'rgba(255,255,255,0.85)', flexShrink: 0 }} />
+                <div style={styles.checkWrap}><FaCheckCircle size={14} /></div>
                 <span>{f}</span>
               </div>
             ))}
@@ -131,7 +131,7 @@ const PortalDocenteLogin = () => {
 const styles = {
   leftPanel: { 
     flex: 1, 
-    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)', 
+    background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', 
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'center', 
@@ -141,23 +141,24 @@ const styles = {
     overflow: 'hidden'
   },
   leftContent: { maxWidth: 420, position: 'relative', zIndex: 2 },
-  iconWrap: { 
-    width: 90, 
-    height: 90, 
-    background: 'rgba(255,255,255,0.15)', 
+  logoBadgeWrap: { 
+    width: 100, 
+    height: 100, 
+    background: 'white', 
     borderRadius: 24, 
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'center', 
     marginBottom: 24,
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.2)'
+    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+    padding: '10px'
   },
-  leftTitle: { fontSize: 34, fontWeight: 900, marginBottom: 8 },
-  leftSubtitle: { fontSize: 17, opacity: 0.8, marginBottom: 35 },
+  leftTitle: { fontSize: 34, fontWeight: 900, marginBottom: 8, letterSpacing: '-0.02em' },
+  leftSubtitle: { fontSize: 17, opacity: 0.8, marginBottom: 35, fontWeight: '500' },
   featureList: { display: 'flex', flexDirection: 'column', gap: 15, marginBottom: 30 },
-  featureItem: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 500 },
-  circle: { position: 'absolute', background: 'rgba(255,255,255,0.06)', borderRadius: '50%' },
+  featureItem: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.9)' },
+  checkWrap: { width: 24, height: 24, background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.2)' },
+  circle: { position: 'absolute', background: 'rgba(255,255,255,0.03)', borderRadius: '50%' },
   
   rightPanel: { 
     flex: 1, 
