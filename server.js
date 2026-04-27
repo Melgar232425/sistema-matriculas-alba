@@ -79,14 +79,29 @@ app.use('/api/portal', portalRoutes);
 const docentePortalRoutes = require('./routes/docentePortal.routes');
 app.use('/api/portal-docente', docentePortalRoutes);
 
-// Ruta temporal para corregir la base de datos (Error de estados de pago)
+// Ruta temporal para corregir la base de datos (Creación de tabla y estados)
 app.get('/api/fix-db', async (req, res) => {
   try {
     const { promisePool } = require('./config/database');
+    
+    // Crear tabla de seguimientos si no existe
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS seguimientos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id INT NOT NULL,
+        usuario_id INT,
+        comentario TEXT NOT NULL,
+        contacto_padre VARCHAR(255),
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id) ON DELETE CASCADE
+      )
+    `);
+
     await promisePool.query("UPDATE matriculas SET estado_pago = 'pagado' WHERE CAST(monto_pagado AS DECIMAL(10,2)) >= CAST(monto_total AS DECIMAL(10,2))");
     await promisePool.query("UPDATE matriculas SET estado_pago = 'parcial' WHERE CAST(monto_pagado AS DECIMAL(10,2)) > 0 AND CAST(monto_pagado AS DECIMAL(10,2)) < CAST(monto_total AS DECIMAL(10,2))");
     await promisePool.query("UPDATE matriculas SET estado_pago = 'pendiente' WHERE CAST(monto_pagado AS DECIMAL(10,2)) = 0 OR monto_pagado IS NULL");
-    res.json({ success: true, message: "Base de datos corregida correctamente" });
+    
+    res.json({ success: true, message: "Base de datos y tabla de seguimientos actualizadas correctamente" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
