@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { docentePortalAPI } from '../services/api';
-import { FaSignOutAlt, FaBookOpen, FaCheck, FaUsers, FaCalendarAlt, FaChalkboardTeacher } from 'react-icons/fa';
+import { FaSignOutAlt, FaBookOpen, FaCheck, FaChalkboardTeacher } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 const PortalDocenteInicio = () => {
