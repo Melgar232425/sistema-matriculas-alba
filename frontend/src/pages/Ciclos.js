@@ -96,7 +96,7 @@ const Ciclos = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar este ciclo? Solo se puede eliminar si no tiene cursos.')) return;
+        if (!window.confirm('⚠️ ADVERTENCIA: ¿Eliminar este ciclo permanentemente? Esto también ELIMINARÁ TODOS LOS CURSOS que pertenezcan a este ciclo. Esta acción no se puede deshacer.')) return;
         try {
             const response = await ciclosAPI.delete(id);
             if (response.data.success) {
