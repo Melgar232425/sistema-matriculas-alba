@@ -111,7 +111,7 @@ function App() {
           
           <Route path="/tutores" element={
             <PrivateRoute allowedRoles={['tutor']}>
-              <div className="app"><Sidebar /><Tutores /></div>
+              <Tutores />
             </PrivateRoute>
           } />
 

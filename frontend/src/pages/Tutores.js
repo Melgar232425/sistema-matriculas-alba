@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { estudiantesAPI, pagosAPI, matriculasAPI, seguimientosAPI } from '../services/api';
-import { FaSearch, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard, FaUsers, FaHistory } from 'react-icons/fa';
+import { FaSearch, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard, FaUsers, FaHistory, FaSignOutAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -14,6 +16,13 @@ const Tutores = () => {
   const [seguimiento, setSeguimiento] = useState({ comentario: '', contacto_padre: '' });
   const [filtroEstado, setFiltroEstado] = useState('Todos');
   const [saving, setSaving] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     cargarDatos();
@@ -152,8 +161,35 @@ const Tutores = () => {
   };
 
   return (
-    <div className="main-content" style={styles.page}>
-      <style>{`
+    <div style={styles.page}>
+      {/* Header Premium Estilo Alba */}
+      <header style={styles.headerPremium}>
+        <div style={styles.headerInner}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+            <img src="/logo_oficial.png" alt="Logo Alba" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#f8fafc' }}>ALBA ACADEMY</h1>
+              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>TUTOR PORTAL</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+              <div style={{ fontSize: '13px', fontWeight: '800', color: '#f8fafc' }}>
+                {user ? `${user.nombres} ${user.apellidos}` : 'Tutor Verificado'}
+              </div>
+              <div style={{ fontSize: '10px', color: '#10b981', fontWeight: '800', letterSpacing: '0.05em' }}>
+                ● TUTOR ACADÉMICO
+              </div>
+            </div>
+            <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
+              <FaSignOutAlt />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main style={styles.mainContent}>
+        <style>{`
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.5s ease forwards; }
@@ -339,7 +375,11 @@ const Tutores = () => {
 };
 
 const styles = {
-  page: { minHeight: '100vh', background: '#f8fafc', padding: '40px', fontFamily: "'Inter', sans-serif" },
+  page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
+  headerPremium: { background: '#0f172a', padding: '15px 40px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
+  headerInner: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' },
+  mainContent: { maxWidth: '1200px', margin: '40px auto', padding: '0 20px' },
   statsDashboard: { display: 'flex', gap: '25px', marginBottom: '40px', flexWrap: 'wrap' },
   statBox: { flex: 1, minWidth: '260px', background: 'white', padding: '24px', borderRadius: '28px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
   statCircle: { width: '56px', height: '56px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
