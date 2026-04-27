@@ -928,15 +928,14 @@ textarea {
   .premium-dashboard header {
     padding: 15px 20px !important;
   }
-  .premium-dashboard header > div {
-    flex-direction: column !important;
-    gap: 15px !important;
-    text-align: center !important;
+  .premium-dashboard header {
+    padding: 10px 15px !important;
   }
-  .premium-dashboard header > div > div {
-    justify-content: center !important;
-    text-align: center !important;
-    width: 100% !important;
+  .premium-dashboard header h1 {
+    font-size: 14px !important;
+  }
+  .premium-dashboard header p {
+    font-size: 9px !important;
   }
   
   .premium-dashboard main {
