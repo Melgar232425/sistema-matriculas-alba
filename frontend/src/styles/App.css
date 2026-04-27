@@ -920,3 +920,70 @@ textarea {
     display: none !important;
   }
 }
+
+/* ========================================================= */
+/* ADAPTABILIDAD RESPONSIVE - PREMIUM PLUS (MOBILE & TABLET) */
+/* ========================================================= */
+@media (max-width: 768px) {
+  .premium-dashboard header {
+    padding: 15px 20px !important;
+  }
+  .premium-dashboard header > div {
+    flex-direction: column !important;
+    gap: 15px !important;
+    text-align: center !important;
+  }
+  .premium-dashboard header > div > div {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+  
+  .premium-dashboard main {
+    margin: 20px auto !important;
+    padding: 0 15px !important;
+  }
+
+  .premium-dashboard .fade-in > div:first-child,
+  .premium-dashboard main > div:first-child {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 25px 20px !important;
+    gap: 15px !important;
+  }
+  
+  .premium-dashboard main > div:first-child h2 {
+    font-size: 24px !important;
+  }
+
+  .premium-dashboard .stat-card,
+  .premium-dashboard .calendarCard,
+  .premium-dashboard [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  .premium-dashboard form,
+  .premium-dashboard .filterBar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+  }
+
+  .premium-dashboard button,
+  .premium-dashboard select,
+  .premium-dashboard input {
+    width: 100% !important;
+  }
+  
+  .premium-dashboard .headerInner > div:last-child button {
+    width: auto !important;
+  }
+
+  .premium-dashboard table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+}

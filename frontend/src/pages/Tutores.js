@@ -161,7 +161,7 @@ const Tutores = () => {
   };
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="premium-dashboard">
       {/* Header Premium Estilo Alba */}
       <header style={styles.headerPremium}>
         <div style={styles.headerInner}>

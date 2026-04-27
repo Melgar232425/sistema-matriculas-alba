@@ -100,7 +100,7 @@ const PortalDocenteInicio = () => {
   );
 
   if (loading) return (
-    <div style={styles.page}>
+    <div style={styles.page} className="premium-dashboard">
       <div style={styles.header}>
          <div style={styles.headerInner}><Skeleton width="150px" height="30px" /></div>
       </div>
@@ -115,7 +115,7 @@ const PortalDocenteInicio = () => {
   );
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="premium-dashboard">
       <style>{`
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

@@ -53,7 +53,7 @@ const PortalPagos = () => {
   if (loading) return <div style={styles.loading}><div style={styles.spinner} /></div>;
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="premium-dashboard">
       {/* Header Estilo Apple/Elite */}
       <header style={styles.headerPremium}>
         <div style={styles.headerInner}>
