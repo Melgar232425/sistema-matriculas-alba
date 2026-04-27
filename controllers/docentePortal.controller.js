@@ -89,9 +89,18 @@ exports.marcarAsistencia = async (req, res) => {
     const { curso_id } = req.params;
     const { matricula_id, fecha, estado } = req.body;
 
+    console.log(`[Asistencia] Marcando: Curso ${curso_id}, Matrícula ${matricula_id}, Fecha ${fecha}, Estado ${estado}`);
+
+    if (!matricula_id || isNaN(matricula_id)) {
+      return res.status(400).json({ success: false, message: 'ID de matrícula inválido' });
+    }
+
     // Verificar permiso
     const [curso] = await promisePool.query('SELECT id FROM cursos WHERE id = ? AND docente_id = ?', [curso_id, req.docente.id]);
-    if (curso.length === 0) return res.status(403).json({ success: false, message: 'Permiso denegado' });
+    if (curso.length === 0) {
+      console.warn(`[Asistencia] Permiso denegado para docente ${req.docente.id} en curso ${curso_id}`);
+      return res.status(403).json({ success: false, message: 'Permiso denegado' });
+    }
 
     // Si el estado es 'no_registrado', eliminamos el registro de asistencia (limpiar)
     if (estado === 'no_registrado') {
@@ -112,6 +121,7 @@ exports.marcarAsistencia = async (req, res) => {
 
     res.json({ success: true, message: 'Asistencia registrada' });
   } catch (err) {
+    console.error('[Asistencia] Error crítico:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
