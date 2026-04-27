@@ -76,22 +76,36 @@ exports.cambiarEstado = async (req, res) => {
     }
 };
 
-// Eliminar ciclo (solo si no tiene cursos o lógica similar)
+// Eliminar ciclo (forzar borrado en cascada de cursos)
 exports.eliminar = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Verificar si tiene cursos
-        const [cursos] = await promisePool.query('SELECT id FROM cursos WHERE ciclo_id = ? LIMIT 1', [id]);
-        if (cursos.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No se puede eliminar un ciclo que tiene cursos asociados. Intente desactivarlo.' 
-            });
-        }
+        const connection = await promisePool.getConnection();
+        await connection.beginTransaction();
 
-        await promisePool.query('DELETE FROM ciclos WHERE id = ?', [id]);
-        res.json({ success: true, message: 'Ciclo eliminado exitosamente' });
+        try {
+            // 1. Borrar todos los cursos asociados a este ciclo permanentemente
+            await connection.query('DELETE FROM cursos WHERE ciclo_id = ?', [id]);
+            
+            // 2. Borrar el ciclo
+            await connection.query('DELETE FROM ciclos WHERE id = ?', [id]);
+
+            await connection.commit();
+            res.json({ success: true, message: 'Ciclo y todos sus cursos eliminados permanentemente' });
+        } catch (error) {
+            await connection.rollback();
+            // Si hay un error de llave foránea (ej. un curso ya tiene matrículas o pagos)
+            if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'No se puede eliminar. Existen alumnos ya matriculados en los cursos de este ciclo.' 
+                });
+            }
+            throw error;
+        } finally {
+            connection.release();
+        }
     } catch (error) {
         console.error('Error al eliminar ciclo:', error);
         res.status(500).json({ success: false, message: 'Error al eliminar ciclo' });
