@@ -134,8 +134,8 @@ const PortalDocenteInicio = () => {
               style={{ width: '45px', height: '45px', objectFit: 'contain', borderRadius: '10px' }} 
             />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
-              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>FACULTY PORTAL</p>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PORTAL DOCENTE</p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>

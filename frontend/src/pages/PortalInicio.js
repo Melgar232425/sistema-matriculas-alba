@@ -101,8 +101,8 @@ const PortalInicio = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
             <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
-              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>STUDENT PORTAL</p>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PORTAL ALUMNO</p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>

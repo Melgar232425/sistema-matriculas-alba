@@ -168,14 +168,14 @@ const Tutores = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
             <img src="/logo_oficial.png" alt="Logo Alba" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#f8fafc' }}>ALBA ACADEMY</h1>
-              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>TUTOR PORTAL</p>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#f8fafc' }}>ACADEMIA ALBA</h1>
+              <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PORTAL TUTOR</p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
             <div style={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
               <div style={{ fontSize: '13px', fontWeight: '800', color: '#f8fafc' }}>
-                {user ? `${user.nombres} ${user.apellidos}` : 'Tutor Verificado'}
+                {(user?.nombres || user?.nombre) ? `${user.nombres || user.nombre} ${user.apellidos || ''}`.trim() : 'Tutor Verificado'}
               </div>
               <div style={{ fontSize: '10px', color: '#10b981', fontWeight: '800', letterSpacing: '0.05em' }}>
                 ● TUTOR ACADÉMICO
