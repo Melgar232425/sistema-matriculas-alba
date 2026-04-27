@@ -492,7 +492,7 @@ exports.obtenerDisponibilidadHorario = async (req, res) => {
       });
     }
 
-    const { extraerDias } = require('../utils/scheduleValidator');
+    const { extraerDias, AULAS_PERMITIDAS } = require('../utils/scheduleValidator');
     const diasSeleccionados = extraerDias(dia);
 
     if (diasSeleccionados.length === 0) {
@@ -505,7 +505,7 @@ exports.obtenerDisponibilidadHorario = async (req, res) => {
     // Traer cursos activos del ciclo (excluyendo, si corresponde, el curso que se está editando)
     const params = [ciclo_id];
     let query = `
-      SELECT id, horario, docente_id, aula
+      SELECT id, nombre, horario, docente_id, aula
       FROM cursos
       WHERE estado = 'activo' AND ciclo_id = ?
     `;
@@ -518,6 +518,7 @@ exports.obtenerDisponibilidadHorario = async (req, res) => {
     const [cursos] = await promisePool.query(query, params);
 
     const ocupados = {}; // Mapeo bloque -> razón
+    const aulasOcupadasPorBloque = {}; // Mapeo bloque -> [Aulas ocupadas]
 
     // Pre-parsear los bloques permitidos para comparar rangos de tiempo
     const bloquesEvaluar = BLOQUES_PERMITIDOS.map(bloque => ({
@@ -525,30 +526,47 @@ exports.obtenerDisponibilidadHorario = async (req, res) => {
       parsed: parsearHorario(`${dia} ${bloque}`)
     }));
 
-    for (const curso of cursos) {
-      if (!curso.horario) continue;
+    for (const bObj of bloquesEvaluar) {
+      if (!bObj.parsed) continue;
+      aulasOcupadasPorBloque[bObj.upper] = [];
 
-      const horarioParsed = parsearHorario(curso.horario);
-      if (!horarioParsed) continue;
+      for (const curso of cursos) {
+        if (!curso.horario) continue;
 
-      // Solo considerar cursos que se dictan en alguno de los días seleccionados
-      const diasEnComun = horarioParsed.dias.filter(d => diasSeleccionados.includes(d));
-      if (diasEnComun.length === 0) continue;
+        const horarioParsed = parsearHorario(curso.horario);
+        if (!horarioParsed) continue;
 
-      for (const bObj of bloquesEvaluar) {
-        if (!bObj.parsed) continue;
+        // Solo considerar cursos que se dictan en alguno de los días seleccionados
+        const diasEnComun = horarioParsed.dias.filter(d => diasSeleccionados.includes(d));
+        if (diasEnComun.length === 0) continue;
 
         // Verificamos si hay cruce real entre el bloque de la lista y el curso existente
         if (hayCruce(bObj.parsed, horarioParsed)) {
           
-          const coincidenciaDocente = docente_id && curso.docente_id && Number(curso.docente_id) === Number(docente_id);
-          
-          if (coincidenciaDocente) {
+          // Caso 1: El docente solicitado ya está ocupado en este bloque
+          if (docente_id && curso.docente_id && Number(curso.docente_id) === Number(docente_id)) {
             ocupados[bObj.upper] = 'Docente Ocupado';
-          } else {
-            // Regla 1:1 - Solo un curso por bloque en toda la academia
-            ocupados[bObj.upper] = 'Horario Ocupado';
           }
+          
+          // Caso 2: El aula solicitada ya está ocupada en este bloque
+          if (aula && curso.aula && curso.aula.toLowerCase() === aula.toLowerCase()) {
+            ocupados[bObj.upper] = 'Aula Ocupada';
+          }
+
+          // Registrar el aula como ocupada para este bloque
+          if (curso.aula) {
+            aulasOcupadasPorBloque[bObj.upper].push(curso.aula.toLowerCase());
+          }
+        }
+      }
+
+      // Caso 3: Si no hay un aula específica seleccionada, marcar como ocupado solo si TODAS las aulas están llenas
+      if (!aula && !ocupados[bObj.upper]) {
+        const totalAulas = AULAS_PERMITIDAS.length;
+        const ocupadasUnicas = [...new Set(aulasOcupadasPorBloque[bObj.upper])];
+        
+        if (ocupadasUnicas.length >= totalAulas) {
+          ocupados[bObj.upper] = 'Aulas Llenas';
         }
       }
     }
@@ -557,7 +575,8 @@ exports.obtenerDisponibilidadHorario = async (req, res) => {
       success: true,
       data: {
         ocupados,
-        totalAulasDisponibles: 1
+        totalAulasDisponibles: AULAS_PERMITIDAS.length,
+        bloques: BLOQUES_PERMITIDOS
       }
     });
   } catch (error) {

@@ -133,7 +133,7 @@ const Cursos = () => {
 
 
   // Consulta disponibilidad de bloques horarios al backend
-  const fetchDisponibilidad = async (ciclo_id, dia, docente_id, excluir_id) => {
+  const fetchDisponibilidad = async (ciclo_id, dia, docente_id, aula, excluir_id) => {
     if (!ciclo_id || !dia) {
       setBloquesOcupados({});
       return;
@@ -141,6 +141,7 @@ const Cursos = () => {
     try {
       const params = { ciclo_id, dia };
       if (docente_id) params.docente_id = docente_id;
+      if (aula) params.aula = aula;
       if (excluir_id) params.curso_id_excluir = excluir_id;
 
       const res = await cursosAPI.getDisponibilidad(params);
@@ -169,6 +170,7 @@ const Cursos = () => {
     // Si se selecciona un aula, fijar cupos a 40
     if (name === 'aula' && value !== '') {
       newFormData.cupos_totales = 40;
+      fetchDisponibilidad(newFormData.ciclo_id, newFormData.dias, newFormData.docente_id, value, modoEdicion && cursoActual ? cursoActual.id : null);
     }
 
     // Sincronizar Turno automáticamente según las horas
@@ -196,17 +198,17 @@ const Cursos = () => {
         newFormData.fecha_fin = '';
       }
       // Actualizar disponibilidad cuando cambia el ciclo
-      fetchDisponibilidad(value, newFormData.dias, newFormData.docente_id, modoEdicion && cursoActual ? cursoActual.id : null);
+      fetchDisponibilidad(value, newFormData.dias, newFormData.docente_id, newFormData.aula, modoEdicion && cursoActual ? cursoActual.id : null);
     }
 
     // Actualizar disponibilidad cuando cambia el día
     if (name === 'dias') {
-      fetchDisponibilidad(newFormData.ciclo_id, value, newFormData.docente_id, modoEdicion && cursoActual ? cursoActual.id : null);
+      fetchDisponibilidad(newFormData.ciclo_id, value, newFormData.docente_id, newFormData.aula, modoEdicion && cursoActual ? cursoActual.id : null);
     }
 
     // Actualizar disponibilidad cuando cambia el docente (puede tener sus propios bloques ocupados)
     if (name === 'docente_id') {
-      fetchDisponibilidad(newFormData.ciclo_id, newFormData.dias, value, modoEdicion && cursoActual ? cursoActual.id : null);
+      fetchDisponibilidad(newFormData.ciclo_id, newFormData.dias, value, newFormData.aula, modoEdicion && cursoActual ? cursoActual.id : null);
     }
 
     // Validar Especialidad del Docente
@@ -258,6 +260,7 @@ const Cursos = () => {
         formData.ciclo_id,
         formData.dias,
         formData.docente_id,
+        formData.aula,
         cursoActual?.id
       );
     } else if (!showModal) {
@@ -287,33 +290,6 @@ const Cursos = () => {
         return;
       }
     }
-
-    // 2. DETECCIÓN DE COLISIONES (Aulas y Docentes)
-    const conflicto = cursos.find(c => {
-        // Ignorar el mismo curso si estamos editando
-        if (modoEdicion && cursoActual && c.id === cursoActual.id) return false;
-        if (c.estado === 'inactivo') return false;
-
-        const mismoDia = c.horario.includes(formData.dias);
-        const mismaHora = c.horario.includes(formData.horas);
-        const mismoCiclo = c.ciclo_id === parseInt(formData.ciclo_id);
-
-        if (mismoDia && mismaHora && mismoCiclo) {
-            // Verificar Aula
-            if (formData.aula && c.aula === formData.aula) {
-                toast.error(`❌ ¡CONFLICTO DE AULA! El "${c.aula}" ya está ocupado por el curso: ${c.nombre}.`, { duration: 5000 });
-                return true;
-            }
-            // Verificar Docente
-            if (formData.docente_id && c.docente_id === parseInt(formData.docente_id)) {
-                toast.error(`❌ ¡CONFLICTO DE DOCENTE! El profesor ya dicta "${c.nombre}" en este horario.`, { duration: 5000 });
-                return true;
-            }
-        }
-        return false;
-    });
-
-    if (conflicto) return; // Detener si hay colisión
 
     try {
       // VALIDACIÓN ESTRICTA DE ESPECIALIDAD
