@@ -46,6 +46,16 @@ const Tutores = () => {
     }
   };
 
+  // Componente de Carga Elegante (Skeleton)
+  const Skeleton = ({ width, height, borderRadius = '12px' }) => (
+    <div style={{
+      width, height, borderRadius,
+      background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'skeleton-loading 1.5s infinite linear'
+    }} />
+  );
+
   const handlesaveSeguimiento = (e) => {
     e.preventDefault();
     if (seguimiento.comentario.length < 10) {
@@ -112,9 +122,17 @@ const Tutores = () => {
   };
 
   return (
-    <div className="main-content" style={{ padding: '30px' }}>
+    <div className="main-content" style={styles.page}>
+      <style>{`
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .student-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important; }
+        .filter-btn:hover { background: #e2e8f0; }
+      `}</style>
+
       {/* Dashboard Ejecutivo de Tutoría */}
-      <div style={styles.statsDashboard}>
+      <div style={styles.statsDashboard} className="fade-in">
         <div style={styles.statBox}>
           <div style={{...styles.statCircle, background: '#eef2ff', color: '#4361ee'}}><FaUsers /></div>
           <div>
@@ -139,20 +157,17 @@ const Tutores = () => {
       </div>
 
       {/* Filtros Inteligentes */}
-      <div style={styles.filterBar}>
+      <div style={styles.filterBar} className="fade-in">
         <div style={styles.filterTabs}>
           {['Todos', 'Deudores', 'Al Día'].map(tab => (
             <button 
               key={tab}
-              onClick={() => {
-                if (tab === 'Todos') setBusqueda('');
-                if (tab === 'Deudores') { setBusqueda(''); /* Logic for state filter */ }
-                setFiltroEstado(tab);
-              }}
+              onClick={() => setFiltroEstado(tab)}
               style={{
                 ...styles.filterTab,
                 ...(filtroEstado === tab ? styles.filterTabActive : {})
               }}
+              className="filter-btn"
             >
               {tab}
             </button>
@@ -173,12 +188,11 @@ const Tutores = () => {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '100px' }}>
-          <div className="spinner"></div>
-          <p style={{ marginTop: '20px', fontWeight: 'bold', color: '#64748b' }}>Cargando Estudiantes...</p>
+        <div style={styles.grid}>
+          {[1,2,3,4,5,6].map(i => <Skeleton key={i} width="100%" height="220px" borderRadius="24px" />)}
         </div>
       ) : (
-        <div style={styles.grid}>
+        <div style={styles.grid} className="fade-in">
           {estudiantesFiltrados
             .filter(est => {
               if (filtroEstado === 'Deudores') return est.tieneDeuda;
@@ -186,28 +200,28 @@ const Tutores = () => {
               return true;
             })
             .map(est => (
-            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => setSelectedEstudiante(est)}>
+            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => setSelectedEstudiante(est)} className="student-card">
               <div style={styles.cardTop}>
                 <div style={styles.userAvatar}><FaUserGraduate /></div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '800', margin: 0 }}>{est.apellidos}, {est.nombres}</h3>
-                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>DNI: {est.dni}</span>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', margin: 0, color: '#1e293b' }}>{est.apellidos}, {est.nombres}</h3>
+                  <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800' }}>DNI: {est.dni}</span>
                 </div>
                 {est.tieneDeuda ? (
-                  <div style={styles.debtTag}><FaExclamationTriangle /> DEUDA</div>
+                  <div style={styles.debtTag}>RIESGO</div>
                 ) : (
-                  <div style={styles.paidTag}><FaCheckCircle /> AL DÍA</div>
+                  <div style={styles.paidTag}>SOLVENTE</div>
                 )}
               </div>
 
               <div style={styles.cardBody}>
-                <div style={styles.infoRow}><FaClipboardList color="#3b82f6" /> <span>{est.totalCursos} Cursos Inscritos</span></div>
-                <div style={styles.infoRow}><FaPhone color="#10b981" /> <span>{est.telefono_apoderado || 'Sin apoderado'}</span></div>
+                <div style={styles.infoRow}><FaClipboardList color="#4361ee" size={14} /> <span>{est.totalCursos} Cursos Inscritos</span></div>
+                <div style={styles.infoRow}><FaPhone color="#10b981" size={14} /> <span>{est.telefono_apoderado || 'S/APODERADO'}</span></div>
               </div>
 
               <div style={styles.cardFooter}>
                 <button style={styles.trackBtn}>
-                   <FaCommentDots /> REGISTRAR SEGUIMIENTO
+                   <FaCommentDots /> GESTIONAR SEGUIMIENTO
                 </button>
               </div>
             </div>
@@ -276,49 +290,50 @@ const Tutores = () => {
 };
 
 const styles = {
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' },
-  headerIcon: { width: '55px', height: '55px', background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 10px 15px -3px rgba(67, 97, 238, 0.3)' },
-  statsDashboard: { display: 'flex', gap: '25px', marginBottom: '35px', flexWrap: 'wrap' },
-  statBox: { flex: 1, minWidth: '240px', background: 'white', padding: '20px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
-  statCircle: { width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
-  statValue: { fontSize: '22px', fontWeight: '900', color: '#0f172a', lineHeight: '1' },
-  statLabel: { fontSize: '12px', color: '#64748b', fontWeight: '600', marginTop: '4px' },
-  filterBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '20px', flexWrap: 'wrap' },
-  filterTabs: { display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '16px', gap: '5px' },
-  filterTab: { padding: '10px 24px', borderRadius: '12px', border: 'none', background: 'transparent', fontSize: '13px', fontWeight: '800', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' },
-  filterTabActive: { background: 'white', color: '#4361ee', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
-  searchContainer: { position: 'relative', flex: '1', maxWidth: '400px' },
-  searchIcon: { position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' },
-  searchInput: { width: '100%', padding: '14px 15px 14px 55px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '14px', outline: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', transition: 'all 0.3s' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' },
+  page: { minHeight: '100vh', background: '#f8fafc', padding: '40px', fontFamily: "'Inter', sans-serif" },
+  statsDashboard: { display: 'flex', gap: '25px', marginBottom: '40px', flexWrap: 'wrap' },
+  statBox: { flex: 1, minWidth: '260px', background: 'white', padding: '24px', borderRadius: '28px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
+  statCircle: { width: '56px', height: '56px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
+  statValue: { fontSize: '28px', fontWeight: '900', color: '#1e293b', lineHeight: '1' },
+  statLabel: { fontSize: '11px', color: '#64748b', fontWeight: '800', marginTop: '5px', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  filterBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', gap: '25px', flexWrap: 'wrap' },
+  filterTabs: { display: 'flex', background: 'rgba(241, 245, 249, 0.8)', backdropFilter: 'blur(10px)', padding: '6px', borderRadius: '20px', gap: '5px', border: '1px solid #e2e8f0' },
+  filterTab: { padding: '12px 28px', borderRadius: '16px', border: 'none', background: 'transparent', fontSize: '13px', fontWeight: '800', color: '#64748b', cursor: 'pointer', transition: 'all 0.3s' },
+  filterTabActive: { background: 'white', color: '#4361ee', boxShadow: '0 10px 15px -3px rgba(67, 97, 238, 0.15)' },
+  searchContainer: { position: 'relative', flex: '1', maxWidth: '450px' },
+  searchIcon: { position: 'absolute', left: '22px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' },
+  searchInput: { width: '100%', padding: '16px 20px 16px 60px', background: 'white', border: '2px solid #f1f5f9', borderRadius: '50px', fontSize: '14px', fontWeight: '600', outline: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', transition: 'all 0.3s' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '30px' },
   estCard: (debt) => ({
     background: 'white',
-    padding: '24px',
-    borderRadius: '24px',
-    border: `1px solid ${debt ? '#fecada' : '#e2e8f0'}`,
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)',
+    padding: '28px',
+    borderRadius: '32px',
+    border: `1px solid ${debt ? '#fecdd3' : '#e2e8f0'}`,
+    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.02)',
     cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    position: 'relative',
+    overflow: 'hidden'
   }),
-  cardTop: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' },
-  userAvatar: { width: '45px', height: '45px', background: '#f1f5f9', color: '#6366f1', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
-  debtTag: { background: '#fff1f2', color: '#e11d48', fontWeight: '900', fontSize: '10px', padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '5px' },
-  paidTag: { background: '#f0fdf4', color: '#16a34a', fontWeight: '900', fontSize: '10px', padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '5px' },
-  cardBody: { display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' },
-  infoRow: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#475569', fontWeight: '600' },
-  cardFooter: { borderTop: '1px solid #f1f5f9', paddingTop: '20px' },
-  trackBtn: { width: '100%', background: '#f8fafc', border: '1.5px dashed #e2e8f0', padding: '12px', borderRadius: '15px', color: '#6366f1', fontWeight: '900', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' },
-  modal: { maxWidth: '650px', borderRadius: '28px' },
-  modalHeader: { padding: '25px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  modalAvatar: { width: '50px', height: '50px', background: '#eef2ff', color: '#4361ee', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' },
-  closeModal: { background: '#f1f5f9', border: 'none', width: '35px', height: '35px', borderRadius: '10px', cursor: 'pointer', fontWeight: '900', fontSize: '20px' },
-  sectionTitle: { fontSize: '11px', fontWeight: '900', color: '#94a3b8', letterSpacing: '0.05em', marginBottom: '15px' },
-  matList: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  matRow: { background: '#f8fafc', padding: '15px 20px', borderRadius: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #f1f5f9' },
-  pdfBtn: { background: 'white', color: '#ef4444', border: '1px solid #fee2e2', padding: '6px 15px', borderRadius: '10px', fontSize: '11px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' },
-  textarea: { width: '100%', padding: '18px', borderRadius: '18px', border: '1.5px solid #e2e8f0', fontSize: '14px', outline: 'none', minHeight: '120px', fontFamily: 'inherit', background: '#fcfcfc' },
-  saveModalBtn: { flex: 2, background: 'linear-gradient(135deg, #4361ee, #2563eb)', color: 'white', border: 'none', padding: '15px', borderRadius: '16px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(37,99,235,0.3)' },
-  cancelBtn: { flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', padding: '15px', borderRadius: '16px', fontWeight: '900', cursor: 'pointer' }
+  cardTop: { display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '25px' },
+  userAvatar: { width: '50px', height: '50px', background: '#f8fafc', color: '#4361ee', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', border: '1px solid #f1f5f9' },
+  debtTag: { background: '#fff1f2', color: '#e11d48', fontWeight: '900', fontSize: '9px', padding: '5px 12px', borderRadius: '50px', letterSpacing: '0.05em' },
+  paidTag: { background: '#f0fdf4', color: '#16a34a', fontWeight: '900', fontSize: '9px', padding: '5px 12px', borderRadius: '50px', letterSpacing: '0.05em' },
+  cardBody: { display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '25px' },
+  infoRow: { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#475569', fontWeight: '700' },
+  cardFooter: { borderTop: '1px solid #f1f5f9', paddingTop: '22px' },
+  trackBtn: { width: '100%', background: '#f8fafc', border: '1.5px dashed #e2e8f0', padding: '14px', borderRadius: '18px', color: '#4361ee', fontWeight: '900', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.3s' },
+  modal: { maxWidth: '700px', borderRadius: '32px', overflow: 'hidden' },
+  modalHeader: { padding: '30px', background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  modalAvatar: { width: '54px', height: '54px', background: '#eef2ff', color: '#4361ee', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
+  closeModal: { background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', fontWeight: '900', fontSize: '22px', transition: 'all 0.2s' },
+  sectionTitle: { fontSize: '10px', fontWeight: '900', color: '#94a3b8', letterSpacing: '0.1em', marginBottom: '20px', textTransform: 'uppercase' },
+  matList: { display: 'flex', flexDirection: 'column', gap: '14px' },
+  matRow: { background: '#f8fafc', padding: '18px 25px', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #f1f5f9', transition: 'all 0.2s' },
+  pdfBtn: { background: 'white', color: '#ef4444', border: '1.5px solid #fee2e2', padding: '8px 18px', borderRadius: '12px', fontSize: '11px', fontWeight: '900', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' },
+  textarea: { width: '100%', padding: '22px', borderRadius: '20px', border: '2px solid #f1f5f9', fontSize: '14px', fontWeight: '600', outline: 'none', minHeight: '140px', fontFamily: 'inherit', background: '#fcfcfc', transition: 'all 0.3s' },
+  saveModalBtn: { flex: 2, background: 'linear-gradient(135deg, #4361ee, #2563eb)', color: 'white', border: 'none', padding: '16px', borderRadius: '18px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(67, 97, 238, 0.4)', transition: 'all 0.3s' },
+  cancelBtn: { flex: 1, background: '#f1f5f9', color: '#475569', border: 'none', padding: '16px', borderRadius: '18px', fontWeight: '900', cursor: 'pointer', transition: 'all 0.3s' }
 };
 
 export default Tutores;

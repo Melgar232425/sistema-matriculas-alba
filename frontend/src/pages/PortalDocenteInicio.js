@@ -10,6 +10,7 @@ const PortalDocenteInicio = () => {
   const [estudiantes, setEstudiantes] = useState([]);
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
+  const [loadingEstudiantes, setLoadingEstudiantes] = useState(false);
   const [cambiosPendientes, setCambiosPendientes] = useState({});
   const [guardando, setGuardando] = useState(false);
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const PortalDocenteInicio = () => {
 
   const fetchCursos = async () => {
     try {
+      setLoading(true);
       const res = await docentePortalAPI.getCursos();
       setCursos(res.data.data);
     } catch (err) {
@@ -42,10 +44,13 @@ const PortalDocenteInicio = () => {
 
   const fetchEstudiantes = async (cursoId, fechaBuscada) => {
     try {
+      setLoadingEstudiantes(true);
       const res = await docentePortalAPI.getEstudiantesAsistencia(cursoId, fechaBuscada);
       setEstudiantes(res.data.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadingEstudiantes(false);
     }
   };
 
@@ -62,7 +67,7 @@ const PortalDocenteInicio = () => {
   const guardarCambios = async () => {
     if (Object.keys(cambiosPendientes).length === 0) return;
     setGuardando(true);
-    const loadingToast = toast.loading('Guardando asistencia...');
+    const loadingToast = toast.loading('Sincronizando con la nube...');
     try {
       const promesas = Object.entries(cambiosPendientes).map(([matricula_id, estado]) => 
         docentePortalAPI.marcarAsistencia(cursoSeleccionado.id, { 
@@ -73,121 +78,142 @@ const PortalDocenteInicio = () => {
       );
       await Promise.all(promesas);
       toast.dismiss(loadingToast);
-      toast.success('Asistencia guardada correctamente');
+      toast.success('Asistencia sincronizada');
       setCambiosPendientes({});
       fetchEstudiantes(cursoSeleccionado.id, fecha);
     } catch (err) {
       toast.dismiss(loadingToast);
-      toast.error('Error al guardar la asistencia');
+      toast.error('Error de sincronización');
     } finally {
       setGuardando(false);
     }
   };
 
+  // Componente de Carga Elegante (Skeleton)
+  const Skeleton = ({ width, height, borderRadius = '10px' }) => (
+    <div style={{
+      width, height, borderRadius,
+      background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'skeleton-loading 1.5s infinite linear'
+    }} />
+  );
+
   if (loading) return (
-    <div style={styles.center}>
-      <div style={styles.spinner}></div>
-      <p style={{ marginTop: '20px', color: '#64748b', fontWeight: 'bold' }}>Cargando Panel Docente...</p>
+    <div style={styles.page}>
+      <div style={styles.header}>
+         <div style={styles.headerInner}><Skeleton width="150px" height="30px" /></div>
+      </div>
+      <div style={styles.main}>
+         <Skeleton width="100%" height="150px" borderRadius="24px" />
+         <div style={{ display: 'flex', gap: '30px', marginTop: '30px' }}>
+            <div style={{ width: '300px' }}><Skeleton width="100%" height="400px" borderRadius="24px" /></div>
+            <div style={{ flex: 1 }}><Skeleton width="100%" height="400px" borderRadius="24px" /></div>
+         </div>
+      </div>
     </div>
   );
 
   return (
     <div style={styles.page}>
-      {/* Header Premium */}
+      <style>{`
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .course-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px -5px rgba(67, 97, 238, 0.3) !important; }
+        .btn-hover:hover { filter: brightness(1.1); transform: scale(1.02); }
+      `}</style>
+
+      {/* Header Estilo Apple/Elite */}
       <header style={styles.header}>
         <div style={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
-            <div style={styles.logoCircle}>ALBA</div>
-            <div className="hide-mobile">
-              <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Portal Docente</h1>
-              <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Gestión Académica de Élite</p>
+            <div style={styles.logoCircle}>A</div>
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>FACULTY PORTAL</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ textAlign: 'right' }} className="hide-mobile">
-              <div style={{ fontWeight: '800', fontSize: '14px' }}>Prof. {user.nombres}</div>
-              <div style={{ fontSize: '11px', color: '#0ea5e9', fontWeight: 'bold' }}>DOCENTE ACTIVO</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: '#1e293b' }}>{user.nombres} {user.apellidos}</div>
+              <div style={{ fontSize: '10px', color: '#10b981', fontWeight: '900', letterSpacing: '0.05em' }}>● DOCENTE VERIFICADO</div>
             </div>
-            <button onClick={handleLogout} style={styles.logoutBtn}>
-              <FaSignOutAlt /> <span>Cerrar Sesión</span>
+            <button onClick={handleLogout} style={styles.logoutBtn} className="btn-hover">
+              <FaSignOutAlt />
             </button>
           </div>
         </div>
       </header>
 
-      <main style={styles.main}>
-        {/* Banner de Bienvenida Premium */}
+      <main style={styles.main} className="fade-in">
+        {/* Banner con Glassmorphism */}
         <div style={styles.banner}>
           <div style={{ flex: 1 }}>
-            <div style={styles.badgeTop}>SISTEMA ACADÉMICO ALBA</div>
-            <h2 style={{ fontSize: '28px', fontWeight: '900', marginBottom: '8px', letterSpacing: '-0.02em' }}>
-              ¡Hola, Prof. {user.nombres}! 👋
+            <div style={styles.badgeTop}>PANEL DE CONTROL ACADÉMICO</div>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '8px', letterSpacing: '-0.03em' }}>
+              ¡Excelente jornada, {user.nombres.split(' ')[0]}! 🚀
             </h2>
-            <p style={{ opacity: 0.9, fontSize: '15px', fontWeight: '500' }}>
-              Tu pasión por la enseñanza construye el futuro de la Academia Alba.
+            <p style={{ opacity: 0.85, fontSize: '16px', fontWeight: '500', maxWidth: '500px' }}>
+              Gestione sus aulas y monitoree el rendimiento estudiantil con herramientas de precisión.
             </p>
           </div>
           <div style={styles.statsRow}>
             <div style={styles.miniStat}>
-              <div style={styles.miniIcon}><FaBookOpen /></div>
-              <div>
-                <div style={styles.miniVal}>{cursos.length}</div>
-                <div style={styles.miniLab}>CURSOS</div>
-              </div>
+              <div style={styles.miniVal}>{cursos.length}</div>
+              <div style={styles.miniLab}>Cursos</div>
             </div>
             <div style={styles.miniStat}>
-              <div style={styles.miniIcon}><FaUsers /></div>
-              <div>
-                <div style={styles.miniVal}>{estudiantes.length || '0'}</div>
-                <div style={styles.miniLab}>ALUMNOS</div>
-              </div>
+              <div style={styles.miniVal}>{estudiantes.length || '0'}</div>
+              <div style={styles.miniLab}>Alumnos</div>
             </div>
           </div>
         </div>
 
         <div style={styles.layout}>
-          {/* Columna Izquierda: Mis Cursos */}
+          {/* Sidebar Minimalista */}
           <div style={styles.sidebar}>
-            <div style={styles.sectionHeader}>
-              <FaChalkboardTeacher /> <span>MIS CURSOS ACTIVOS</span>
-            </div>
+            <div style={styles.sectionHeader}>AULAS ASIGNADAS</div>
             <div style={styles.cursoList}>
               {cursos.map(c => (
                 <div 
                   key={c.id} 
                   onClick={() => {
-                    if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Deseas perder los cambios de asistencia?')) return;
+                    if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Perder cambios pendientes?')) return;
                     setCursoSeleccionado(c);
                   }}
                   style={{...styles.cursoCard, ...(cursoSeleccionado?.id === c.id ? styles.cursoActive : {})}}
+                  className="course-card"
                 >
-                  <div style={{...styles.cursoIcon, background: cursoSeleccionado?.id === c.id ? 'rgba(255,255,255,0.2)' : '#f1f5f9'}}>
-                    <FaBookOpen color={cursoSeleccionado?.id === c.id ? '#fff' : '#4361ee'} />
+                  <div style={{...styles.cursoIcon, background: cursoSeleccionado?.id === c.id ? 'rgba(255,255,255,0.2)' : '#f8fafc'}}>
+                    <FaBookOpen size={16} color={cursoSeleccionado?.id === c.id ? '#fff' : '#4361ee'} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: '14px' }}>{c.nombre}</div>
-                    <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px', fontWeight: '600' }}>{c.horario}</div>
+                    <div style={{ fontWeight: 800, fontSize: '13px' }}>{c.nombre.toUpperCase()}</div>
+                    <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '3px', fontWeight: '700' }}>{c.horario}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Columna Derecha: Control de Asistencia */}
+          {/* Área de Trabajo */}
           <div style={styles.content}>
             {!cursoSeleccionado ? (
               <div style={styles.emptyState}>
-                <div style={styles.emptyIcon}><FaCalendarAlt /></div>
-                <h3 style={{ fontWeight: '900', color: '#0f172a' }}>Selector de Aula Virtual</h3>
-                <p style={{ color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>Elige un curso del panel izquierdo para comenzar a gestionar las asistencias y ver el progreso de tus alumnos.</p>
+                <div style={styles.emptyIcon}><FaChalkboardTeacher /></div>
+                <h3 style={{ fontWeight: '900', color: '#1e293b', marginBottom: '10px' }}>Seleccione un aula virtual</h3>
+                <p style={{ color: '#64748b', maxWidth: '350px', margin: '0 auto', fontSize: '14px' }}>
+                  Comience la gestión del día eligiendo uno de sus cursos asignados en el panel izquierdo.
+                </p>
               </div>
             ) : (
-              <>
+              <div className="fade-in">
                 <div style={styles.panelHeader}>
-                  <div>
-                    <div style={styles.breadcrumb}>GESTIÓN ACADÉMICA / ASISTENCIA</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#0f172a', margin: 0 }}>{cursoSeleccionado.nombre}</h2>
+                  <div style={{ flex: 1 }}>
+                    <div style={styles.breadcrumb}>GESTIÓN DE ASISTENCIA / {cursoSeleccionado.ciclo_nombre}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                      <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a', margin: 0 }}>{cursoSeleccionado.nombre}</h2>
                       <div style={styles.asistenciaProgress}>
                          <div style={styles.progressText}>
                             {estudiantes.filter(e => e.estado_asistencia !== 'no_registrado' || cambiosPendientes[e.matricula_id]).length} / {estudiantes.length} Marcados
@@ -201,7 +227,7 @@ const PortalDocenteInicio = () => {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <input 
                       type="date" 
                       value={fecha} 
@@ -210,72 +236,80 @@ const PortalDocenteInicio = () => {
                       style={styles.dateInput}
                     />
                     {Object.keys(cambiosPendientes).length > 0 && (
-                      <button onClick={guardarCambios} disabled={guardando} style={styles.saveBtn}>
-                        <FaCheck /> GUARDAR ASISTENCIA ({Object.keys(cambiosPendientes).length})
+                      <button onClick={guardarCambios} disabled={guardando} style={styles.saveBtn} className="btn-hover">
+                        <FaCheck /> GUARDAR CAMBIOS
                       </button>
                     )}
                   </div>
                 </div>
 
-                <div style={styles.tableCard}>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>Estudiante</th>
-                        <th style={styles.th}>Estado de Asistencia</th>
-                        <th style={{...styles.th, textAlign: 'center'}}>Inasistencias</th>
-                        <th style={{...styles.th, textAlign: 'right'}}>Control de Aula</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {estudiantes.map(e => {
-                        const estado = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
-                        const modificado = !!cambiosPendientes[e.matricula_id];
+                <div style={styles.tableWrapper}>
+                  {loadingEstudiantes ? (
+                    <div style={{ padding: '40px' }}>
+                       <Skeleton width="100%" height="40px" borderRadius="10px" />
+                       <div style={{ marginTop: '10px' }}><Skeleton width="100%" height="40px" borderRadius="10px" /></div>
+                       <div style={{ marginTop: '10px' }}><Skeleton width="100%" height="40px" borderRadius="10px" /></div>
+                    </div>
+                  ) : (
+                    <table style={styles.table}>
+                      <thead>
+                        <tr>
+                          <th style={styles.th}>Estudiante</th>
+                          <th style={styles.th}>Estado de Asistencia</th>
+                          <th style={{...styles.th, textAlign: 'center'}}>Inasistencias</th>
+                          <th style={{...styles.th, textAlign: 'right'}}>Control de Aula</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {estudiantes.map(e => {
+                          const estado = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
+                          const modificado = !!cambiosPendientes[e.matricula_id];
 
-                        return (
-                          <tr key={e.estudiante_id} style={styles.tr}>
-                            <td style={styles.td}>
-                              <div style={{ fontWeight: '800', color: '#1e293b' }}>{e.apellidos}, {e.nombres}</div>
-                              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>CÓDIGO: {e.codigo}</div>
-                            </td>
-                            <td style={styles.td}>
-                              <div style={styles.statusBadge(estado)}>
-                                {estado.replace('_', ' ').toUpperCase()}
-                              </div>
-                              {modificado && <span style={styles.pendingDot}>PENDIENTE DE GUARDAR</span>}
-                            </td>
-                            <td style={{ ...styles.td, textAlign: 'center' }}>
-                               <div style={{ 
-                                 fontSize: '13px', 
-                                 color: e.total_faltas >= 3 ? '#e11d48' : '#059669', 
-                                 fontWeight: '900',
-                                 background: e.total_faltas >= 3 ? '#fff1f2' : '#f0fdf4',
-                                 padding: '4px 12px',
-                                 borderRadius: '10px',
-                                 display: 'inline-block'
-                               }}>
-                                 {e.total_faltas} Faltas
-                               </div>
-                            </td>
-                            <td style={{ ...styles.td, textAlign: 'right' }}>
-                              <select 
-                                value={estado} 
-                                onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
-                                style={styles.select(modificado)}
-                              >
-                                <option value="no_registrado">Seleccionar estado...</option>
-                                <option value="presente">Presente ✅</option>
-                                <option value="tardanza">Tardanza ⏳</option>
-                                <option value="ausente">Ausente ❌</option>
-                              </select>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                          return (
+                            <tr key={e.estudiante_id} style={styles.tr}>
+                              <td style={styles.td}>
+                                <div style={{ fontWeight: '800', color: '#1e293b' }}>{e.apellidos}, {e.nombres}</div>
+                                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>CÓDIGO: {e.codigo}</div>
+                              </td>
+                              <td style={styles.td}>
+                                <div style={styles.statusBadge(estado)}>
+                                  {estado.replace('_', ' ').toUpperCase()}
+                                </div>
+                                {modificado && <span style={styles.pendingDot}>PENDIENTE DE GUARDAR</span>}
+                              </td>
+                              <td style={{ ...styles.td, textAlign: 'center' }}>
+                                 <div style={{ 
+                                   fontSize: '13px', 
+                                   color: e.total_faltas >= 3 ? '#e11d48' : '#059669', 
+                                   fontWeight: '900',
+                                   background: e.total_faltas >= 3 ? '#fff1f2' : '#f0fdf4',
+                                   padding: '4px 12px',
+                                   borderRadius: '10px',
+                                   display: 'inline-block'
+                                 }}>
+                                   {e.total_faltas} Faltas
+                                 </div>
+                              </td>
+                              <td style={{ ...styles.td, textAlign: 'right' }}>
+                                <select 
+                                  value={estado} 
+                                  onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
+                                  style={styles.select(modificado)}
+                                >
+                                  <option value="no_registrado">Seleccionar estado...</option>
+                                  <option value="presente">Presente ✅</option>
+                                  <option value="tardanza">Tardanza ⏳</option>
+                                  <option value="ausente">Ausente ❌</option>
+                                </select>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -285,65 +319,62 @@ const PortalDocenteInicio = () => {
 };
 
 const styles = {
-  center: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f8fafc' },
-  spinner: { width: 50, height: 50, border: '5px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-  page: { minHeight: '100vh', background: '#f8fafc', color: '#0f172a' },
-  header: { background: 'white', borderBottom: '1px solid #e2e8f0', padding: '15px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
+  header: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  logoCircle: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '12px' },
-  logoutBtn: { background: '#fff1f2', color: '#e11d48', border: '1px solid #fecdd3', padding: '8px 16px', borderRadius: '10px', fontWeight: '800', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' },
-  main: { maxWidth: 1400, margin: '0 auto', padding: '30px 40px' },
-  banner: { background: 'linear-gradient(135deg, #4361ee, #2563eb)', color: 'white', padding: '35px 40px', borderRadius: '28px', marginBottom: '35px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 20px 25px -5px rgba(37, 99, 235, 0.2)' },
-  badgeTop: { background: 'rgba(255,255,255,0.2)', color: 'white', padding: '4px 12px', borderRadius: '50px', fontSize: '10px', fontWeight: '900', display: 'inline-block', marginBottom: '12px', letterSpacing: '0.1em' },
-  statsRow: { display: 'flex', gap: '30px' },
-  miniStat: { display: 'flex', alignItems: 'center', gap: '15px' },
-  miniIcon: { padding: '12px', borderRadius: '14px', background: 'rgba(255,255,255,0.15)', fontSize: '18px', color: 'white' },
-  miniVal: { fontSize: '24px', fontWeight: '900' },
-  miniLab: { fontSize: '10px', fontWeight: '800', opacity: 0.8, letterSpacing: '0.05em' },
-  layout: { display: 'flex', gap: '35px' },
-  sidebar: { width: '300px', flexShrink: 0 },
-  sectionHeader: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11px', fontWeight: '900', color: '#94a3b8', marginBottom: '20px', paddingLeft: '5px', letterSpacing: '0.05em' },
-  cursoList: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  cursoCard: { background: 'white', padding: '18px', borderRadius: '20px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' },
-  cursoIcon: { width: '45px', height: '45px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
-  cursoActive: { background: '#4361ee', color: 'white', borderColor: '#4361ee', boxShadow: '0 12px 20px rgba(67, 97, 238, 0.25)', transform: 'translateY(-2px)' },
+  logoCircle: { background: '#1e293b', color: 'white', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' },
+  logoutBtn: { background: '#f1f5f9', color: '#475569', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  main: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
+  banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
+  badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },
+  statsRow: { display: 'flex', gap: '40px' },
+  miniStat: { textAlign: 'center' },
+  miniVal: { fontSize: '32px', fontWeight: '900', marginBottom: '2px' },
+  miniLab: { fontSize: '10px', fontWeight: '800', opacity: 0.6, letterSpacing: '0.1em', textTransform: 'uppercase' },
+  layout: { display: 'flex', gap: '40px' },
+  sidebar: { width: '280px', flexShrink: 0 },
+  sectionHeader: { fontSize: '10px', fontWeight: '900', color: '#94a3b8', marginBottom: '20px', letterSpacing: '0.15em', paddingLeft: '5px' },
+  cursoList: { display: 'flex', flexDirection: 'column', gap: '10px' },
+  cursoCard: { background: 'white', padding: '16px', borderRadius: '20px', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
+  cursoIcon: { width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  cursoActive: { background: '#1e293b', color: 'white', borderColor: '#1e293b', transform: 'translateX(8px)' },
   content: { flex: 1 },
   asistenciaProgress: { background: '#f1f5f9', padding: '10px 18px', borderRadius: '15px', minWidth: '180px' },
-  progressText: { fontSize: '11px', fontWeight: '900', color: '#475569', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' },
-  progressBar: { width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' },
-  progressFill: { height: '100%', background: 'linear-gradient(90deg, #10b981, #34d399)', borderRadius: '10px', transition: 'width 0.5s ease' },
-  emptyState: { textAlign: 'center', padding: '100px 40px', background: 'white', borderRadius: '28px', border: '2px dashed #e2e8f0' },
-  emptyIcon: { fontSize: '48px', color: '#cbd5e1', marginBottom: '20px' },
-  panelHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '30px' },
-  breadcrumb: { fontSize: '10px', fontWeight: '900', color: '#4361ee', marginBottom: '8px', letterSpacing: '0.05em' },
-  dateInput: { background: 'white', border: '2px solid #f1f5f9', padding: '12px 18px', borderRadius: '15px', fontSize: '14px', fontWeight: '800', color: '#1e293b', outline: 'none', transition: 'all 0.2s' },
-  saveBtn: { background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '15px', fontWeight: '900', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.3)' },
-  tableCard: { background: 'white', borderRadius: '28px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
+  progressText: { fontSize: '10px', fontWeight: '900', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between' },
+  progressBar: { width: '100%', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' },
+  progressFill: { height: '100%', background: '#10b981', borderRadius: '10px', transition: 'width 0.8s cubic-bezier(0.65, 0, 0.35, 1)' },
+  emptyState: { textAlign: 'center', padding: '120px 40px', background: 'white', borderRadius: '32px', border: '2px dashed #e2e8f0' },
+  emptyIcon: { fontSize: '50px', color: '#e2e8f0', marginBottom: '25px' },
+  panelHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '35px' },
+  breadcrumb: { fontSize: '9px', fontWeight: '900', color: '#4361ee', marginBottom: '8px', letterSpacing: '0.1em' },
+  dateInput: { background: 'white', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '800', color: '#1e293b', outline: 'none', transition: 'all 0.2s' },
+  saveBtn: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '12px 28px', borderRadius: '16px', fontWeight: '900', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' },
+  tableWrapper: { background: 'white', borderRadius: '32px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#f8fafc', padding: '20px 25px', textAlign: 'left', fontSize: '11px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: '1px solid #f1f5f9' },
-  td: { padding: '22px 25px', borderBottom: '1px solid #f1f5f9', fontSize: '14px' },
+  th: { background: '#f8fafc', padding: '22px 30px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid #f1f5f9' },
+  td: { padding: '24px 30px', borderBottom: '1px solid #f1f5f9', fontSize: '14px' },
   tr: { transition: 'all 0.2s' },
   statusBadge: (status) => ({
-    background: status === 'presente' ? '#ecfdf5' : status === 'ausente' ? '#fff1f2' : status === 'tardanza' ? '#fffbeb' : '#f8fafc',
-    color: status === 'presente' ? '#059669' : status === 'ausente' ? '#e11d48' : status === 'tardanza' ? '#d97706' : '#94a3b8',
-    padding: '6px 12px',
+    background: status === 'presente' ? '#f0fdf4' : status === 'ausente' ? '#fff1f2' : status === 'tardanza' ? '#fffbeb' : '#f8fafc',
+    color: status === 'presente' ? '#16a34a' : status === 'ausente' ? '#e11d48' : status === 'tardanza' ? '#d97706' : '#94a3b8',
+    padding: '6px 14px',
     borderRadius: '10px',
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: '900',
     display: 'inline-block',
-    border: `1px solid ${status === 'presente' ? '#d1fae5' : status === 'ausente' ? '#fee2e2' : status === 'tardanza' ? '#fef3c7' : '#e2e8f0'}`
+    border: `1px solid ${status === 'presente' ? '#dcfce7' : status === 'ausente' ? '#fee2e2' : status === 'tardanza' ? '#fef3c7' : '#e2e8f0'}`
   }),
-  pendingDot: { display: 'block', fontSize: '9px', color: '#4361ee', fontWeight: '900', marginTop: '5px', letterSpacing: '0.02em' },
+  pendingDot: { display: 'block', fontSize: '9px', color: '#4361ee', fontWeight: '900', marginTop: '6px', letterSpacing: '0.02em', textTransform: 'uppercase' },
   select: (mod) => ({
-    padding: '10px 15px',
-    borderRadius: '12px',
+    padding: '10px 18px',
+    borderRadius: '14px',
     border: `2px solid ${mod ? '#4361ee' : '#f1f5f9'}`,
     fontSize: '13px',
     fontWeight: mod ? '900' : '700',
     background: 'white',
     outline: 'none',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.3s'
   })
 };
 
