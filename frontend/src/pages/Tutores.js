@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { estudiantesAPI, pagosAPI, matriculasAPI } from '../services/api';
-import { FaSearch, FaUserShield, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard } from 'react-icons/fa';
+import { FaSearch, FaUserShield, FaPhone, FaExclamationTriangle, FaCheckCircle, FaClipboardList, FaCommentDots, FaFilePdf, FaUserGraduate, FaIdCard, FaUsers } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
