@@ -76,7 +76,7 @@ exports.cambiarEstado = async (req, res) => {
     }
 };
 
-// Eliminar ciclo (forzar borrado en cascada de cursos)
+// Eliminar ciclo (BORRADO TOTAL EN CASCADA: Pagos -> Matrículas -> Cursos -> Ciclo)
 exports.eliminar = async (req, res) => {
     try {
         const { id } = req.params;
@@ -85,29 +85,36 @@ exports.eliminar = async (req, res) => {
         await connection.beginTransaction();
 
         try {
-            // 1. Borrar todos los cursos asociados a este ciclo permanentemente
+            // 1. Borrar PAGOS asociados a las matrículas de los cursos de este ciclo
+            await connection.query(`
+                DELETE FROM pagos 
+                WHERE matricula_id IN (
+                    SELECT id FROM matriculas 
+                    WHERE curso_id IN (SELECT id FROM cursos WHERE ciclo_id = ?)
+                )`, [id]);
+
+            // 2. Borrar MATRÍCULAS asociadas a los cursos de este ciclo
+            await connection.query(`
+                DELETE FROM matriculas 
+                WHERE curso_id IN (SELECT id FROM cursos WHERE ciclo_id = ?)
+            `, [id]);
+
+            // 3. Borrar CURSOS asociados al ciclo
             await connection.query('DELETE FROM cursos WHERE ciclo_id = ?', [id]);
             
-            // 2. Borrar el ciclo
+            // 4. Finalmente borrar el CICLO
             await connection.query('DELETE FROM ciclos WHERE id = ?', [id]);
 
             await connection.commit();
-            res.json({ success: true, message: 'Ciclo y todos sus cursos eliminados permanentemente' });
+            res.json({ success: true, message: 'Ciclo y todos sus datos asociados eliminados permanentemente' });
         } catch (error) {
             await connection.rollback();
-            // Si hay un error de llave foránea (ej. un curso ya tiene matrículas o pagos)
-            if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'No se puede eliminar. Existen alumnos ya matriculados en los cursos de este ciclo.' 
-                });
-            }
             throw error;
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error('Error al eliminar ciclo:', error);
-        res.status(500).json({ success: false, message: 'Error al eliminar ciclo' });
+        console.error('Error al eliminar ciclo completo:', error);
+        res.status(500).json({ success: false, message: 'Error al eliminar el ciclo y sus datos' });
     }
 };
