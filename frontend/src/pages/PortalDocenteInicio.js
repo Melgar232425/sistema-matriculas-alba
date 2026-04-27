@@ -14,6 +14,7 @@ const PortalDocenteInicio = () => {
   const [cambiosPendientes, setCambiosPendientes] = useState({});
   const [guardando, setGuardando] = useState(false);
   const navigate = useNavigate();
+  const [errorDia, setErrorDia] = useState(null);
 
   const user = JSON.parse(localStorage.getItem('docente_user') || '{}');
 
@@ -58,6 +59,37 @@ const PortalDocenteInicio = () => {
     localStorage.removeItem('docente_token');
     localStorage.removeItem('docente_user');
     navigate('/portal-docente');
+  };
+
+  // Extrae los días de clase desde el string de horario
+  // Formatos soportados: "Lunes 08:00 AM - 10:00 AM", "Lunes y Miércoles 08:00 AM...", "Lunes a Viernes..."
+  const getDiasDeClase = (horarioStr) => {
+    if (!horarioStr) return [];
+    const DIAS_SEMANA = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const horNorm = normalizar(horarioStr);
+    return DIAS_SEMANA.filter(d => horNorm.includes(d));
+  };
+
+  const getDiaHoyNormalizado = () => {
+    const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return normalizar(dias[new Date().getDay()]);
+  };
+
+  const seleccionarCurso = (c) => {
+    if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Perder cambios pendientes?')) return;
+    const diasClase = getDiasDeClase(c.horario);
+    const diaHoy = getDiaHoyNormalizado();
+    if (diasClase.length > 0 && !diasClase.includes(diaHoy)) {
+      const nombresCompletos = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo' };
+      const diasTexto = diasClase.map(d => nombresCompletos[d] || d).join(', ');
+      setErrorDia(`Este curso tiene clases los ${diasTexto}. Hoy no hay sesión programada.`);
+      setCursoSeleccionado(c);
+    } else {
+      setErrorDia(null);
+      setCursoSeleccionado(c);
+    }
   };
 
   const marcarAsistenciaLocal = (matricula_id, estado) => {
@@ -196,10 +228,7 @@ const PortalDocenteInicio = () => {
               {cursos.map(c => (
                 <div 
                   key={c.id} 
-                  onClick={() => {
-                    if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Perder cambios pendientes?')) return;
-                    setCursoSeleccionado(c);
-                  }}
+                  onClick={() => seleccionarCurso(c)}
                   style={{...styles.cursoCard, ...(cursoSeleccionado?.id === c.id ? styles.cursoActive : {})}}
                   className="course-card"
                 >
@@ -225,10 +254,19 @@ const PortalDocenteInicio = () => {
                   Comience la gestión del día eligiendo uno de sus cursos asignados en el panel izquierdo.
                 </p>
               </div>
+            ) : errorDia ? (
+              <div className="fade-in" style={{ textAlign: 'center', padding: '60px 20px', background: 'white', borderRadius: '32px', border: '2px dashed #fde68a' }}>
+                <div style={{ fontSize: '50px', marginBottom: '20px' }}>📅</div>
+                <h3 style={{ fontWeight: '900', color: '#92400e', marginBottom: '12px' }}>{cursoSeleccionado?.nombre}</h3>
+                <p style={{ color: '#b45309', fontWeight: '600', fontSize: '15px', maxWidth: '380px', margin: '0 auto', lineHeight: '1.6' }}>{errorDia}</p>
+                <div style={{ marginTop: '20px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '14px', padding: '12px 20px', display: 'inline-block' }}>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#78350f', fontWeight: '700' }}>💡 Solo puedes registrar asistencia en el día de clase correspondiente.</p>
+                </div>
+              </div>
             ) : (
               <div className="fade-in">
-                <div style={styles.panelHeader}>
-                  <div style={{ flex: 1 }}>
+                <div style={{ ...styles.panelHeader, flexWrap: 'wrap', gap: '15px' }} className="asist-panel-header">
+                  <div style={{ flex: 1, minWidth: '200px' }}>
                     <div style={styles.breadcrumb}>GESTIÓN DE ASISTENCIA / {cursoSeleccionado.ciclo_nombre}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                       <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a', margin: 0 }}>{cursoSeleccionado.nombre}</h2>
@@ -245,16 +283,17 @@ const PortalDocenteInicio = () => {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <input 
-                      type="date" 
+                      type="date"
+                      className="asist-date-input"
                       value={fecha} 
                       onChange={e => setFecha(e.target.value)} 
                       max={new Date().toISOString().split('T')[0]}
                       style={styles.dateInput}
                     />
                     {Object.keys(cambiosPendientes).length > 0 && (
-                      <button onClick={guardarCambios} disabled={guardando} style={styles.saveBtn} className="btn-hover">
+                      <button onClick={guardarCambios} disabled={guardando} style={styles.saveBtn} className="btn-hover asist-save-btn">
                         <FaCheck /> GUARDAR CAMBIOS
                       </button>
                     )}
