@@ -370,6 +370,7 @@ const Tutores = () => {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 };
