@@ -351,20 +351,22 @@ const PortalDocenteInicio = () => {
                                 width: '100%',
                                 padding: '14px 16px',
                                 borderRadius: '14px',
-                                border: `2px solid ${modificado ? '#4361ee' : '#e2e8f0'}`,
+                                border: `2px solid ${modificado ? '#4361ee' : '#cbd5e1'}`,
                                 fontSize: '14px',
-                                fontWeight: modificado ? '900' : '700',
-                                background: 'white',
+                                fontWeight: '700',
+                                background: '#f8fafc',
                                 outline: 'none',
                                 cursor: 'pointer',
                                 color: '#1e293b',
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                appearance: 'auto',
+                                WebkitAppearance: 'auto'
                               }}
                             >
-                              <option value="no_registrado">Seleccionar estado...</option>
-                              <option value="presente">Presente ✅</option>
-                              <option value="tardanza">Tardanza ⏳</option>
-                              <option value="ausente">Ausente ❌</option>
+                              <option value="no_registrado" style={{ color: '#64748b' }}>— Seleccionar estado —</option>
+                              <option value="presente" style={{ color: '#059669', fontWeight: '700' }}>✅ Presente</option>
+                              <option value="tardanza" style={{ color: '#d97706', fontWeight: '700' }}>⏳ Tardanza</option>
+                              <option value="ausente" style={{ color: '#e11d48', fontWeight: '700' }}>❌ Ausente</option>
                             </select>
                             {modificado && <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', marginTop: '8px' }}>● CAMBIO PENDIENTE DE GUARDAR</div>}
                           </div>
