@@ -93,7 +93,16 @@ exports.marcarAsistencia = async (req, res) => {
     const [curso] = await promisePool.query('SELECT id FROM cursos WHERE id = ? AND docente_id = ?', [curso_id, req.docente.id]);
     if (curso.length === 0) return res.status(403).json({ success: false, message: 'Permiso denegado' });
 
-    // Insertar o Actualizar
+    // Si el estado es 'no_registrado', eliminamos el registro de asistencia (limpiar)
+    if (estado === 'no_registrado') {
+      await promisePool.query(
+        'DELETE FROM asistencias WHERE matricula_id = ? AND fecha = ?',
+        [matricula_id, fecha]
+      );
+      return res.json({ success: true, message: 'Asistencia eliminada (reinicio)' });
+    }
+
+    // Insertar o Actualizar para estados válidos
     await promisePool.query(
       `INSERT INTO asistencias (matricula_id, fecha, estado) 
        VALUES (?, ?, ?) 
