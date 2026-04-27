@@ -324,8 +324,10 @@ const Tutores = () => {
                     required
                   />
                   <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                    <button type="button" onClick={() => setSelectedEstudiante(null)} style={styles.cancelBtn}>Cancelar</button>
-                    <button type="submit" style={styles.saveModalBtn}>Guardar Seguimiento</button>
+                    <button type="button" onClick={() => setSelectedEstudiante(null)} style={styles.cancelBtn} disabled={saving}>Cancelar</button>
+                    <button type="submit" style={styles.saveModalBtn} disabled={saving}>
+                      {saving ? 'Guardando...' : 'Guardar Seguimiento'}
+                    </button>
                   </div>
                </form>
             </div>
