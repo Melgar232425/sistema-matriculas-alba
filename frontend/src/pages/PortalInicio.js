@@ -63,75 +63,82 @@ const PortalInicio = () => {
 
   if (loading) {
     return (
-      <div style={styles.loadingScreen}>
-        <div style={styles.spinner} />
-        <p style={{ color: '#64748b', fontWeight: 600, marginTop: 16, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Cargando tu información...</p>
+      <div style={styles.page}>
+        <header style={styles.header}>
+           <div style={styles.headerInner}><Skeleton width="150px" height="30px" /></div>
+        </header>
+        <main style={styles.main}>
+           <Skeleton width="100%" height="150px" borderRadius="24px" />
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginTop: '30px' }}>
+              {[1,2,3,4].map(i => <Skeleton key={i} width="100%" height="100px" borderRadius="20px" />)}
+           </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="portal-page">
-      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
-        {sidebarActive ? <FaTimes /> : <FaBars />}
-      </button>
+    <div style={styles.page}>
+      <style>{`
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1) !important; }
+      `}</style>
 
-      {/* SIDEBAR del portal */}
-      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
-        <div style={styles.sidebarHeader}>
-          <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))' }} />
+      {/* Header Estilo Apple/Elite */}
+      <header style={styles.header}>
+        <div style={styles.headerInner}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+            <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>STUDENT PORTAL</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: '#1e293b' }}>{perfil?.nombres} {perfil?.apellidos}</div>
+              <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', letterSpacing: '0.05em' }}>● ALUMNO ACTIVO</div>
+            </div>
+            <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
+              <FaSignOutAlt />
+            </button>
+          </div>
         </div>
-        <nav style={styles.nav}>
-          {[
-            { to: '/portal/inicio',  icon: <FaUserGraduate />,    label: 'Mi Perfil' },
-            { to: '/portal/horario', icon: <FaCalendarAlt />,     label: 'Mi Horario' },
-            { to: '/portal/asistencia', icon: <FaCheckCircle />, label: 'Mi Asistencia' },
-            { to: '/portal/pagos',   icon: <FaMoneyBillWave />,   label: 'Mis Pagos' },
-          ].map(item => (
-            <Link
-              key={item.to}
-              to={item.to}
-              style={{
-                ...styles.navLink,
-                ...(window.location.pathname === item.to ? styles.navLinkActive : {})
-              }}
-            >
-              {item.icon} <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <button onClick={handleLogout} style={styles.logoutBtn}>
-          <FaSignOutAlt /> Salir
-        </button>
-      </aside>
+      </header>
 
-      {/* CONTENIDO */}
-      <main className="portal-main">
-        {/* Bienvenida */}
-        <div style={styles.welcomeBanner}>
-          <div>
-            <h1 style={styles.welcomeTitle}>
-              ¡Hola, {perfil?.nombres?.split(' ')[0]}! 👋
-            </h1>
-            <p style={styles.welcomeSub}>
-              Bienvenido a tu portal estudiantil — Academia Alba Perú
+      <main style={styles.main} className="fade-in">
+        {/* Banner con Glassmorphism */}
+        <div style={styles.banner}>
+          <div style={{ flex: 1 }}>
+            <div style={styles.badgeTop}>CENTRO DE APRENDIZAJE</div>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '8px', letterSpacing: '-0.03em' }}>
+              ¡Hola de nuevo, {perfil?.nombres?.split(' ')[0]}! 🎓
+            </h2>
+            <p style={{ opacity: 0.85, fontSize: '16px', fontWeight: '500', maxWidth: '500px' }}>
+              Sigue tu progreso, revisa tus clases y mantente al día con tus metas académicas.
             </p>
+          </div>
+          <div style={styles.codigoBadge}>
+             <div style={{ fontSize: '10px', opacity: 0.7, fontWeight: '800', marginBottom: '4px' }}>CÓDIGO ALUMNO</div>
+             <div style={{ fontSize: '20px', fontWeight: '900' }}>{perfil?.codigo}</div>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats Grid - Premium Cards */}
         <div style={styles.statsGrid}>
           {[
-            { label: 'Matrículas activas', value: matriculas.length, icon: <FaClipboardList />, color: '#4361ee', bg: '#eff6ff' },
-            { label: 'Total pagado', value: `S/ ${totalPagado.toFixed(2)}`, icon: <FaMoneyBillWave />, color: '#10b981', bg: '#f0fdf4' },
-            { label: 'Saldo pendiente', value: `S/ ${totalDeuda.toFixed(2)}`, icon: <FaExclamationCircle />, color: totalDeuda > 0 ? '#ef4444' : '#10b981', bg: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4' },
-            { label: 'Pagos realizados', value: pagos.length, icon: <FaCheckCircle />, color: '#8b5cf6', bg: '#f5f3ff' },
+            { label: 'Matrículas', value: matriculas.length, icon: <FaClipboardList />, color: '#4361ee', bg: '#eff6ff' },
+            { label: 'Total Pagado', value: `S/ ${totalPagado.toFixed(2)}`, icon: <FaMoneyBillWave />, color: '#10b981', bg: '#f0fdf4' },
+            { label: 'Saldo Pendiente', value: `S/ ${totalDeuda.toFixed(2)}`, icon: <FaExclamationCircle />, color: totalDeuda > 0 ? '#ef4444' : '#10b981', bg: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4' },
+            { label: 'Cursos Activos', value: matriculas.filter(m => m.estado_matricula === 'activa').length, icon: <FaUserGraduate />, color: '#8b5cf6', bg: '#f5f3ff' },
           ].map((s, i) => (
-            <div key={i} style={styles.statCard}>
+            <div key={i} style={styles.statCard} className="stat-card">
               <div style={{ ...styles.statIcon, background: s.bg, color: s.color }}>{s.icon}</div>
               <div>
-                <p style={styles.statValue}>{s.value}</p>
-                <p style={styles.statLabel}>{s.label}</p>
+                <div style={styles.statLabel}>{s.label.toUpperCase()}</div>
+                <div style={styles.statValue}>{s.value}</div>
               </div>
             </div>
           ))}
@@ -196,70 +203,44 @@ const PortalInicio = () => {
   );
 };
 
+// Componente de Carga Elegante (Skeleton)
+const Skeleton = ({ width, height, borderRadius = '10px' }) => (
+  <div style={{
+    width, height, borderRadius,
+    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'skeleton-loading 1.5s infinite linear'
+  }} />
+);
+
 const styles = {
-  page: { display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  loadingScreen: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8fafc' },
-  spinner: { width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebar: {
-    background: 'white', borderRight: '1px solid #e2e8f0',
-    display: 'flex', flexDirection: 'column',
-    padding: '0 0 24px 0', boxShadow: '2px 0 12px rgba(0,0,0,0.04)',
-  },
-  sidebarHeader: {
-    background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    marginBottom: 16,
-  },
-  nav: { flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 },
-  navLink: {
-    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-    borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600,
-    fontSize: 14, transition: 'all 0.2s',
-  },
-  navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', boxShadow: '0 4px 12px rgba(67,97,238,0.3)' },
-  logoutBtn: {
-    margin: '0 12px', padding: '12px 16px', background: '#fef2f2', color: '#ef4444',
-    border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer',
-    display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif",
-  },
-  main: { flex: 1, padding: '32px 36px' },
-  welcomeBanner: {
-    background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', borderRadius: 20,
-    padding: '28px 32px', color: 'white', marginBottom: 28, display: 'flex',
-    justifyContent: 'space-between', alignItems: 'center',
-    boxShadow: '0 8px 24px rgba(67,97,238,0.3)',
-  },
-  welcomeTitle: { fontSize: 26, fontWeight: 800, marginBottom: 6, color: 'white' },
-  welcomeSub: { fontSize: 14, opacity: 0.8, color: 'white' },
-  codigoBadge: {
-    background: 'rgba(255,255,255,0.15)', padding: '10px 18px', borderRadius: 12,
-    display: 'flex', alignItems: 'center', gap: 10, fontSize: 16, fontWeight: 700,
-    color: 'white', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)',
-  },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 },
-  statCard: {
-    background: 'white', borderRadius: 16, padding: '20px 24px', display: 'flex',
-    alignItems: 'center', gap: 16, border: '1px solid #e2e8f0',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-  },
-  statIcon: { width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 },
-  statValue: { fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 2 },
-  statLabel: { fontSize: 12, color: '#64748b', fontWeight: 600 },
-  card: { background: 'white', borderRadius: 20, padding: '28px 32px', marginBottom: 24, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' },
-  cardTitle: { fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 20, display: 'flex', alignItems: 'center' },
-  infoGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px 24px' },
-  infoItem: { display: 'flex', flexDirection: 'column', gap: 4, padding: '12px', background: '#f8fafc', borderRadius: 10 },
-  infoLabel: { fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.3px' },
-  infoValue: { fontSize: 14, fontWeight: 600, color: '#0f172a' },
-  tableWrap: { overflowX: 'auto', borderRadius: 12, border: '1px solid #f1f5f9' },
+  page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
+  header: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  main: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
+  banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
+  badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },
+  codigoBadge: { background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px 25px', borderRadius: '20px', textAlign: 'center', backdropFilter: 'blur(5px)' },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' },
+  statCard: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'all 0.3s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' },
+  statIcon: { width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
+  statLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '4px', letterSpacing: '0.05em' },
+  statValue: { fontSize: '24px', fontWeight: '900', color: '#1e293b' },
+  card: { background: 'white', borderRadius: '32px', padding: '35px', marginBottom: '30px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
+  cardTitle: { fontSize: '20px', fontWeight: '900', color: '#1e293b', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '12px' },
+  infoGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' },
+  infoItem: { background: '#f8fafc', padding: '18px 22px', borderRadius: '20px', border: '1px solid #f1f5f9' },
+  infoLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' },
+  infoValue: { fontSize: '15px', fontWeight: '700', color: '#1e293b' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#f8fafc', padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', borderBottom: '2px solid #f1f5f9' },
-  td: { padding: '14px 16px', borderBottom: '1px solid #f8fafc', fontSize: 13, color: '#0f172a', verticalAlign: 'middle' },
-  tr: { transition: 'background 0.15s' },
-  code: { background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, color: '#4361ee' },
-  horarioPill: { background: '#eff6ff', color: '#3b82f6', padding: '3px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600 },
-  emptyText: { color: '#94a3b8', fontWeight: 500, textAlign: 'center', padding: '20px 0' },
-  viewAllLink: { color: '#4361ee', fontWeight: 700, textDecoration: 'none', fontSize: 14 },
+  th: { background: '#f8fafc', padding: '18px 25px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid #f1f5f9' },
+  td: { padding: '20px 25px', borderBottom: '1px solid #f1f5f9', fontSize: '14px', color: '#475569' },
+  tr: { transition: 'all 0.2s' },
+  code: { background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', color: '#4361ee' },
+  horarioPill: { background: '#eff6ff', color: '#4361ee', padding: '4px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '700' },
+  emptyText: { textAlign: 'center', padding: '40px', color: '#94a3b8', fontWeight: '600' },
+  viewAllLink: { color: '#4361ee', fontWeight: '800', textDecoration: 'none', fontSize: '14px', transition: 'all 0.2s' },
 };
 
 export default PortalInicio;

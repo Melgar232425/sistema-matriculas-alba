@@ -91,28 +91,31 @@ const PortalHorario = () => {
   if (loading) return <div style={styles.center}><div style={styles.spinner}></div></div>;
 
   return (
-    <div className="portal-page">
-      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
-        {sidebarActive ? <FaTimes /> : <FaBars />}
-      </button>
-
-      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
-        <div style={styles.sidebarHeader}>
-          <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120 }} />
+    <div style={styles.page}>
+      {/* Header Estilo Apple/Elite */}
+      <header style={styles.headerPremium}>
+        <div style={styles.headerInner}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+            <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>STUDENT SCHEDULE</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <Link to="/portal/inicio" style={styles.backBtn}>← Volver al Inicio</Link>
+            <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
+              <FaSignOutAlt />
+            </button>
+          </div>
         </div>
-        <nav style={styles.nav}>
-          <Link to="/portal/inicio" style={styles.navLink}><FaUserGraduate /> <span>Mi Perfil</span></Link>
-          <Link to="/portal/horario" style={{...styles.navLink, ...styles.navLinkActive}}><FaCalendarAlt /> <span>Mi Horario</span></Link>
-          <Link to="/portal/asistencia" style={styles.navLink}><FaCalendarCheck size={16} /> <span>Mi Asistencia</span></Link>
-          <Link to="/portal/pagos" style={styles.navLink}><FaMoneyBillWave /> <span>Mis Pagos</span></Link>
-        </nav>
-        <button onClick={handleLogout} style={styles.logoutBtn}><FaSignOutAlt /> Salir</button>
-      </aside>
+      </header>
 
-      <main className="portal-main">
-        <div style={styles.header}>
-            <h1 style={styles.pageTitle}>Calendario Semanal de Clases</h1>
-            <p style={styles.pageSub}>Distribución de tus lecciones académicas del periodo</p>
+      <main style={styles.mainContent}>
+        <div style={styles.pageHeader}>
+            <div style={styles.badgeTop}>CALENDARIO ACADÉMICO</div>
+            <h1 style={styles.pageTitle}>Mi Horario Semanal</h1>
+            <p style={styles.pageSub}>Organización de tus lecciones para el periodo vigente</p>
         </div>
 
         {horario.length === 0 ? (
@@ -214,36 +217,38 @@ const PortalHorario = () => {
 };
 
 const styles = {
+  page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
+  headerPremium: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
+  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
+  pageHeader: { marginBottom: '35px' },
+  badgeTop: { background: '#eff6ff', color: '#4361ee', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '12px', letterSpacing: '0.1em' },
+  pageTitle: { fontSize: '28px', fontWeight: '900', color: '#1e293b', marginBottom: '6px', letterSpacing: '-0.02em' },
+  pageSub: { color: '#64748b', fontSize: '14px', fontWeight: '500' },
   center: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' },
   spinner: { width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  nav: { flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 },
-  navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
-  navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', boxShadow: '0 4px 12px rgba(67,97,238,0.3)' },
-  logoutBtn: { margin: '0 12px', padding: '12px 16px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  header: { marginBottom: 25 },
-  pageTitle: { fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 6 },
-  pageSub: { color: '#64748b', fontSize: 14, fontWeight: 500 },
-  emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 12 },
+  emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 12, background: 'white', borderRadius: '32px', border: '1px solid #e2e8f0' },
   emptyTitle: { fontSize: 18, fontWeight: 700, color: '#475569' },
   emptyText: { fontSize: 14, color: '#94a3b8', textAlign: 'center', maxWidth: 320 },
-  calendarCard: { background: 'white', borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.03)', overflowX: 'auto', marginBottom: 30 },
-  calendarHeader: { display: 'grid', gridTemplateColumns: '80px repeat(6, 1fr)', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', minWidth: '900px' },
-  headerCell: { padding: '16px 8px', textAlign: 'center', fontSize: '12px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' },
+  calendarCard: { background: 'white', borderRadius: '32px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)', overflowX: 'auto', marginBottom: '40px', padding: '20px' },
+  calendarHeader: { display: 'grid', gridTemplateColumns: '80px repeat(6, 1fr)', background: '#f8fafc', borderRadius: '16px', marginBottom: '10px', minWidth: '900px' },
+  headerCell: { padding: '16px 8px', textAlign: 'center', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' },
   calendarBody: { minWidth: '900px' },
-  calendarRow: { display: 'grid', gridTemplateColumns: '80px repeat(6, 1fr)', height: '70px', borderBottom: '1px solid #f1f5f9' },
-  timeLabel: { fontSize: '11px', fontWeight: '800', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', borderRight: '1px solid #f1f5f9' },
-  calendarCell: { position: 'relative', borderRight: '1px solid #f8fafc' },
-  eventBlock: { position: 'absolute', top: 1, left: 1, right: 1, borderRadius: '6px', padding: '4px 8px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '0px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', zIndex: 5 },
-  eventTitle: { fontSize: '11px', fontWeight: '800', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' },
-  eventDocente: { fontSize: '9px', fontWeight: '500', opacity: 0.9, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  eventTimeRange: { fontSize: '9px', fontWeight: '800', marginTop: 'auto' },
-  cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '15px' },
-  cursoCard: { background: 'white', borderRadius: '12px', padding: '15px', display: 'flex', gap: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' },
-  cursoIcon: { width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  cursoNombre: { fontSize: '15px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' },
+  calendarRow: { display: 'grid', gridTemplateColumns: '80px repeat(6, 1fr)', height: '75px', borderBottom: '1px solid #f8fafc' },
+  timeLabel: { fontSize: '10px', fontWeight: '900', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #f8fafc' },
+  calendarCell: { position: 'relative' },
+  eventBlock: { position: 'absolute', top: 2, left: 2, right: 2, borderRadius: '12px', padding: '8px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '2px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', boxSizing: 'border-box', zIndex: 5, transition: 'all 0.2s' },
+  eventTitle: { fontSize: '11px', fontWeight: '900', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  eventDocente: { fontSize: '9px', fontWeight: '600', opacity: 0.8 },
+  eventTimeRange: { fontSize: '9px', fontWeight: '900', marginTop: 'auto', opacity: 0.7 },
+  cursosGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' },
+  cursoCard: { background: 'white', borderRadius: '24px', padding: '20px', display: 'flex', gap: '15px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', transition: 'all 0.3s' },
+  cursoIcon: { width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  cursoNombre: { fontSize: '16px', fontWeight: '900', color: '#1e293b', marginBottom: '4px' },
   cursoMeta: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  metaItem: { display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '12px', fontWeight: '500' }
+  metaItem: { display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '12px', fontWeight: '600' }
 };
 
 export default PortalHorario;

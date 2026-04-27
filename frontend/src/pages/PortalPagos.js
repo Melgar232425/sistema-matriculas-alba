@@ -54,48 +54,57 @@ const PortalPagos = () => {
   if (loading) return <div style={styles.loading}><div style={styles.spinner} /></div>;
 
   return (
-    <div className="portal-page">
-      <button className="sidebar-toggle" onClick={() => setSidebarActive(!sidebarActive)}>
-        {sidebarActive ? <FaTimes /> : <FaBars />}
-      </button>
-
-      <aside className={`portal-sidebar ${sidebarActive ? 'active' : ''}`}>
-        <div style={styles.sidebarHeader}>
-          <img src="/logo_oficial.png" alt="Academia Alba" style={{ width: '100%', maxWidth: 120, height: 'auto' }} />
+    <div style={styles.page}>
+      {/* Header Estilo Apple/Elite */}
+      <header style={styles.headerPremium}>
+        <div style={styles.headerInner}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+            <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <div>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ALBA ACADEMY</h1>
+              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>FINANCIAL PORTAL</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <Link to="/portal/inicio" style={styles.backBtn}>← Volver al Inicio</Link>
+            <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
+              <FaSignOutAlt />
+            </button>
+          </div>
         </div>
-        <nav style={styles.nav}>
-          {[
-            { to: '/portal/inicio',  icon: <FaUserGraduate />,  label: 'Mi Perfil' },
-            { to: '/portal/horario', icon: <FaCalendarAlt />,   label: 'Mi Horario' },
-            { to: '/portal/asistencia', icon: <FaCheckCircle />, label: 'Mi Asistencia' },
-            { to: '/portal/pagos',   icon: <FaMoneyBillWave />, label: 'Mis Pagos' },
-          ].map(item => (
-            <Link key={item.to} to={item.to} style={{ ...styles.navLink, ...(window.location.pathname === item.to ? styles.navLinkActive : {}) }}>
-              {item.icon} <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <button onClick={handleLogout} style={styles.logoutBtn}><FaSignOutAlt /> Salir</button>
-      </aside>
+      </header>
 
-      <main className="portal-main">
-        <div style={styles.header}>
-          <div>
-            <h1 style={styles.pageTitle}><FaMoneyBillWave style={{ marginRight: 12, color: '#4361ee' }} />Mis Pagos</h1>
-            <p style={styles.pageSub}>Historial completo de tus abonos registrados</p>
+      <main style={styles.mainContent}>
+        {/* Banner con Glassmorphism */}
+        <div style={styles.banner}>
+          <div style={{ flex: 1 }}>
+            <div style={styles.badgeTop}>ESTADO DE CUENTA</div>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '8px', letterSpacing: '-0.03em' }}>
+              Mi Historial de Pagos 💸
+            </h2>
+            <p style={{ opacity: 0.85, fontSize: '16px', fontWeight: '500', maxWidth: '500px' }}>
+              Consulta tus abonos, descarga recibos oficiales y mantén tus finanzas académicas al día.
+            </p>
+          </div>
+          <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', padding: '20px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+             <div style={{ fontSize: '10px', opacity: 0.8, fontWeight: '900', marginBottom: '5px' }}>SALDO PENDIENTE</div>
+             <div style={{ fontSize: '28px', fontWeight: '900', color: totalDeuda > 0 ? '#ff8a8a' : '#fff' }}>S/ {totalDeuda.toFixed(2)}</div>
           </div>
         </div>
 
-        {/* Resumen */}
+        {/* Stats Row - Premium Cards */}
         <div style={styles.statsRow}>
           {[
-            { label: 'Total de pagos', value: pagos.length, color: '#4361ee', bg: '#eff6ff' },
-            { label: 'Total pagado', value: `S/ ${totalPagado.toFixed(2)}`, color: '#10b981', bg: '#f0fdf4' },
-            { label: 'Saldo pendiente', value: `S/ ${totalDeuda.toFixed(2)}`, color: totalDeuda > 0 ? '#ef4444' : '#10b981', bg: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4' },
+            { label: 'Abonos realizados', value: pagos.length, color: '#4361ee', bg: '#eff6ff' },
+            { label: 'Inversión total', value: `S/ ${totalPagado.toFixed(2)}`, color: '#10b981', bg: '#f0fdf4' },
+            { label: 'Cursos con deuda', value: matriculas.filter(m => (m.monto_total - m.monto_pagado) > 0).length, color: totalDeuda > 0 ? '#ef4444' : '#10b981', bg: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4' },
           ].map((s, i) => (
-            <div key={i} style={styles.statCard}>
-              <p style={{ ...styles.statValue, color: s.color }}>{s.value}</p>
-              <p style={styles.statLabel}>{s.label}</p>
+            <div key={i} style={styles.statCard} className="stat-card">
+              <div style={{ ...styles.statIcon, background: s.bg, color: s.color }}><FaMoneyBillWave /></div>
+              <div>
+                <div style={styles.statLabel}>{s.label.toUpperCase()}</div>
+                <div style={styles.statValue}>{s.value}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -210,33 +219,30 @@ const PortalPagos = () => {
 };
 
 const styles = {
-  page: { display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' },
+  page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
+  headerPremium: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
+  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
+  banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
+  badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },
+  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8fafc' },
   spinner: { width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
-  sidebar: { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', padding: '0 0 24px 0', zIndex: 100 },
-  sidebarHeader: { background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', padding: '28px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  nav: { flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 },
-  navLink: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, color: '#475569', textDecoration: 'none', fontWeight: 600, fontSize: 14 },
-  navLinkActive: { background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', boxShadow: '0 4px 12px rgba(67,97,238,0.3)' },
-  logoutBtn: { margin: '0 12px', padding: '12px 16px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  main: { flex: 1, padding: '32px 36px' },
-  header: { marginBottom: 28 },
-  pageTitle: { fontSize: 24, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', marginBottom: 6 },
-  pageSub: { color: '#64748b', fontSize: 14, fontWeight: 500 },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 28 },
-  statCard: { background: 'white', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
-  statValue: { fontSize: 22, fontWeight: 800, marginBottom: 4 },
-  statLabel: { fontSize: 12, color: '#64748b', fontWeight: 600 },
-  card: { background: 'white', borderRadius: 20, padding: '24px 28px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' },
-  searchInput: { width: '100%', maxWidth: 340, height: 42, border: '2px solid #e2e8f0', borderRadius: 50, paddingLeft: 20, fontSize: 14, outline: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" },
-  tableWrap: { overflowX: 'auto', borderRadius: 12, border: '1px solid #f1f5f9' },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' },
+  statCard: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'all 0.3s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' },
+  statIcon: { width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
+  statLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '4px', letterSpacing: '0.05em' },
+  statValue: { fontSize: '24px', fontWeight: '900', color: '#1e293b' },
+  card: { background: 'white', borderRadius: '32px', padding: '35px', marginBottom: '30px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
+  searchInput: { width: '100%', maxWidth: '340px', background: '#f8fafc', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '700', color: '#1e293b', outline: 'none', transition: 'all 0.2s', marginBottom: '10px' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#f8fafc', padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', borderBottom: '2px solid #f1f5f9' },
-  td: { padding: '14px 16px', borderBottom: '1px solid #f8fafc', fontSize: 13, color: '#0f172a', verticalAlign: 'middle' },
-  tr: {},
-  code: { background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, color: '#4361ee' },
-  montoPill: { background: '#f0fdf4', color: '#10b981', padding: '4px 10px', borderRadius: 8, fontSize: 13, fontWeight: 700 },
-  emptyText: { color: '#94a3b8', fontWeight: 500, textAlign: 'center', padding: '24px 0' },
+  th: { background: '#f8fafc', padding: '18px 25px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid #f1f5f9' },
+  td: { padding: '20px 25px', borderBottom: '1px solid #f1f5f9', fontSize: '14px', color: '#475569' },
+  tr: { transition: 'all 0.2s' },
+  code: { background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', color: '#4361ee' },
+  montoPill: { background: '#f0fdf4', color: '#10b981', padding: '6px 14px', borderRadius: '12px', fontSize: '14px', fontWeight: '900' },
+  emptyText: { textAlign: 'center', padding: '40px', color: '#94a3b8', fontWeight: '600' }
 };
 
 export default PortalPagos;
