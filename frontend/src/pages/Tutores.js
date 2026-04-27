@@ -11,6 +11,7 @@ const Tutores = () => {
   const [busqueda, setBusqueda] = useState('');
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
   const [seguimiento, setSeguimiento] = useState({ comentario: '', contacto_padre: '' });
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
 
   useEffect(() => {
     cargarDatos();
@@ -112,14 +113,50 @@ const Tutores = () => {
 
   return (
     <div className="main-content" style={{ padding: '30px' }}>
-      {/* Header del Módulo */}
-      <div style={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={styles.headerIcon}><FaUserShield /></div>
+      {/* Dashboard Ejecutivo de Tutoría */}
+      <div style={styles.statsDashboard}>
+        <div style={styles.statBox}>
+          <div style={{...styles.statCircle, background: '#eef2ff', color: '#4361ee'}}><FaUsers /></div>
           <div>
-            <h1 style={{ fontSize: '26px', fontWeight: '900', color: '#0f172a', margin: 0 }}>Área de Tutoría</h1>
-            <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Monitoreo académico y financiero de estudiantes</p>
+            <div style={styles.statValue}>{estudiantes.length}</div>
+            <div style={styles.statLabel}>Estudiantes Totales</div>
           </div>
+        </div>
+        <div style={styles.statBox}>
+          <div style={{...styles.statCircle, background: '#fff1f2', color: '#e11d48'}}><FaExclamationTriangle /></div>
+          <div>
+            <div style={styles.statValue}>{estudiantes.filter(e => e.tieneDeuda).length}</div>
+            <div style={styles.statLabel}>En Riesgo Financiero</div>
+          </div>
+        </div>
+        <div style={styles.statBox}>
+          <div style={{...styles.statCircle, background: '#f0fdf4', color: '#16a34a'}}><FaCheckCircle /></div>
+          <div>
+            <div style={styles.statValue}>{estudiantes.filter(e => !e.tieneDeuda).length}</div>
+            <div style={styles.statLabel}>Al Día / Solventes</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros Inteligentes */}
+      <div style={styles.filterBar}>
+        <div style={styles.filterTabs}>
+          {['Todos', 'Deudores', 'Al Día'].map(tab => (
+            <button 
+              key={tab}
+              onClick={() => {
+                if (tab === 'Todos') setBusqueda('');
+                if (tab === 'Deudores') { setBusqueda(''); /* Logic for state filter */ }
+                setFiltroEstado(tab);
+              }}
+              style={{
+                ...styles.filterTab,
+                ...(filtroEstado === tab ? styles.filterTabActive : {})
+              }}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
         
         {/* Buscador Integrado */}
@@ -142,7 +179,13 @@ const Tutores = () => {
         </div>
       ) : (
         <div style={styles.grid}>
-          {estudiantesFiltrados.map(est => (
+          {estudiantesFiltrados
+            .filter(est => {
+              if (filtroEstado === 'Deudores') return est.tieneDeuda;
+              if (filtroEstado === 'Al Día') return !est.tieneDeuda;
+              return true;
+            })
+            .map(est => (
             <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => setSelectedEstudiante(est)}>
               <div style={styles.cardTop}>
                 <div style={styles.userAvatar}><FaUserGraduate /></div>
@@ -233,11 +276,20 @@ const Tutores = () => {
 };
 
 const styles = {
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' },
   headerIcon: { width: '55px', height: '55px', background: 'linear-gradient(135deg, #4361ee, #6366f1)', color: 'white', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 10px 15px -3px rgba(67, 97, 238, 0.3)' },
-  searchContainer: { position: 'relative', flex: '1', maxWidth: '450px' },
+  statsDashboard: { display: 'flex', gap: '25px', marginBottom: '35px', flexWrap: 'wrap' },
+  statBox: { flex: 1, minWidth: '240px', background: 'white', padding: '20px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' },
+  statCircle: { width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
+  statValue: { fontSize: '22px', fontWeight: '900', color: '#0f172a', lineHeight: '1' },
+  statLabel: { fontSize: '12px', color: '#64748b', fontWeight: '600', marginTop: '4px' },
+  filterBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '20px', flexWrap: 'wrap' },
+  filterTabs: { display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '16px', gap: '5px' },
+  filterTab: { padding: '10px 24px', borderRadius: '12px', border: 'none', background: 'transparent', fontSize: '13px', fontWeight: '800', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' },
+  filterTabActive: { background: 'white', color: '#4361ee', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  searchContainer: { position: 'relative', flex: '1', maxWidth: '400px' },
   searchIcon: { position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' },
-  searchInput: { width: '100%', padding: '15px 15px 15px 55px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '14px', outline: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', transition: 'all 0.3s' },
+  searchInput: { width: '100%', padding: '14px 15px 14px 55px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '50px', fontSize: '14px', outline: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', transition: 'all 0.3s' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' },
   estCard: (debt) => ({
     background: 'white',
