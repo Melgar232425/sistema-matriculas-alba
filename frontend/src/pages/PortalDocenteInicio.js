@@ -122,6 +122,20 @@ const PortalDocenteInicio = () => {
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .course-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px -5px rgba(67, 97, 238, 0.3) !important; }
         .btn-hover:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+        /* === MOBILE: Tabla de Asistencia → Tarjetas === */
+        @media (max-width: 768px) {
+          .asist-table { display: none !important; }
+          .asist-cards { display: flex !important; }
+          .asist-panel-header { flex-direction: column !important; gap: 12px !important; }
+          .asist-panel-header > div { width: 100% !important; }
+          .asist-save-btn { width: 100% !important; justify-content: center !important; }
+          .asist-date-input { width: 100% !important; box-sizing: border-box !important; }
+        }
+        @media (min-width: 769px) {
+          .asist-table { display: table !important; }
+          .asist-cards { display: none !important; }
+        }
       `}</style>
 
       {/* Header Estilo Apple/Elite */}
@@ -255,62 +269,112 @@ const PortalDocenteInicio = () => {
                        <div style={{ marginTop: '10px' }}><Skeleton width="100%" height="40px" borderRadius="10px" /></div>
                     </div>
                   ) : (
-                    <table style={styles.table}>
-                      <thead>
-                        <tr>
-                          <th style={styles.th}>Estudiante</th>
-                          <th style={styles.th}>Estado de Asistencia</th>
-                          <th style={{...styles.th, textAlign: 'center'}}>Inasistencias</th>
-                          <th style={{...styles.th, textAlign: 'right'}}>Control de Aula</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <>
+                      {/* Vista Desktop: Tabla */}
+                      <table style={styles.table} className="asist-table">
+                        <thead>
+                          <tr>
+                            <th style={styles.th}>Estudiante</th>
+                            <th style={styles.th}>Estado de Asistencia</th>
+                            <th style={{...styles.th, textAlign: 'center'}}>Inasistencias</th>
+                            <th style={{...styles.th, textAlign: 'right'}}>Control de Aula</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {estudiantes.map(e => {
+                            const estado = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
+                            const modificado = !!cambiosPendientes[e.matricula_id];
+                            return (
+                              <tr key={e.estudiante_id} style={styles.tr}>
+                                <td style={styles.td}>
+                                  <div style={{ fontWeight: '800', color: '#1e293b' }}>{e.apellidos}, {e.nombres}</div>
+                                  <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>CÓDIGO: {e.codigo}</div>
+                                </td>
+                                <td style={styles.td}>
+                                  <div style={styles.statusBadge(estado)}>
+                                    {estado.replace('_', ' ').toUpperCase()}
+                                  </div>
+                                  {modificado && <span style={styles.pendingDot}>PENDIENTE DE GUARDAR</span>}
+                                </td>
+                                <td style={{ ...styles.td, textAlign: 'center' }}>
+                                   <div style={{ fontSize: '13px', color: e.total_faltas >= 3 ? '#e11d48' : '#059669', fontWeight: '900', background: e.total_faltas >= 3 ? '#fff1f2' : '#f0fdf4', padding: '4px 12px', borderRadius: '10px', display: 'inline-block' }}>
+                                     {e.total_faltas} Faltas
+                                   </div>
+                                </td>
+                                <td style={{ ...styles.td, textAlign: 'right' }}>
+                                  <select
+                                    value={estado}
+                                    onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
+                                    style={styles.select(modificado)}
+                                  >
+                                    <option value="no_registrado">Seleccionar estado...</option>
+                                    <option value="presente">Presente ✅</option>
+                                    <option value="tardanza">Tardanza ⏳</option>
+                                    <option value="ausente">Ausente ❌</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+
+                      {/* Vista Móvil: Tarjetas */}
+                      <div className="asist-cards" style={{ flexDirection: 'column', gap: '12px', padding: '16px' }}>
                         {estudiantes.map(e => {
                           const estado = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
                           const modificado = !!cambiosPendientes[e.matricula_id];
-
                           return (
-                            <tr key={e.estudiante_id} style={styles.tr}>
-                              <td style={styles.td}>
-                                <div style={{ fontWeight: '800', color: '#1e293b' }}>{e.apellidos}, {e.nombres}</div>
-                                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>CÓDIGO: {e.codigo}</div>
-                              </td>
-                              <td style={styles.td}>
-                                <div style={styles.statusBadge(estado)}>
-                                  {estado.replace('_', ' ').toUpperCase()}
+                            <div key={e.estudiante_id} style={{
+                              background: modificado ? '#eff6ff' : 'white',
+                              borderRadius: '20px',
+                              padding: '18px',
+                              border: `2px solid ${modificado ? '#4361ee' : '#e2e8f0'}`,
+                              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)'
+                            }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                                <div>
+                                  <div style={{ fontWeight: '900', fontSize: '15px', color: '#1e293b' }}>{e.apellidos}, {e.nombres}</div>
+                                  <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', marginTop: '3px' }}>CÓD: {e.codigo}</div>
                                 </div>
-                                {modificado && <span style={styles.pendingDot}>PENDIENTE DE GUARDAR</span>}
-                              </td>
-                              <td style={{ ...styles.td, textAlign: 'center' }}>
-                                 <div style={{ 
-                                   fontSize: '13px', 
-                                   color: e.total_faltas >= 3 ? '#e11d48' : '#059669', 
-                                   fontWeight: '900',
-                                   background: e.total_faltas >= 3 ? '#fff1f2' : '#f0fdf4',
-                                   padding: '4px 12px',
-                                   borderRadius: '10px',
-                                   display: 'inline-block'
-                                 }}>
-                                   {e.total_faltas} Faltas
-                                 </div>
-                              </td>
-                              <td style={{ ...styles.td, textAlign: 'right' }}>
-                                <select 
-                                  value={estado} 
-                                  onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
-                                  style={styles.select(modificado)}
-                                >
-                                  <option value="no_registrado">Seleccionar estado...</option>
-                                  <option value="presente">Presente ✅</option>
-                                  <option value="tardanza">Tardanza ⏳</option>
-                                  <option value="ausente">Ausente ❌</option>
-                                </select>
-                              </td>
-                            </tr>
+                                <div style={{
+                                  fontSize: '12px',
+                                  color: e.total_faltas >= 3 ? '#e11d48' : '#059669',
+                                  fontWeight: '900',
+                                  background: e.total_faltas >= 3 ? '#fff1f2' : '#f0fdf4',
+                                  padding: '4px 10px',
+                                  borderRadius: '10px'
+                                }}>
+                                  {e.total_faltas} Faltas
+                                </div>
+                              </div>
+                              <select
+                                value={estado}
+                                onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '14px 16px',
+                                  borderRadius: '14px',
+                                  border: `2px solid ${modificado ? '#4361ee' : '#e2e8f0'}`,
+                                  fontSize: '14px',
+                                  fontWeight: modificado ? '900' : '700',
+                                  background: 'white',
+                                  outline: 'none',
+                                  cursor: 'pointer',
+                                  color: '#1e293b'
+                                }}
+                              >
+                                <option value="no_registrado">Seleccionar estado...</option>
+                                <option value="presente">Presente ✅</option>
+                                <option value="tardanza">Tardanza ⏳</option>
+                                <option value="ausente">Ausente ❌</option>
+                              </select>
+                              {modificado && <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', marginTop: '8px', letterSpacing: '0.05em' }}>● CAMBIO PENDIENTE DE GUARDAR</div>}
+                            </div>
                           );
                         })}
-                      </tbody>
-                    </table>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
