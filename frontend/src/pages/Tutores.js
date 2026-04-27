@@ -244,7 +244,7 @@ const Tutores = () => {
                <button style={styles.closeModal} onClick={() => setSelectedEstudiante(null)}>×</button>
             </div>
 
-            <div style={{ padding: '25px' }}>
+            <div style={styles.modalContent}>
                <h4 style={styles.sectionTitle}>SITUACIÓN FINANCIERA X CURSO</h4>
                <div style={styles.matList}>
                  {selectedEstudiante.matriculas.map(m => (
@@ -323,8 +323,33 @@ const styles = {
   infoRow: { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#475569', fontWeight: '700' },
   cardFooter: { borderTop: '1px solid #f1f5f9', paddingTop: '22px' },
   trackBtn: { width: '100%', background: '#f8fafc', border: '1.5px dashed #e2e8f0', padding: '14px', borderRadius: '18px', color: '#4361ee', fontWeight: '900', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.3s' },
-  modal: { maxWidth: '700px', borderRadius: '32px', overflow: 'hidden' },
-  modalHeader: { padding: '30px', background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  modal: { 
+    maxWidth: '700px', 
+    width: '95%', 
+    maxHeight: '90vh', 
+    borderRadius: '32px', 
+    overflow: 'hidden', 
+    display: 'flex', 
+    flexDirection: 'column',
+    position: 'relative',
+    background: 'white'
+  },
+  modalHeader: { 
+    padding: '30px', 
+    background: 'white', 
+    borderBottom: '1px solid #f1f5f9', 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    flexShrink: 0
+  },
+  modalContent: {
+    padding: '30px',
+    overflowY: 'auto',
+    flex: 1,
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#e2e8f0 transparent'
+  },
   modalAvatar: { width: '54px', height: '54px', background: '#eef2ff', color: '#4361ee', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
   closeModal: { background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', fontWeight: '900', fontSize: '22px', transition: 'all 0.2s' },
   sectionTitle: { fontSize: '10px', fontWeight: '900', color: '#94a3b8', letterSpacing: '0.1em', marginBottom: '20px', textTransform: 'uppercase' },
