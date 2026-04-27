@@ -55,18 +55,27 @@ exports.getEstudiantesAsistencia = async (req, res) => {
     if (curso.length === 0) return res.status(403).json({ success: false, message: 'Curso no pertenece al docente' });
 
     // Obtener los estudiantes matriculados en este curso y que su matrícula esté activa o terminada... asumiendo activa
-    // Obtener los estudiantes matriculados en este curso (únicos)
+    // Obtener los estudiantes matriculados en este curso (únicos usando subconsulta limpia)
     const [estudiantes] = await promisePool.query(
-      `SELECT MAX(m.id) as matricula_id, e.id as estudiante_id, e.codigo, e.nombres, e.apellidos, 
-              COALESCE(a.estado, 'no_registrado') as estado_asistencia,
-              (SELECT COUNT(*) FROM asistencias WHERE matricula_id = MAX(m.id) AND estado = 'ausente') as total_faltas
-       FROM matriculas m
+      `SELECT 
+        m.id as matricula_id, 
+        e.id as estudiante_id, 
+        e.codigo, 
+        e.nombres, 
+        e.apellidos, 
+        COALESCE(a.estado, 'no_registrado') as estado_asistencia,
+        (SELECT COUNT(*) FROM asistencias WHERE matricula_id = m.id AND estado = 'ausente') as total_faltas
+       FROM (
+         SELECT MAX(id) as id, estudiante_id 
+         FROM matriculas 
+         WHERE curso_id = ? AND estado_matricula = 'activa' 
+         GROUP BY estudiante_id
+       ) m_latest
+       JOIN matriculas m ON m.id = m_latest.id
        JOIN estudiantes e ON m.estudiante_id = e.id
        LEFT JOIN asistencias a ON a.matricula_id = m.id AND a.fecha = ?
-       WHERE m.curso_id = ? AND m.estado_matricula = 'activa'
-       GROUP BY e.id
        ORDER BY e.apellidos ASC`,
-      [fecha, id]
+      [id, fecha]
     );
     
     res.json({ success: true, data: estudiantes });
