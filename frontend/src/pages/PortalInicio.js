@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import {
   FaUserGraduate, FaClipboardList, FaMoneyBillWave,
-  FaSignOutAlt, FaExclamationCircle
+  FaSignOutAlt, FaExclamationCircle, FaCheckCircle, FaClock
 } from 'react-icons/fa';
 
 const Skeleton = ({ width, height, borderRadius }) => (
