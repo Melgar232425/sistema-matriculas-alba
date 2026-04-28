@@ -10,8 +10,34 @@ import 'jspdf-autotable';
 
 const PortalAsistencia = () => {
   const [asistencias, setAsistencias] = useState([]);
+  const [matriculas, setMatriculas] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const getDiasDeClase = (horarioStr) => {
+    if (!horarioStr) return [];
+    const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const horNorm = horarioStr.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return DIAS_SEMANA.filter(d => horNorm.includes(d));
+  };
+
+  const calcularTotalSesiones = (fechaInicio, fechaFin, horarioStr) => {
+    if (!fechaInicio || !fechaFin || !horarioStr) return 0;
+    const diasClase = getDiasDeClase(horarioStr);
+    if (diasClase.length === 0) return 0;
+    const start = new Date(fechaInicio + 'T12:00:00');
+    const end = new Date(fechaFin + 'T12:00:00');
+    let count = 0;
+    const current = new Date(start);
+    const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    while (current <= end) {
+      const diaActual = normalizar(diasSemanaMap[current.getDay()]);
+      if (diasClase.includes(diaActual)) count++;
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  };
 
   const user = JSON.parse(localStorage.getItem('student_user') || '{}');
 
@@ -23,8 +49,12 @@ const PortalAsistencia = () => {
 
   const fetchAsistencias = async () => {
     try {
-      const res = await portalAPI.getAsistencias();
-      setAsistencias(res.data.data || []);
+      const [asisRes, matRes] = await Promise.all([
+        portalAPI.getAsistencias(),
+        portalAPI.getMatriculas()
+      ]);
+      setAsistencias(asisRes.data.data || []);
+      setMatriculas(matRes.data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -104,19 +134,32 @@ const PortalAsistencia = () => {
   };
 
   const resumenPorCurso = useMemo(() => {
-    const resumen = {};
+    const cursosMap = {};
+    
+    // Inicializar con datos de matrículas para tener las fechas del ciclo
+    matriculas.forEach(m => {
+      cursosMap[m.curso_nombre] = {
+        nombre: m.curso_nombre,
+        asistencias: 0,
+        faltas: 0,
+        totalCiclo: calcularTotalSesiones(m.fecha_inicio, m.fecha_fin, m.horario)
+      };
+    });
+
+    // Sumar asistencias reales
     asistencias.forEach(a => {
-      if (!resumen[a.curso_nombre]) { resumen[a.curso_nombre] = { total: 0, asistencias: 0, faltas: 0, tardanzas: 0 }; }
-      resumen[a.curso_nombre].total += 1;
-      if (a.estado === 'presente') resumen[a.curso_nombre].asistencias += 1;
-      else if (a.estado === 'ausente') resumen[a.curso_nombre].faltas += 1;
-      else if (a.estado === 'tardanza') resumen[a.curso_nombre].tardanzas += 1;
+      if (!cursosMap[a.curso_nombre]) {
+        cursosMap[a.curso_nombre] = { nombre: a.curso_nombre, asistencias: 0, faltas: 0, totalCiclo: 0 };
+      }
+      if (a.estado === 'presente' || a.estado === 'tardanza') {
+        cursosMap[a.curso_nombre].asistencias++;
+      } else if (a.estado === 'ausente') {
+        cursosMap[a.curso_nombre].faltas++;
+      }
     });
-    return Object.entries(resumen).map(([nombre, stats]) => {
-      const porcFaltas = ((stats.faltas / stats.total) * 100).toFixed(1);
-      return { nombre, ...stats, porcFaltas };
-    });
-  }, [asistencias]);
+
+    return Object.values(cursosMap);
+  }, [asistencias, matriculas]);
 
   if (loading) return <div style={styles.center}><div style={styles.spinner} /></div>;
 
@@ -160,7 +203,7 @@ const PortalAsistencia = () => {
         </div>
 
         <div style={styles.card}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: 'white', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
             <FaChartBar color="#4361ee" /> CURSOS MATRICULADOS EN EL PERIODO - MIS ASISTENCIAS
           </h2>
           {resumenPorCurso.length === 0 ? (
@@ -177,33 +220,38 @@ const PortalAsistencia = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {resumenPorCurso.map((item, idx) => (
-                    <tr key={idx} style={styles.tr}>
-                      <td style={{...styles.td, fontWeight: 700, color: 'white'}}>{item.nombre}</td>
-                      <td style={{...styles.td, textAlign: 'center'}}>
-                        <div style={styles.countBadge}>{item.asistencias + item.tardanzas} de {item.total}</div>
-                      </td>
-                      <td style={{...styles.td, textAlign: 'center'}}>
-                        <span style={{ 
-                          fontWeight: 800, 
-                          color: item.porcFaltas > 20 ? '#ef4444' : '#1e293b',
-                          background: item.porcFaltas > 20 ? '#fef2f2' : '#f8fafc',
-                          padding: '4px 12px', borderRadius: '8px', fontSize: '13px'
-                        }}>
-                          {item.porcFaltas}%
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <div style={styles.progressBarBg}>
-                          <div style={{
-                            ...styles.progressBarFill,
-                            width: `${100 - item.porcFaltas}%`,
-                            backgroundColor: item.porcFaltas > 20 ? '#ef4444' : item.porcFaltas > 10 ? '#f59e0b' : '#10b981'
-                          }}></div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {resumenPorCurso.map((item, idx) => {
+                    const porcAsistencia = item.totalCiclo > 0 ? Math.round((item.asistencias / item.totalCiclo) * 100) : 0;
+                    const porcFaltas = item.totalCiclo > 0 ? ((item.faltas / item.totalCiclo) * 100).toFixed(1) : '0.0';
+                    
+                    return (
+                      <tr key={idx} style={styles.tr}>
+                        <td style={{...styles.td, fontWeight: 700, color: '#1e293b'}}>{item.nombre}</td>
+                        <td style={{...styles.td, textAlign: 'center'}}>
+                          <div style={styles.countBadge}>{item.asistencias} de {item.totalCiclo}</div>
+                        </td>
+                        <td style={{...styles.td, textAlign: 'center'}}>
+                          <span style={{ 
+                            fontWeight: 800, 
+                            color: parseFloat(porcFaltas) > 20 ? '#ef4444' : '#1e293b',
+                            background: parseFloat(porcFaltas) > 20 ? '#fef2f2' : '#f8fafc',
+                            padding: '4px 12px', borderRadius: '8px', fontSize: '13px'
+                          }}>
+                            {porcFaltas}%
+                          </span>
+                        </td>
+                        <td style={styles.td}>
+                          <div style={styles.progressBarBg}>
+                            <div style={{
+                              ...styles.progressBarFill,
+                              width: `${porcAsistencia}%`,
+                              background: 'linear-gradient(90deg, #4361ee, #4cc9f0)'
+                            }}></div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -222,9 +270,8 @@ const PortalAsistencia = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  headerPremium: { background: '#0f172a', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerPremium: { background: '#0f172a', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
   logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
   mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
