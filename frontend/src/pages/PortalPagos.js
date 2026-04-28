@@ -60,7 +60,7 @@ const PortalPagos = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
             <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: 'white' }}>ACADEMIA ALBA</h1>
               <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PAGOS ALUMNO</p>
             </div>
           </div>
@@ -219,10 +219,10 @@ const PortalPagos = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  headerPremium: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerPremium: { background: '#0f172a', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
-  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
   mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
   badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },
@@ -232,9 +232,9 @@ const styles = {
   statCard: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'all 0.3s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' },
   statIcon: { width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
   statLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '4px', letterSpacing: '0.05em' },
-  statValue: { fontSize: '24px', fontWeight: '900', color: '#1e293b' },
+  statValue: { fontSize: '24px', fontWeight: '900', color: 'white' },
   card: { background: 'white', borderRadius: '32px', padding: '35px', marginBottom: '30px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
-  searchInput: { width: '100%', maxWidth: '340px', background: '#f8fafc', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '700', color: '#1e293b', outline: 'none', transition: 'all 0.2s', marginBottom: '10px' },
+  searchInput: { width: '100%', maxWidth: '340px', background: '#f8fafc', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '700', color: 'white', outline: 'none', transition: 'all 0.2s', marginBottom: '10px' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { background: '#f8fafc', padding: '18px 25px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid #f1f5f9' },
   td: { padding: '20px 25px', borderBottom: '1px solid #f1f5f9', fontSize: '14px', color: '#475569' },

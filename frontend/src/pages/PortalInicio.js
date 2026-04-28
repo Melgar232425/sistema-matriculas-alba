@@ -99,16 +99,16 @@ const PortalInicio = () => {
       <header style={styles.header}>
         <div style={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
-            <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <div style={styles.logoCircle}>A</div>
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
-              <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PORTAL ALUMNO</p>
+              <h1 style={{ fontSize: '18px', fontWeight: '900', color: 'white', margin: 0, letterSpacing: '-0.5px' }}>ACADEMIA ALBA</h1>
+              <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', margin: 0, fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>PORTAL ALUMNO</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: '#1e293b' }}>{perfil?.nombres} {perfil?.apellidos}</div>
-              <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', letterSpacing: '0.05em' }}>● ALUMNO ACTIVO</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '14px', fontWeight: '800', color: 'white' }}>{perfil?.nombres} {perfil?.apellidos}</span>
+              <span style={{ fontSize: '10px', color: '#10b981', fontWeight: '900', textTransform: 'uppercase' }}>● ALUMNO REGISTRADO</span>
             </div>
             <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
               <FaSignOutAlt />
@@ -215,9 +215,10 @@ const PortalInicio = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  header: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  header: { background: '#0f172a', borderBottom: '1px solid rgba(255,255,255,0.1)', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  logoCircle: { background: 'white', color: '#0f172a', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '16px' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
   main: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
   badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },

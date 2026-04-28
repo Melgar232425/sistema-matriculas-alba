@@ -128,7 +128,7 @@ const PortalAsistencia = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
             <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: 'white' }}>ACADEMIA ALBA</h1>
               <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>ASISTENCIA ALUMNO</p>
             </div>
           </div>
@@ -160,7 +160,7 @@ const PortalAsistencia = () => {
         </div>
 
         <div style={styles.card}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 25, color: 'white', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #f1f5f9', paddingBottom: 15 }}>
             <FaChartBar color="#4361ee" /> CURSOS MATRICULADOS EN EL PERIODO - MIS ASISTENCIAS
           </h2>
           {resumenPorCurso.length === 0 ? (
@@ -179,7 +179,7 @@ const PortalAsistencia = () => {
                 <tbody>
                   {resumenPorCurso.map((item, idx) => (
                     <tr key={idx} style={styles.tr}>
-                      <td style={{...styles.td, fontWeight: 700, color: '#1e293b'}}>{item.nombre}</td>
+                      <td style={{...styles.td, fontWeight: 700, color: 'white'}}>{item.nombre}</td>
                       <td style={{...styles.td, textAlign: 'center'}}>
                         <div style={styles.countBadge}>{item.asistencias + item.tardanzas} de {item.total}</div>
                       </td>
@@ -222,10 +222,10 @@ const PortalAsistencia = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  headerPremium: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerPremium: { background: '#0f172a', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
-  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
   mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
   badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },

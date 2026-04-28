@@ -50,45 +50,48 @@ const StudentNavbar = () => {
 
 const styles = {
   navContainer: {
-    background: 'white',
-    borderBottom: '1px solid #e2e8f0',
+    background: '#1e293b',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
     position: 'sticky',
-    top: '70px', /* Adjust based on header height */
+    top: '60px', /* Ajustado a la altura del header */
     zIndex: 90,
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)'
+    boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
   },
   navInner: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
     padding: '0 40px',
     display: 'flex',
-    gap: '30px',
+    gap: '15px',
     overflowX: 'auto',
-    scrollbarWidth: 'none' /* Hide scrollbar for clean look */
+    scrollbarWidth: 'none'
   },
   navItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '16px 8px',
-    color: '#64748b',
+    padding: '18px 12px',
+    color: 'rgba(255,255,255,0.6)',
     textDecoration: 'none',
     fontSize: '13px',
+    fontWeight: '700',
     letterSpacing: '0.02em',
     borderBottom: '3px solid transparent',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'all 0.2s ease',
     whiteSpace: 'nowrap'
   },
   navItemActive: {
-    color: '#4361ee',
-    borderBottomColor: '#4361ee'
+    color: 'white',
+    borderBottomColor: '#4361ee',
+    background: 'rgba(255,255,255,0.03)'
   },
   icon: {
     fontSize: '16px',
-    transition: 'transform 0.2s'
+    opacity: 0.8
   },
   iconActive: {
-    transform: 'scale(1.15)'
+    opacity: 1,
+    transform: 'scale(1.1)'
   }
 };
 

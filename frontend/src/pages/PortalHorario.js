@@ -98,7 +98,7 @@ const PortalHorario = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
             <img src="/logo_oficial.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
             <div>
-              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: '#1e293b' }}>ACADEMIA ALBA</h1>
+              <h1 style={{ fontSize: '16px', fontWeight: '900', margin: 0, color: 'white' }}>ACADEMIA ALBA</h1>
               <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>HORARIO ALUMNO</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ const PortalHorario = () => {
             </div>
 
             <div style={{ marginTop: 40, marginBottom: 20 }}>
-               <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b' }}>Resumen Detallado de Matrícula</h2>
+               <h2 style={{ fontSize: 18, fontWeight: 800, color: 'white' }}>Resumen Detallado de Matrícula</h2>
             </div>
             <div style={styles.cursosGrid}>
           {horario.map((c, i) => {
@@ -218,10 +218,10 @@ const PortalHorario = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  headerPremium: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerPremium: { background: '#0f172a', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
-  logoutBtn: { background: '#f1f5f9', color: '#ef4444', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
   mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   pageHeader: { marginBottom: '35px' },
   badgeTop: { background: '#eff6ff', color: '#4361ee', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '12px', letterSpacing: '0.1em' },
