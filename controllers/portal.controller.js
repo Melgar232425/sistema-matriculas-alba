@@ -109,8 +109,8 @@ exports.getMisMatriculas = async (req, res) => {
       `SELECT
          m.id, m.codigo, m.fecha_matricula, m.estado_pago,
          m.monto_total, m.monto_pagado,
-         c.nombre AS curso_nombre, c.nivel, c.horario,
-          ci.nombre AS ciclo_nombre, ci.fecha_inicio, ci.fecha_fin,
+         c.nombre AS curso_nombre, c.id AS curso_id, c.nivel, c.horario,
+          ci.nombre AS ciclo_nombre, ci.id AS ciclo_id, ci.fecha_inicio, ci.fecha_fin,
           CONCAT(d.nombres, ' ', d.apellidos) AS docente_nombre
         FROM matriculas m
         INNER JOIN cursos c ON m.curso_id = c.id
@@ -183,7 +183,7 @@ exports.getMiHorario = async (req, res) => {
 exports.getMisAsistencias = async (req, res) => {
   try {
     const [asistencias] = await promisePool.query(
-      `SELECT a.id, a.fecha, a.estado, c.nombre as curso_nombre
+      `SELECT a.id, a.fecha, a.estado, c.nombre as curso_nombre, c.id as curso_id
        FROM asistencias a
        INNER JOIN matriculas m ON a.matricula_id = m.id
        INNER JOIN cursos c ON m.curso_id = c.id
