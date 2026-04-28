@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { portalAPI } from '../services/api';
 import StudentNavbar from '../components/StudentNavbar';
+import toast from 'react-hot-toast';
 import {
   FaUserGraduate, FaClipboardList, FaMoneyBillWave,
   FaSignOutAlt, FaExclamationCircle, FaCheckCircle, FaClock
@@ -72,6 +73,19 @@ const PortalInicio = () => {
       setMatriculas(matriculasRes.data.data || []);
       setPagos(pagosRes.data.data || []);
       setAsistencias(asistenciasRes.data.data || []);
+      
+      // Notificación de ingreso exitoso
+      if (perfilRes.data.data) {
+        const nombre = perfilRes.data.data.nombres.split(' ')[0];
+        toast.success(`¡Bienvenido, ${nombre}! Sesión iniciada correctamente.`, {
+          icon: '👋',
+          style: {
+            borderRadius: '10px',
+            background: '#0f172a',
+            color: '#fff',
+          },
+        });
+      }
     } catch {
       // Error de red: el usuario ya ve la UI vacía
     } finally {
