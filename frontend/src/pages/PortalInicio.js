@@ -20,8 +20,36 @@ const PortalInicio = () => {
   const [perfil, setPerfil] = useState(null);
   const [matriculas, setMatriculas] = useState([]);
   const [pagos, setPagos] = useState([]);
+  const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const getDiasDeClase = (horarioStr) => {
+    if (!horarioStr) return [];
+    const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const horNorm = horarioStr.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return DIAS_SEMANA.filter(d => horNorm.includes(d));
+  };
+
+  const calcularTotalSesiones = (fechaInicio, fechaFin, horarioStr) => {
+    if (!fechaInicio || !fechaFin || !horarioStr) return 0;
+    const diasClase = getDiasDeClase(horarioStr);
+    if (diasClase.length === 0) return 0;
+
+    const start = new Date(fechaInicio + 'T12:00:00');
+    const end = new Date(fechaFin + 'T12:00:00');
+    let count = 0;
+    const current = new Date(start);
+    const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    while (current <= end) {
+      const diaActual = normalizar(diasSemanaMap[current.getDay()]);
+      if (diasClase.includes(diaActual)) count++;
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('student_token');
@@ -32,14 +60,16 @@ const PortalInicio = () => {
 
   const fetchData = async () => {
     try {
-      const [perfilRes, matriculasRes, pagosRes] = await Promise.all([
+      const [perfilRes, matriculasRes, pagosRes, asistenciasRes] = await Promise.all([
         portalAPI.getPerfil(),
         portalAPI.getMatriculas(),
         portalAPI.getPagos(),
+        portalAPI.getAsistencias()
       ]);
       setPerfil(perfilRes.data.data);
       setMatriculas(matriculasRes.data.data || []);
       setPagos(pagosRes.data.data || []);
+      setAsistencias(asistenciasRes.data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -193,16 +223,40 @@ const PortalInicio = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {matriculas.map(m => (
-                    <tr key={m.id} style={styles.tr}>
-                      <td style={styles.td}><code style={styles.code}>{m.codigo}</code></td>
-                      <td style={styles.td}><strong>{m.curso_nombre}</strong><br /><small style={{ color: '#64748b' }}>{m.nivel}</small></td>
-                      <td style={styles.td}>{m.ciclo_nombre || '—'}</td>
-                      <td style={styles.td}><span style={styles.horarioPill}>{m.horario || '—'}</span></td>
-                      <td style={styles.td}>S/ {parseFloat(m.monto_total || 0).toFixed(2)}</td>
-                      <td style={styles.td}>{estadoBadge(m.estado_pago)}</td>
-                    </tr>
-                  ))}
+                  {matriculas.map(m => {
+                    const asistenciasCurso = asistencias.filter(a => a.curso_nombre === m.curso_nombre && (a.estado === 'presente' || a.estado === 'tardanza')).length;
+                    const totalSesiones = calcularTotalSesiones(m.fecha_inicio, m.fecha_fin, m.horario);
+                    const porcentaje = totalSesiones > 0 ? Math.min(100, Math.round((asistenciasCurso / totalSesiones) * 100)) : 0;
+
+                    return (
+                      <tr key={m.id} style={styles.tr}>
+                        <td style={styles.td}><code style={styles.code}>{m.codigo}</code></td>
+                        <td style={styles.td}>
+                          <strong>{m.curso_nombre}</strong><br />
+                          <small style={{ color: '#64748b' }}>{m.nivel}</small>
+                          {/* Barra de Progreso del Ciclo */}
+                          <div style={{ marginTop: '10px', maxWidth: '180px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                              <span style={{ fontSize: '9px', fontWeight: '800', color: '#94a3b8' }}>AVANCE CICLO</span>
+                              <span style={{ fontSize: '9px', fontWeight: '900', color: '#4361ee' }}>{asistenciasCurso}/{totalSesiones} ({porcentaje}%)</span>
+                            </div>
+                            <div style={{ height: '5px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ 
+                                width: `${porcentaje}%`, 
+                                height: '100%', 
+                                background: 'linear-gradient(90deg, #4361ee, #4cc9f0)',
+                                transition: 'width 0.5s ease'
+                              }} />
+                            </div>
+                          </div>
+                        </td>
+                        <td style={styles.td}>{m.ciclo_nombre || '—'}</td>
+                        <td style={styles.td}><span style={styles.horarioPill}>{m.horario || '—'}</span></td>
+                        <td style={styles.td}>S/ {parseFloat(m.monto_total || 0).toFixed(2)}</td>
+                        <td style={styles.td}>{estadoBadge(m.estado_pago)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

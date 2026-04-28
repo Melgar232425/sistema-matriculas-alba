@@ -108,6 +108,26 @@ const PortalDocenteInicio = () => {
     }
   }, [cursoSeleccionado, fecha]);
 
+  const calcularTotalSesiones = (fechaInicio, fechaFin, horarioStr) => {
+    if (!fechaInicio || !fechaFin || !horarioStr) return 0;
+    const diasClase = getDiasDeClase(horarioStr);
+    if (diasClase.length === 0) return 0;
+
+    const start = new Date(fechaInicio + 'T12:00:00');
+    const end = new Date(fechaFin + 'T12:00:00');
+    let count = 0;
+    const current = new Date(start);
+    const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    while (current <= end) {
+      const diaActual = normalizar(diasSemanaMap[current.getDay()]);
+      if (diasClase.includes(diaActual)) count++;
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  };
+
   const marcarAsistenciaLocal = (matricula_id, estado) => {
     setCambiosPendientes(prev => ({ ...prev, [matricula_id]: estado }));
   };
@@ -136,6 +156,9 @@ const PortalDocenteInicio = () => {
       setGuardando(false);
     }
   };
+
+  // Cálculos de progreso del ciclo
+  const totalSesionesCiclo = cursoSeleccionado ? calcularTotalSesiones(cursoSeleccionado.fecha_inicio, cursoSeleccionado.fecha_fin, cursoSeleccionado.horario) : 0;
 
   // Componente de Carga Elegante (Skeleton)
   const Skeleton = ({ width, height, borderRadius = '10px' }) => (
@@ -282,14 +305,16 @@ const PortalDocenteInicio = () => {
                     <div style={styles.breadcrumb}>GESTIÓN DE ASISTENCIA / {cursoSeleccionado.ciclo_nombre}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                       <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a', margin: 0 }}>{cursoSeleccionado.nombre}</h2>
-                      <div style={styles.asistenciaProgress}>
-                         <div style={styles.progressText}>
-                            {estudiantes.filter(e => e.estado_asistencia !== 'no_registrado' || cambiosPendientes[e.matricula_id]).length} / {estudiantes.length} Marcados
+                      <div style={{ ...styles.asistenciaProgress, width: '250px' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: '800', color: '#64748b' }}>AVANCE DEL CICLO</span>
+                            <span style={{ fontSize: '10px', fontWeight: '900', color: '#4361ee' }}>{totalSesionesCiclo} CLASES TOTALES</span>
                          </div>
                          <div style={styles.progressBar}>
                             <div style={{
                               ...styles.progressFill,
-                              width: `${(estudiantes.filter(e => e.estado_asistencia !== 'no_registrado' || cambiosPendientes[e.matricula_id]).length / estudiantes.length) * 100}%`
+                              width: '100%', /* Por ahora mostramos la barra llena del ciclo o podemos calcular avance promedio */
+                              background: 'linear-gradient(90deg, #4361ee, #4cc9f0)'
                             }}></div>
                          </div>
                       </div>

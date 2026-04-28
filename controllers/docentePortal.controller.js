@@ -33,7 +33,8 @@ exports.loginDocente = async (req, res) => {
 exports.getCursos = async (req, res) => {
   try {
     const [cursos] = await promisePool.query(
-      `SELECT c.id, c.nombre, c.horario, c.estado, ci.nombre as ciclo_nombre 
+      `SELECT c.id, c.nombre, c.horario, c.estado, 
+              ci.nombre as ciclo_nombre, ci.fecha_inicio, ci.fecha_fin
        FROM cursos c
        LEFT JOIN ciclos ci ON c.ciclo_id = ci.id
        WHERE c.docente_id = ? AND c.estado = 'activo'`,

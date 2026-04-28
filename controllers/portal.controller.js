@@ -106,12 +106,12 @@ exports.getMisMatriculas = async (req, res) => {
          m.id, m.codigo, m.fecha_matricula, m.estado_pago,
          m.monto_total, m.monto_pagado,
          c.nombre AS curso_nombre, c.nivel, c.horario,
-         ci.nombre AS ciclo_nombre,
-         CONCAT(d.nombres, ' ', d.apellidos) AS docente_nombre
-       FROM matriculas m
-       INNER JOIN cursos c ON m.curso_id = c.id
-       LEFT  JOIN ciclos  ci ON c.ciclo_id   = ci.id
-       LEFT  JOIN docentes d  ON c.docente_id = d.id
+          ci.nombre AS ciclo_nombre, ci.fecha_inicio, ci.fecha_fin,
+          CONCAT(d.nombres, ' ', d.apellidos) AS docente_nombre
+        FROM matriculas m
+        INNER JOIN cursos c ON m.curso_id = c.id
+        LEFT  JOIN ciclos  ci ON c.ciclo_id   = ci.id
+        LEFT  JOIN docentes d  ON c.docente_id = d.id
        WHERE m.estudiante_id = ?
        ORDER BY m.fecha_matricula DESC`,
       [req.estudiante.id]
@@ -155,13 +155,13 @@ exports.getMiHorario = async (req, res) => {
     const [horario] = await promisePool.query(
       `SELECT
          c.id AS curso_id, c.nombre AS curso_nombre, c.nivel, c.horario,
-         ci.nombre AS ciclo_nombre,
-         CONCAT(d.nombres, ' ', d.apellidos) AS docente_nombre,
-         m.estado_pago
-       FROM matriculas m
-       INNER JOIN cursos   c  ON m.curso_id   = c.id AND c.estado = 'activo'
-       LEFT  JOIN ciclos   ci ON c.ciclo_id   = ci.id
-       LEFT  JOIN docentes d  ON c.docente_id = d.id
+          ci.nombre AS ciclo_nombre, ci.fecha_inicio, ci.fecha_fin,
+          CONCAT(d.nombres, ' ', d.apellidos) AS docente_nombre,
+          m.estado_pago
+        FROM matriculas m
+        INNER JOIN cursos   c  ON m.curso_id   = c.id AND c.estado = 'activo'
+        LEFT  JOIN ciclos   ci ON c.ciclo_id   = ci.id
+        LEFT  JOIN docentes d  ON c.docente_id = d.id
        WHERE m.estudiante_id = ?
        ORDER BY c.nombre`,
       [req.estudiante.id]
