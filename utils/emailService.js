@@ -184,12 +184,53 @@ const sendOtpEmail = async (estudiante, otp) => {
     } catch (error) { console.error('Error Brevo OTP:', error.message); return false; }
 };
 
+/**
+ * Envía una notificación de inicio de sesión detectado
+ */
+const sendLoginNotification = async (estudiante) => {
+    try {
+        const fecha = new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' });
+        let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        sendSmtpEmail.subject = `🔔 Aviso de Inicio de Sesión - Academia Alba`;
+        sendSmtpEmail.htmlContent = `
+            <div style="${commonStyles}">
+                <div style="background: #0f172a; padding: 25px; text-align: center;">
+                    <img src="${logoUrl}" alt="Academia Alba" style="width: 80px; height: auto; margin-bottom: 10px; border-radius: 8px;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 18px; letter-spacing: 1px;">ALERTA DE SEGURIDAD</h1>
+                </div>
+                <div style="padding: 30px; text-align: center;">
+                    <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 8px;">¡Hola, ${estudiante.nombres}!</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">
+                        Se ha detectado un nuevo inicio de sesión en tu cuenta.
+                    </p>
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; display: inline-block; text-align: left; min-width: 250px;">
+                        <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b;"><strong>Fecha y Hora:</strong> ${fecha}</p>
+                        <p style="margin: 0; font-size: 13px; color: #64748b;"><strong>Plataforma:</strong> Portal del Estudiante</p>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 12px; margin-top: 25px;">
+                        Si fuiste tú, no necesitas realizar ninguna acción.<br>
+                        Si no reconoces este acceso, contacta a administración.
+                    </p>
+                </div>
+                <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 11px; color: #94a3b8;">
+                    Academia Alba Perú &mdash; Seguridad de Cuentas
+                </div>
+            </div>
+        `;
+        sendSmtpEmail.sender = EMAIL_FROM_DEFAULT;
+        sendSmtpEmail.to = [{ email: estudiante.email, name: estudiante.nombres }];
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
+        return true;
+    } catch (error) { console.error('Error Brevo Login Alert:', error.message); return false; }
+};
+
 module.exports = {
     sendWelcomeEmail,
     sendEnrollmentEmail,
     sendPaymentEmail,
     sendTeacherWelcomeEmail,
     sendTeacherCourseEmail,
-    sendOtpEmail
+    sendOtpEmail,
+    sendLoginNotification
 };
 

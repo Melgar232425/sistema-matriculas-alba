@@ -2,7 +2,7 @@
 // Flujo: correo + código de estudiante permanente (EST-XXXX) → JWT
 const { promisePool } = require('../config/database');
 const jwt = require('jsonwebtoken');
-const { enviarNotificacionLogin } = require('../utils/email');
+const { sendLoginNotification } = require('../utils/emailService');
 
 // ─────────────────────────────────────────────
 // LOGIN: correo + código permanente (EST-XXXX)
@@ -58,8 +58,8 @@ exports.loginEstudiante = async (req, res) => {
       { expiresIn: '12h' }
     );
 
-    // Enviar correo de notificación (sin esperar para no retrasar el login)
-    enviarNotificacionLogin(estudiante.email, estudiante.nombres).catch(err => console.error("Email error:", err));
+    // Enviar correo de notificación oficial vía Brevo
+    sendLoginNotification(estudiante).catch(err => console.error("Email error:", err));
 
     res.json({
       success: true,
