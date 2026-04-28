@@ -36,8 +36,11 @@ const PortalInicio = () => {
     const diasClase = getDiasDeClase(horarioStr);
     if (diasClase.length === 0) return 0;
 
-    const start = new Date(fechaInicio + 'T12:00:00');
-    const end = new Date(fechaFin + 'T12:00:00');
+    const startStr = typeof fechaInicio === 'string' ? fechaInicio.split('T')[0] : new Date(fechaInicio).toISOString().split('T')[0];
+    const endStr = typeof fechaFin === 'string' ? fechaFin.split('T')[0] : new Date(fechaFin).toISOString().split('T')[0];
+
+    const start = new Date(startStr + 'T12:00:00');
+    const end = new Date(endStr + 'T12:00:00');
     let count = 0;
     const current = new Date(start);
     const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
