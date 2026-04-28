@@ -449,8 +449,8 @@ const Estudiantes = () => {
                                    return (
                                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                          <td style={{ padding: '12px', fontSize: '13px' }}>
-                                            <div style={{ fontWeight: '700' }}>{m.curso}</div>
-                                            <div style={{ fontSize: '10px', color: '#64748b' }}>{m.ciclo}</div>
+                                            <div style={{ fontWeight: '700' }}>{m.curso_nombre}</div>
+                                            <div style={{ fontSize: '10px', color: '#64748b' }}>{m.ciclo_nombre || 'Ciclo Activo'}</div>
                                          </td>
                                          <td style={{ padding: '12px', textAlign: 'center', fontSize: '13px' }}>S/ {parseFloat(m.monto_total).toFixed(2)}</td>
                                          <td style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#10b981', fontWeight: '700' }}>S/ {parseFloat(m.monto_pagado).toFixed(2)}</td>

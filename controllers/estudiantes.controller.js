@@ -483,10 +483,11 @@ exports.obtenerHistorial = async (req, res) => {
 
     // 2. Obtener matrículas con cursos
     const [matriculas] = await promisePool.query(
-      `SELECT m.*, c.nombre as curso_nombre, c.nivel, c.horario
+      `SELECT m.*, c.nombre as curso_nombre, c.nivel, c.horario, ci.nombre as ciclo_nombre
        FROM matriculas m
        INNER JOIN cursos c ON m.curso_id = c.id
-       WHERE m.estudiante_id = ? AND c.estado = 'activo'
+       LEFT JOIN ciclos ci ON c.ciclo_id = ci.id
+       WHERE m.estudiante_id = ? AND ci.estado = 'activo'
        ORDER BY m.fecha_matricula DESC`,
       [id]
     );
