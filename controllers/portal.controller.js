@@ -116,7 +116,7 @@ exports.getMisMatriculas = async (req, res) => {
         INNER JOIN cursos c ON m.curso_id = c.id
         LEFT  JOIN ciclos  ci ON c.ciclo_id   = ci.id
         LEFT  JOIN docentes d  ON c.docente_id = d.id
-       WHERE m.estudiante_id = ?
+       WHERE m.estudiante_id = ? AND ci.estado = 'activo'
        ORDER BY m.fecha_matricula DESC`,
       [req.estudiante.id]
     );
@@ -166,7 +166,7 @@ exports.getMiHorario = async (req, res) => {
         INNER JOIN cursos   c  ON m.curso_id   = c.id AND c.estado = 'activo'
         LEFT  JOIN ciclos   ci ON c.ciclo_id   = ci.id
         LEFT  JOIN docentes d  ON c.docente_id = d.id
-       WHERE m.estudiante_id = ?
+       WHERE m.estudiante_id = ? AND ci.estado = 'activo'
        ORDER BY c.nombre`,
       [req.estudiante.id]
     );
