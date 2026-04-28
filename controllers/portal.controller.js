@@ -184,7 +184,7 @@ exports.getMiHorario = async (req, res) => {
 exports.getMisAsistencias = async (req, res) => {
   try {
     const [asistencias] = await promisePool.query(
-      `SELECT a.id, a.fecha, a.estado, c.nombre as curso_nombre, c.id as curso_id
+      `SELECT a.id, a.fecha, a.estado, c.nombre as curso_nombre, c.id as curso_id, a.matricula_id
        FROM asistencias a
        INNER JOIN matriculas m ON a.matricula_id = m.id
        INNER JOIN cursos c ON m.curso_id = c.id

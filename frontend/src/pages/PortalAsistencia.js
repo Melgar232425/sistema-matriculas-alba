@@ -86,10 +86,11 @@ const PortalAsistencia = () => {
       };
     });
 
-    // Sumar asistencias reales filtrando por curso_id
+    // Sumar asistencias reales filtrando por matricula_id
     asistencias.forEach(a => {
-      // Buscamos la matrícula correspondiente para este curso
-      const key = Object.keys(cursosMap).find(k => cursosMap[k].id === a.curso_id);
+      // Buscamos la matrícula correspondiente usando matricula_id (a.matricula_id) o curso_id (a.curso_id)
+      // Pero para ser 100% precisos usamos la combinación matricula_id si está disponible
+      const key = Object.keys(cursosMap).find(k => k.endsWith(`_${a.matricula_id}`));
       if (key) {
         if (a.estado === 'presente' || a.estado === 'tardanza') {
           cursosMap[key].asistencias++;

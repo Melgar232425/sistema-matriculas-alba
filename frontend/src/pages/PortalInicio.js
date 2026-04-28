@@ -240,7 +240,7 @@ const PortalInicio = () => {
                 </thead>
                 <tbody>
                   {matriculas.map(m => {
-                    const asistenciasCurso = asistencias.filter(a => a.curso_id === m.curso_id && (a.estado === 'presente' || a.estado === 'tardanza')).length;
+                    const asistenciasCurso = asistencias.filter(a => a.matricula_id === m.id && (a.estado === 'presente' || a.estado === 'tardanza')).length;
                     const totalSesiones = calcularTotalSesiones(m.fecha_inicio, m.fecha_fin, m.horario);
                     const sesionesContadas = Math.min(asistenciasCurso, totalSesiones);
                     const porcentaje = totalSesiones > 0 ? Math.round((sesionesContadas / totalSesiones) * 100) : 0;
