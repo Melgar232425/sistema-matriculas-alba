@@ -58,7 +58,6 @@ const PortalInicio = () => {
     const token = localStorage.getItem('student_token');
     if (!token) { navigate('/portal'); return; }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const fetchData = async () => {
@@ -73,8 +72,8 @@ const PortalInicio = () => {
       setMatriculas(matriculasRes.data.data || []);
       setPagos(pagosRes.data.data || []);
       setAsistencias(asistenciasRes.data.data || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error de red: el usuario ya ve la UI vacía
     } finally {
       setLoading(false);
     }

@@ -47,7 +47,6 @@ const PortalAsistencia = () => {
   useEffect(() => {
     if (!localStorage.getItem('student_token')) { navigate('/portal'); return; }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const fetchData = async () => {
@@ -58,8 +57,8 @@ const PortalAsistencia = () => {
       ]);
       setAsistencias(asisRes.data.data || []);
       setMatriculas(matRes.data.data || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error de red: el usuario ya ve la UI vacía
     } finally {
       setLoading(false);
     }
@@ -133,7 +132,7 @@ const PortalAsistencia = () => {
       });
 
       doc.save(`Asistencia_Alba_${user.apellidos}.pdf`);
-    } catch (err) { console.error(err); }
+    } catch { /* PDF: error silencioso */ }
   };
 
   if (loading) return <div style={styles.center}><div style={styles.spinner} /></div>;

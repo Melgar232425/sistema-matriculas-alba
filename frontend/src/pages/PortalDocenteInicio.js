@@ -42,8 +42,8 @@ const PortalDocenteInicio = () => {
       setLoading(true);
       const res = await docentePortalAPI.getCursos();
       setCursos(res.data.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error de red silencioso
     } finally {
       setLoading(false);
     }
@@ -54,8 +54,8 @@ const PortalDocenteInicio = () => {
       setLoadingEstudiantes(true);
       const res = await docentePortalAPI.getEstudiantesAsistencia(cursoId, fechaBuscada);
       setEstudiantes(res.data.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error de red silencioso
     } finally {
       setLoadingEstudiantes(false);
     }
