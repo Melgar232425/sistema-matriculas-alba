@@ -332,7 +332,7 @@ const Calendario = () => {
                         ext: { width: 170, height: 170 }
                     });
                 }
-            } catch (e) { console.log('Sin logo'); }
+            } catch { /* Logo no disponible, se omite */ }
 
             // 2. Info Centralizada (B a H)
             worksheet.getRow(2).height = 40;

@@ -500,7 +500,7 @@ const Cursos = () => {
             ext: { width: 170, height: 170 }
           });
         }
-      } catch (e) { console.log('Logo error'); }
+      } catch { /* Logo no disponible, se omite */ }
 
       // 2. Info Centralizada en el área de datos (B a L)
       worksheet.getRow(2).height = 45;
