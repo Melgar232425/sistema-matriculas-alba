@@ -8,7 +8,13 @@ const PortalDocenteInicio = () => {
   const [cursos, setCursos] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
-  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
+  const getLocalDate = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().split('T')[0];
+  };
+
+  const [fecha, setFecha] = useState(getLocalDate());
   const [loading, setLoading] = useState(true);
   const [loadingEstudiantes, setLoadingEstudiantes] = useState(false);
   const [cambiosPendientes, setCambiosPendientes] = useState({});
