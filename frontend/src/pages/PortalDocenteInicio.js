@@ -31,13 +31,6 @@ const PortalDocenteInicio = () => {
     fetchCursos();
   }, [navigate]);
 
-  useEffect(() => {
-    if (cursoSeleccionado && fecha) {
-      setCambiosPendientes({});
-      fetchEstudiantes(cursoSeleccionado.id, fecha);
-    }
-  }, [cursoSeleccionado, fecha]);
-
   const fetchCursos = async () => {
     try {
       setLoading(true);
@@ -78,26 +71,36 @@ const PortalDocenteInicio = () => {
     return DIAS_SEMANA.filter(d => horNorm.includes(d));
   };
 
-  const getDiaHoyNormalizado = () => {
+  const getDiaNormalizado = (fechaStr) => {
     const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+    // Ajuste para evitar problemas de zona horaria al parsear fecha YYYY-MM-DD
+    const dateObj = new Date(fechaStr + 'T12:00:00');
     const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    return normalizar(dias[new Date().getDay()]);
+    return normalizar(dias[dateObj.getDay()]);
   };
 
   const seleccionarCurso = (c) => {
     if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Perder cambios pendientes?')) return;
-    const diasClase = getDiasDeClase(c.horario);
-    const diaHoy = getDiaHoyNormalizado();
-    if (diasClase.length > 0 && !diasClase.includes(diaHoy)) {
-      const nombresCompletos = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo' };
-      const diasTexto = diasClase.map(d => nombresCompletos[d] || d).join(', ');
-      setErrorDia(`Este curso tiene clases los ${diasTexto}. Hoy no hay sesión programada.`);
-      setCursoSeleccionado(c);
-    } else {
-      setErrorDia(null);
-      setCursoSeleccionado(c);
-    }
+    setCursoSeleccionado(c);
   };
+
+  // Efecto para validar día de clase cuando cambia el curso o la fecha
+  useEffect(() => {
+    if (cursoSeleccionado && fecha) {
+      const diasClase = getDiasDeClase(cursoSeleccionado.horario);
+      const diaSeleccionado = getDiaNormalizado(fecha);
+      
+      if (diasClase.length > 0 && !diasClase.includes(diaSeleccionado)) {
+        const nombresCompletos = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo' };
+        const diasTexto = diasClase.map(d => nombresCompletos[d] || d).join(', ');
+        setErrorDia(`Este curso tiene clases los ${diasTexto}. El día seleccionado (${nombresCompletos[diaSeleccionado]}) no hay sesión programada.`);
+      } else {
+        setErrorDia(null);
+        setCambiosPendientes({});
+        fetchEstudiantes(cursoSeleccionado.id, fecha);
+      }
+    }
+  }, [cursoSeleccionado, fecha]);
 
   const marcarAsistenciaLocal = (matricula_id, estado) => {
     setCambiosPendientes(prev => ({ ...prev, [matricula_id]: estado }));
