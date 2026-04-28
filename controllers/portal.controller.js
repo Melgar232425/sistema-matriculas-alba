@@ -107,7 +107,7 @@ exports.getMisMatriculas = async (req, res) => {
   try {
     const [matriculas] = await promisePool.query(
       `SELECT
-         m.id, m.codigo, m.fecha_matricula, m.estado_pago,
+         m.id, m.codigo, m.fecha_matricula, m.estado_pago, m.estado_matricula,
          m.monto_total, m.monto_pagado,
          c.nombre AS curso_nombre, c.id AS curso_id, c.nivel, c.horario,
           ci.nombre AS ciclo_nombre, ci.id AS ciclo_id, ci.fecha_inicio, ci.fecha_fin,
