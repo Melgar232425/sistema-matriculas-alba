@@ -349,24 +349,24 @@ const PortalDocenteInicio = () => {
                               onChange={(ev) => marcarAsistenciaLocal(e.matricula_id, ev.target.value)}
                               style={{
                                 width: '100%',
-                                padding: '14px 16px',
-                                borderRadius: '14px',
+                                height: '50px',
+                                padding: '0 15px',
+                                borderRadius: '12px',
                                 border: `2px solid ${modificado ? '#4361ee' : '#cbd5e1'}`,
                                 fontSize: '14px',
                                 fontWeight: '700',
                                 background: '#f8fafc',
-                                outline: 'none',
-                                cursor: 'pointer',
                                 color: '#1e293b',
+                                outline: 'none',
                                 boxSizing: 'border-box',
-                                appearance: 'auto',
-                                WebkitAppearance: 'auto'
+                                display: 'block',
+                                lineHeight: 'normal'
                               }}
                             >
-                              <option value="no_registrado" style={{ color: '#64748b' }}>— Seleccionar estado —</option>
-                              <option value="presente" style={{ color: '#059669', fontWeight: '700' }}>✅ Presente</option>
-                              <option value="tardanza" style={{ color: '#d97706', fontWeight: '700' }}>⏳ Tardanza</option>
-                              <option value="ausente" style={{ color: '#e11d48', fontWeight: '700' }}>❌ Ausente</option>
+                              <option value="no_registrado" style={{ color: '#64748b' }}>Seleccionar estado...</option>
+                              <option value="presente" style={{ color: '#059669' }}>✅ Presente</option>
+                              <option value="tardanza" style={{ color: '#d97706' }}>⏳ Tardanza</option>
+                              <option value="ausente" style={{ color: '#e11d48' }}>❌ Ausente</option>
                             </select>
                             {modificado && <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', marginTop: '8px' }}>● CAMBIO PENDIENTE DE GUARDAR</div>}
                           </div>
