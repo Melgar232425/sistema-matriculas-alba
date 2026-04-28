@@ -40,7 +40,7 @@ const Tutores = () => {
       const dataEnriquecida = resEst.data.data.map(est => {
         const misMatriculas = resMat.data.data.filter(m => m.estudiante_id === est.id);
         const tieneDeuda = misMatriculas.some(m => (m.monto_total - m.monto_pagado) > 0);
-        
+
         return {
           ...est,
           tieneDeuda,
@@ -73,7 +73,7 @@ const Tutores = () => {
       toast.error('❌ El comentario es muy corto.');
       return;
     }
-    
+
     try {
       setSaving(true);
       await seguimientosAPI.create({
@@ -81,10 +81,10 @@ const Tutores = () => {
         comentario: seguimiento.comentario,
         contacto_padre: seguimiento.contacto_padre
       });
-      
+
       toast.success(`Seguimiento registrado con éxito`);
       setSeguimiento({ comentario: '', contacto_padre: '' });
-      
+
       // Recargar historial
       const res = await seguimientosAPI.getPorEstudiante(selectedEstudiante.id);
       setHistorialSeguimiento(res.data.data);
@@ -120,12 +120,12 @@ const Tutores = () => {
       // Header Azul Alba
       doc.setFillColor(67, 97, 238);
       doc.rect(0, 0, pageWidth, 50, 'F');
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
       doc.text('ESTADO DE CUENTA', 15, 30);
-      
+
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text('SISTEMA DE TUTORÍA - ACADEMIA ALBA PERÚ', 15, 40);
@@ -197,139 +197,139 @@ const Tutores = () => {
         .filter-btn:hover { background: #e2e8f0; }
       `}</style>
 
-      {/* Dashboard Ejecutivo de Tutoría */}
-      <div style={styles.statsDashboard} className="fade-in">
-        <div style={styles.statBox}>
-          <div style={{...styles.statCircle, background: '#eef2ff', color: '#4361ee'}}><FaUsers /></div>
-          <div>
-            <div style={styles.statValue}>{estudiantes.length}</div>
-            <div style={styles.statLabel}>Estudiantes Totales</div>
-          </div>
-        </div>
-        <div style={styles.statBox}>
-          <div style={{...styles.statCircle, background: '#fff1f2', color: '#e11d48'}}><FaExclamationTriangle /></div>
-          <div>
-            <div style={styles.statValue}>{estudiantes.filter(e => e.tieneDeuda).length}</div>
-            <div style={styles.statLabel}>En Riesgo Financiero</div>
-          </div>
-        </div>
-        <div style={styles.statBox}>
-          <div style={{...styles.statCircle, background: '#f0fdf4', color: '#16a34a'}}><FaCheckCircle /></div>
-          <div>
-            <div style={styles.statValue}>{estudiantes.filter(e => !e.tieneDeuda).length}</div>
-            <div style={styles.statLabel}>Al Día / Solventes</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filtros Inteligentes */}
-      <div style={styles.filterBar} className="fade-in">
-        <div style={styles.filterTabs}>
-          {['Todos', 'Deudores', 'Al Día'].map(tab => (
-            <button 
-              key={tab}
-              onClick={() => setFiltroEstado(tab)}
-              style={{
-                ...styles.filterTab,
-                ...(filtroEstado === tab ? styles.filterTabActive : {})
-              }}
-              className="filter-btn"
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-        
-        {/* Buscador Integrado */}
-        <div style={styles.searchContainer}>
-          <FaSearch style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o DNI..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            style={styles.searchInput}
-          />
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={styles.grid}>
-          {[1,2,3,4,5,6].map(i => <Skeleton key={i} width="100%" height="220px" borderRadius="24px" />)}
-        </div>
-      ) : (
-        <div style={styles.grid} className="fade-in">
-          {estudiantesFiltrados
-            .filter(est => {
-              if (filtroEstado === 'Deudores') return est.tieneDeuda;
-              if (filtroEstado === 'Al Día') return !est.tieneDeuda;
-              return true;
-            })
-            .map(est => (
-            <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => abrirPerfil(est)} className="student-card">
-              <div style={styles.cardTop}>
-                <div style={styles.userAvatar}><FaUserGraduate /></div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '800', margin: 0, color: '#1e293b' }}>{est.apellidos}, {est.nombres}</h3>
-                  <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800' }}>DNI: {est.dni}</span>
-                </div>
-                {est.tieneDeuda ? (
-                  <div style={styles.debtTag}>RIESGO</div>
-                ) : (
-                  <div style={styles.paidTag}>SOLVENTE</div>
-                )}
-              </div>
-
-              <div style={styles.cardBody}>
-                <div style={styles.infoRow}><FaClipboardList color="#4361ee" size={14} /> <span>{est.totalCursos} Cursos Inscritos</span></div>
-                <div style={styles.infoRow}><FaPhone color="#10b981" size={14} /> <span>{est.telefono_apoderado || 'S/APODERADO'}</span></div>
-              </div>
-
-              <div style={styles.cardFooter}>
-                <button style={styles.trackBtn}>
-                   <FaCommentDots /> GESTIONAR SEGUIMIENTO
-                </button>
-              </div>
+        {/* Dashboard Ejecutivo de Tutoría */}
+        <div style={styles.statsDashboard} className="fade-in">
+          <div style={styles.statBox}>
+            <div style={{ ...styles.statCircle, background: '#eef2ff', color: '#4361ee' }}><FaUsers /></div>
+            <div>
+              <div style={styles.statValue}>{estudiantes.length}</div>
+              <div style={styles.statLabel}>Estudiantes Totales</div>
             </div>
-          ))}
+          </div>
+          <div style={styles.statBox}>
+            <div style={{ ...styles.statCircle, background: '#fff1f2', color: '#e11d48' }}><FaExclamationTriangle /></div>
+            <div>
+              <div style={styles.statValue}>{estudiantes.filter(e => e.tieneDeuda).length}</div>
+              <div style={styles.statLabel}>En Riesgo Financiero</div>
+            </div>
+          </div>
+          <div style={styles.statBox}>
+            <div style={{ ...styles.statCircle, background: '#f0fdf4', color: '#16a34a' }}><FaCheckCircle /></div>
+            <div>
+              <div style={styles.statValue}>{estudiantes.filter(e => !e.tieneDeuda).length}</div>
+              <div style={styles.statLabel}>Al Día / Solventes</div>
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Modal de Tutoría Premium */}
-      {selectedEstudiante && (
-        <div className="modal-overlay" onClick={() => setSelectedEstudiante(null)}>
-          <div className="modal" style={styles.modal} onClick={e => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                 <div style={styles.modalAvatar}><FaIdCard /></div>
-                 <div>
+        {/* Filtros Inteligentes */}
+        <div style={styles.filterBar} className="fade-in">
+          <div style={styles.filterTabs}>
+            {['Todos', 'Deudores', 'Al Día'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setFiltroEstado(tab)}
+                style={{
+                  ...styles.filterTab,
+                  ...(filtroEstado === tab ? styles.filterTabActive : {})
+                }}
+                className="filter-btn"
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Buscador Integrado */}
+          <div style={styles.searchContainer}>
+            <FaSearch style={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o DNI..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={styles.grid}>
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} width="100%" height="220px" borderRadius="24px" />)}
+          </div>
+        ) : (
+          <div style={styles.grid} className="fade-in">
+            {estudiantesFiltrados
+              .filter(est => {
+                if (filtroEstado === 'Deudores') return est.tieneDeuda;
+                if (filtroEstado === 'Al Día') return !est.tieneDeuda;
+                return true;
+              })
+              .map(est => (
+                <div key={est.id} style={styles.estCard(est.tieneDeuda)} onClick={() => abrirPerfil(est)} className="student-card">
+                  <div style={styles.cardTop}>
+                    <div style={styles.userAvatar}><FaUserGraduate /></div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '800', margin: 0, color: '#1e293b' }}>{est.apellidos}, {est.nombres}</h3>
+                      <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800' }}>DNI: {est.dni}</span>
+                    </div>
+                    {est.tieneDeuda ? (
+                      <div style={styles.debtTag}>RIESGO</div>
+                    ) : (
+                      <div style={styles.paidTag}>SOLVENTE</div>
+                    )}
+                  </div>
+
+                  <div style={styles.cardBody}>
+                    <div style={styles.infoRow}><FaClipboardList color="#4361ee" size={14} /> <span>{est.totalCursos} Cursos Inscritos</span></div>
+                    <div style={styles.infoRow}><FaPhone color="#10b981" size={14} /> <span>{est.telefono_apoderado || 'S/APODERADO'}</span></div>
+                  </div>
+
+                  <div style={styles.cardFooter}>
+                    <button style={styles.trackBtn}>
+                      <FaCommentDots /> GESTIONAR SEGUIMIENTO
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* Modal de Tutoría Premium */}
+        {selectedEstudiante && (
+          <div className="modal-overlay" onClick={() => setSelectedEstudiante(null)}>
+            <div className="modal" style={styles.modal} onClick={e => e.stopPropagation()}>
+              <div style={styles.modalHeader}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div style={styles.modalAvatar}><FaIdCard /></div>
+                  <div>
                     <h2 style={{ fontSize: '20px', fontWeight: '900', margin: 0 }}>{selectedEstudiante.nombres} {selectedEstudiante.apellidos}</h2>
                     <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Historial Académico y Tutoría</p>
-                 </div>
-               </div>
-               <button style={styles.closeModal} onClick={() => setSelectedEstudiante(null)}>×</button>
-            </div>
+                  </div>
+                </div>
+                <button style={styles.closeModal} onClick={() => setSelectedEstudiante(null)}>×</button>
+              </div>
 
-            <div style={styles.modalContent}>
-               <h4 style={styles.sectionTitle}>SITUACIÓN FINANCIERA X CURSO</h4>
-               <div style={styles.matList}>
-                 {selectedEstudiante.matriculas.map(m => (
-                   <div key={m.id} style={styles.matRow}>
+              <div style={styles.modalContent}>
+                <h4 style={styles.sectionTitle}>SITUACIÓN FINANCIERA POR CURSO</h4>
+                <div style={styles.matList}>
+                  {selectedEstudiante.matriculas.map(m => (
+                    <div key={m.id} style={styles.matRow}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: '800', fontSize: '14px' }}>{m.curso_nombre}</div>
                         <div style={{ fontSize: '11px', color: '#94a3b8' }}>Estado: {m.estado_pago.toUpperCase()}</div>
                       </div>
                       <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <div style={{ fontWeight: '900', color: (m.monto_total - m.monto_pagado) > 0 ? '#ef4444' : '#10b981' }}>
-                           S/ {(m.monto_total - m.monto_pagado).toFixed(2)}
+                          S/ {(m.monto_total - m.monto_pagado).toFixed(2)}
                         </div>
                         <button onClick={() => generarPDF(selectedEstudiante, m)} style={styles.pdfBtn}>
                           <FaFilePdf /> PDF
                         </button>
                       </div>
-                   </div>
-                 ))}
-               </div>
+                    </div>
+                  ))}
+                </div>
 
                 {/* Historial de Seguimiento */}
                 <h4 style={{ ...styles.sectionTitle, marginTop: '30px' }}><FaHistory /> HISTORIAL DE TUTORÍA</h4>
@@ -352,11 +352,11 @@ const Tutores = () => {
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '900', color: '#475569', marginBottom: '8px' }}>
                     OBSERVACIONES / SEGUIMIENTO DEL TUTOR
                   </label>
-                  <textarea 
+                  <textarea
                     style={styles.textarea}
                     placeholder="Escribe aquí las incidencias, llamadas a padres o acuerdos con el alumno..."
                     value={seguimiento.comentario}
-                    onChange={e => setSeguimiento({...seguimiento, comentario: e.target.value})}
+                    onChange={e => setSeguimiento({ ...seguimiento, comentario: e.target.value })}
                     required
                   />
                   <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
@@ -365,11 +365,11 @@ const Tutores = () => {
                       {saving ? 'Guardando...' : 'Guardar Seguimiento'}
                     </button>
                   </div>
-               </form>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </main>
     </div>
   );
@@ -413,23 +413,23 @@ const styles = {
   infoRow: { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: '#475569', fontWeight: '700' },
   cardFooter: { borderTop: '1px solid #f1f5f9', paddingTop: '22px' },
   trackBtn: { width: '100%', background: '#f8fafc', border: '1.5px dashed #e2e8f0', padding: '14px', borderRadius: '18px', color: '#4361ee', fontWeight: '900', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.3s' },
-  modal: { 
-    maxWidth: '700px', 
-    width: '95%', 
-    maxHeight: '90vh', 
-    borderRadius: '32px', 
-    overflow: 'hidden', 
-    display: 'flex', 
+  modal: {
+    maxWidth: '700px',
+    width: '95%',
+    maxHeight: '90vh',
+    borderRadius: '32px',
+    overflow: 'hidden',
+    display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     background: 'white'
   },
-  modalHeader: { 
-    padding: '30px', 
-    background: 'white', 
-    borderBottom: '1px solid #f1f5f9', 
-    display: 'flex', 
-    justifyContent: 'space-between', 
+  modalHeader: {
+    padding: '30px',
+    background: 'white',
+    borderBottom: '1px solid #f1f5f9',
+    display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
     flexShrink: 0
   },
