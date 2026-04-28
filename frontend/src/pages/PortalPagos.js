@@ -136,7 +136,10 @@ const PortalPagos = () => {
                   {pagosFiltrados.map(p => (
                     <tr key={p.id} style={styles.tr}>
                       <td style={styles.td}><code style={styles.code}>{p.codigo}</code></td>
-                      <td style={styles.td}><strong>{p.curso_nombre}</strong></td>
+                      <td style={styles.td}>
+                        <strong>{p.curso_nombre}</strong>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{p.horario}</div>
+                      </td>
                       <td style={styles.td}><span style={styles.montoPill}>S/ {parseFloat(p.monto).toFixed(2)}</span></td>
                       <td style={styles.td}>{p.fecha_pago ? new Date(p.fecha_pago).toLocaleDateString('es-PE') : '—'}</td>
                       <td style={styles.td}>{metodoBadge(p.metodo_pago)}</td>
@@ -170,6 +173,7 @@ const PortalPagos = () => {
                               const tableData = [
                                 ['CÓDIGO DE OPERACIÓN', p.codigo],
                                 ['CONCEPTO / CURSO', p.curso_nombre.toUpperCase()],
+                                ['HORARIO', (p.horario || 'N/A').toUpperCase()],
                                 ['MONTO ABONADO', `S/ ${parseFloat(p.monto).toFixed(2)}`],
                                 ['FECHA DE PAGO', new Date(p.fecha_pago).toLocaleDateString('es-PE')],
                                 ['MÉTODO DE PAGO', p.metodo_pago.toUpperCase()],

@@ -136,11 +136,12 @@ exports.getMisPagos = async (req, res) => {
       `SELECT
          p.id, p.codigo, p.monto, p.fecha_pago, p.metodo_pago, p.numero_recibo,
          m.codigo AS matricula_codigo,
-         c.nombre AS curso_nombre
+         c.nombre AS curso_nombre, c.horario
        FROM pagos p
        INNER JOIN matriculas m ON p.matricula_id = m.id
        INNER JOIN cursos     c ON m.curso_id     = c.id
-       WHERE m.estudiante_id = ?
+       LEFT  JOIN ciclos     ci ON c.ciclo_id    = ci.id
+       WHERE m.estudiante_id = ? AND ci.estado = 'activo'
        ORDER BY p.fecha_pago DESC`,
       [req.estudiante.id]
     );
