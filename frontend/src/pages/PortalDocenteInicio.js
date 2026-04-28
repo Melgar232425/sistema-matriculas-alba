@@ -67,8 +67,6 @@ const PortalDocenteInicio = () => {
     navigate('/portal-docente');
   };
 
-  // Extrae los días de clase desde el string de horario
-  // Formatos soportados: "Lunes 08:00 AM - 10:00 AM", "Lunes y Miércoles 08:00 AM...", "Lunes a Viernes..."
   const getDiasDeClase = (horarioStr) => {
     if (!horarioStr) return [];
     const DIAS_SEMANA = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
@@ -79,7 +77,6 @@ const PortalDocenteInicio = () => {
 
   const getDiaNormalizado = (fechaStr) => {
     const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-    // Ajuste para evitar problemas de zona horaria al parsear fecha YYYY-MM-DD
     const dateObj = new Date(fechaStr + 'T12:00:00');
     const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     return normalizar(dias[dateObj.getDay()]);
@@ -90,7 +87,6 @@ const PortalDocenteInicio = () => {
     setCursoSeleccionado(c);
   };
 
-  // Efecto para validar día de clase cuando cambia el curso o la fecha
   useEffect(() => {
     if (cursoSeleccionado && fecha) {
       const diasClase = getDiasDeClase(cursoSeleccionado.horario);
@@ -112,14 +108,12 @@ const PortalDocenteInicio = () => {
     if (!fechaInicio || !fechaFin || !horarioStr) return 0;
     const diasClase = getDiasDeClase(horarioStr);
     if (diasClase.length === 0) return 0;
-
     const start = new Date(fechaInicio + 'T12:00:00');
     const end = new Date(fechaFin + 'T12:00:00');
     let count = 0;
     const current = new Date(start);
     const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
     while (current <= end) {
       const diaActual = normalizar(diasSemanaMap[current.getDay()]);
       if (diasClase.includes(diaActual)) count++;
@@ -157,10 +151,8 @@ const PortalDocenteInicio = () => {
     }
   };
 
-  // Cálculos de progreso del ciclo
   const totalSesionesCiclo = cursoSeleccionado ? calcularTotalSesiones(cursoSeleccionado.fecha_inicio, cursoSeleccionado.fecha_fin, cursoSeleccionado.horario) : 0;
 
-  // Componente de Carga Elegante (Skeleton)
   const Skeleton = ({ width, height, borderRadius = '10px' }) => (
     <div style={{
       width, height, borderRadius,
@@ -193,8 +185,6 @@ const PortalDocenteInicio = () => {
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .course-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px -5px rgba(67, 97, 238, 0.3) !important; }
         .btn-hover:hover { filter: brightness(1.1); transform: scale(1.02); }
-
-        /* === MOBILE: Tabla de Asistencia → Tarjetas === */
         @media (max-width: 768px) {
           .asist-table { display: none !important; }
           .asist-cards { display: flex !important; }
@@ -209,7 +199,6 @@ const PortalDocenteInicio = () => {
         }
       `}</style>
 
-      {/* Header Estilo Apple/Elite */}
       <header style={styles.header}>
         <div style={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
@@ -232,7 +221,6 @@ const PortalDocenteInicio = () => {
       </header>
 
       <main style={styles.main} className="fade-in">
-        {/* Banner con Glassmorphism */}
         <div style={styles.banner}>
           <div style={{ flex: 1 }}>
             <div style={styles.badgeTop}>PANEL DE CONTROL ACADÉMICO</div>
@@ -256,7 +244,6 @@ const PortalDocenteInicio = () => {
         </div>
 
         <div style={styles.layout} className="docente-layout">
-          {/* Sidebar Minimalista */}
           <div style={styles.sidebar} className="docente-sidebar">
             <div style={styles.sectionHeader}>AULAS ASIGNADAS</div>
             <div style={styles.cursoList}>
@@ -279,7 +266,6 @@ const PortalDocenteInicio = () => {
             </div>
           </div>
 
-          {/* Área de Trabajo */}
           <div style={styles.content}>
             {!cursoSeleccionado ? (
               <div style={styles.emptyState}>
@@ -313,7 +299,7 @@ const PortalDocenteInicio = () => {
                          <div style={styles.progressBar}>
                             <div style={{
                               ...styles.progressFill,
-                              width: '100%', /* Por ahora mostramos la barra llena del ciclo o podemos calcular avance promedio */
+                              width: '100%',
                               background: 'linear-gradient(90deg, #4361ee, #4cc9f0)'
                             }}></div>
                          </div>
@@ -345,7 +331,6 @@ const PortalDocenteInicio = () => {
                        <div style={{ marginTop: '10px' }}><Skeleton width="100%" height="40px" borderRadius="10px" /></div>
                     </div>
                   ) : isMobile ? (
-                    /* Vista Móvil: Tarjetas */
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px' }}>
                       {estudiantes.map(e => {
                         const estado = cambiosPendientes[e.matricula_id] || e.estado_asistencia;
@@ -389,14 +374,13 @@ const PortalDocenteInicio = () => {
                                 color: '#1e293b',
                                 outline: 'none',
                                 boxSizing: 'border-box',
-                                display: 'block',
-                                lineHeight: 'normal'
+                                display: 'block'
                               }}
                             >
-                              <option value="no_registrado" style={{ color: '#64748b' }}>Seleccionar estado...</option>
-                              <option value="presente" style={{ color: '#059669' }}>✅ Presente</option>
-                              <option value="tardanza" style={{ color: '#d97706' }}>⏳ Tardanza</option>
-                              <option value="ausente" style={{ color: '#e11d48' }}>❌ Ausente</option>
+                              <option value="no_registrado">Seleccionar estado...</option>
+                              <option value="presente">✅ Presente</option>
+                              <option value="tardanza">⏳ Tardanza</option>
+                              <option value="ausente">❌ Ausente</option>
                             </select>
                             {modificado && <div style={{ fontSize: '10px', color: '#4361ee', fontWeight: '900', marginTop: '8px' }}>● CAMBIO PENDIENTE DE GUARDAR</div>}
                           </div>
@@ -404,7 +388,6 @@ const PortalDocenteInicio = () => {
                       })}
                     </div>
                   ) : (
-                    /* Vista Desktop: Tabla */
                     <table style={styles.table}>
                       <thead>
                         <tr>
@@ -485,14 +468,13 @@ const styles = {
   cursoActive: { background: '#1e293b', color: 'white', borderColor: '#1e293b', transform: 'translateX(8px)' },
   content: { flex: 1 },
   asistenciaProgress: { background: '#f1f5f9', padding: '10px 18px', borderRadius: '15px', minWidth: '180px' },
-  progressText: { fontSize: '10px', fontWeight: '900', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between' },
   progressBar: { width: '100%', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' },
-  progressFill: { height: '100%', background: '#10b981', borderRadius: '10px', transition: 'width 0.8s cubic-bezier(0.65, 0, 0.35, 1)' },
+  progressFill: { height: '100%', background: '#10b981', borderRadius: '10px', transition: 'width 0.8s' },
   emptyState: { textAlign: 'center', padding: '120px 40px', background: 'white', borderRadius: '32px', border: '2px dashed #e2e8f0' },
   emptyIcon: { fontSize: '50px', color: '#e2e8f0', marginBottom: '25px' },
   panelHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '35px' },
   breadcrumb: { fontSize: '9px', fontWeight: '900', color: '#4361ee', marginBottom: '8px', letterSpacing: '0.1em' },
-  dateInput: { background: 'white', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '800', color: '#1e293b', outline: 'none', transition: 'all 0.2s' },
+  dateInput: { background: 'white', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '800', color: '#1e293b', outline: 'none' },
   saveBtn: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '12px 28px', borderRadius: '16px', fontWeight: '900', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' },
   tableWrapper: { background: 'white', borderRadius: '32px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
   table: { width: '100%', borderCollapse: 'collapse' },
@@ -518,8 +500,7 @@ const styles = {
     fontWeight: mod ? '900' : '700',
     background: 'white',
     outline: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
+    cursor: 'pointer'
   })
 };
 
