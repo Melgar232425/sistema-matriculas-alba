@@ -11,6 +11,7 @@ const Reportes = () => {
   const [loading, setLoading] = useState(true);
   const [fechaInicio, setFechaInicio] = useState('2026-01-01');
   const [fechaFin, setFechaFin] = useState(new Date().toISOString().split('T')[0]);
+  const [activeTab, setActiveTab] = useState('ingresos');
 
   useEffect(() => {
     cargarReportes();
@@ -34,7 +35,6 @@ const Reportes = () => {
   };
 
   const exportarExcelConsolidado = () => {
-    // Verificar que haya datos en al menos uno de los dos
     const hayIngresos = ingresos && ingresos.pagos && ingresos.pagos.length > 0;
     const hayMorosidad = morosidad && morosidad.morosos && morosidad.morosos.length > 0;
 
@@ -45,9 +45,6 @@ const Reportes = () => {
 
     const wb = XLSX.utils.book_new();
 
-    // =============================
-    // HOJA 1: INGRESOS DETALLADOS
-    // =============================
     if (hayIngresos) {
       const rowsIngresos = [];
       rowsIngresos.push(["", {
@@ -95,20 +92,11 @@ const Reportes = () => {
       });
 
       const wsIngresos = XLSX.utils.aoa_to_sheet(rowsIngresos);
-      wsIngresos["!merges"] = [
-        { s: { r: 0, c: 1 }, e: { r: 0, c: 7 } },
-        { s: { r: 1, c: 1 }, e: { r: 1, c: 7 } }
-      ];
-      // Aumentamos los anchos de columna para que el contenido no se corte
-      wsIngresos['!cols'] = [
-        { wch: 5 }, { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 20 }, { wch: 25 }
-      ];
+      wsIngresos["!merges"] = [{ s: { r: 0, c: 1 }, e: { r: 0, c: 7 } }, { s: { r: 1, c: 1 }, e: { r: 1, c: 7 } }];
+      wsIngresos['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 20 }, { wch: 25 }];
       XLSX.utils.book_append_sheet(wb, wsIngresos, "Ingresos");
     }
 
-    // =============================
-    // HOJA 2: DEUDAS PENDIENTES
-    // =============================
     if (hayMorosidad) {
       const rowsDeudas = [];
       rowsDeudas.push(["", {
@@ -157,56 +145,67 @@ const Reportes = () => {
       });
 
       const wsDeudas = XLSX.utils.aoa_to_sheet(rowsDeudas);
-      wsDeudas["!merges"] = [
-        { s: { r: 0, c: 1 }, e: { r: 0, c: 8 } },
-        { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } }
-      ];
-      // Aumentamos los anchos de columna
-      wsDeudas['!cols'] = [
-        { wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 20 }
-      ];
+      wsDeudas["!merges"] = [{ s: { r: 0, c: 1 }, e: { r: 0, c: 8 } }, { s: { r: 1, c: 1 }, e: { r: 1, c: 8 } }];
+      wsDeudas['!cols'] = [{ wch: 5 }, { wch: 15 }, { wch: 40 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 20 }];
       XLSX.utils.book_append_sheet(wb, wsDeudas, "Morosidad");
     }
 
     XLSX.writeFile(wb, `Reporte_Consolidado_Alba_${fechaInicio}_a_${fechaFin}.xlsx`);
   };
 
-
   return (
     <div className="main-content">
+      {/* Selector de Pestañas Premium */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', background: 'white', padding: '10px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+        <button 
+          onClick={() => setActiveTab('ingresos')}
+          style={{
+            flex: 1, padding: '12px', borderRadius: '12px', border: 'none', fontWeight: '800', fontSize: '13px', cursor: 'pointer',
+            background: activeTab === 'ingresos' ? '#eff6ff' : 'transparent',
+            color: activeTab === 'ingresos' ? '#2563eb' : '#64748b',
+            transition: 'all 0.2s'
+          }}
+        >
+          💰 REPORTE DE INGRESOS
+        </button>
+        <button 
+          onClick={() => setActiveTab('morosidad')}
+          style={{
+            flex: 1, padding: '12px', borderRadius: '12px', border: 'none', fontWeight: '800', fontSize: '13px', cursor: 'pointer',
+            background: activeTab === 'morosidad' ? '#fef2f2' : 'transparent',
+            color: activeTab === 'morosidad' ? '#ef4444' : '#64748b',
+            transition: 'all 0.2s'
+          }}
+        >
+          ⚠️ REPORTE DE MOROSIDAD
+        </button>
+      </div>
+
       <div className="card">
         <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
-          <h2 className="card-title">Reporte de Ingresos</h2>
+          <h2 className="card-title">
+            {activeTab === 'ingresos' ? 'Ingresos Detallados' : 'Control de Morosidad'}
+          </h2>
           <button
             className="btn btn-primary"
             onClick={exportarExcelConsolidado}
-            style={{ backgroundColor: '#10b981', color: 'white' }}
+            style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: '700' }}
           >
-            <FaFileExport /> Descargar Excel
+            <FaFileExport /> Descargar Excel Completo
           </button>
         </div>
 
-        <div className="form-row" style={{ marginBottom: '20px' }}>
+        <div className="form-row" style={{ marginBottom: '20px', padding: '20px', background: '#f8fafc', borderRadius: '16px' }}>
           <div className="form-group">
             <label>Fecha Inicio</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-            />
+            <input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
           </div>
           <div className="form-group">
             <label>Fecha Fin</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-            />
+            <input type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
           </div>
           <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <button className="btn btn-primary" onClick={cargarReportes}>
-              Generar
-            </button>
+            <button className="btn btn-primary" onClick={cargarReportes} style={{ height: '42px', padding: '0 30px' }}>Generar</button>
           </div>
         </div>
 
@@ -214,127 +213,107 @@ const Reportes = () => {
           <div className="loading"><div className="spinner"></div></div>
         ) : (
           <>
-            <div className="stats-grid" style={{ marginBottom: '25px' }}>
-                <div className="stat-card">
-                  <div className="stat-icon success" style={{ background: '#dcfce7', color: '#10b981' }}>S/</div>
-                  <div className="stat-info">
-                      <h3>S/ {ingresos?.total || '0.00'}</h3>
-                      <p>Total Ingresos</p>
-                  </div>
+            {activeTab === 'ingresos' ? (
+              <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                <div className="stats-grid" style={{ marginBottom: '25px', padding: '0 20px' }}>
+                    <div className="stat-card" style={{ border: '1px solid #dcfce7' }}>
+                      <div className="stat-icon success" style={{ background: '#dcfce7', color: '#10b981' }}>S/</div>
+                      <div className="stat-info">
+                          <h3>S/ {ingresos?.total || '0.00'}</h3>
+                          <p>Total Ingresos</p>
+                      </div>
+                    </div>
+                    <div className="stat-card" style={{ border: '1px solid #eff6ff' }}>
+                      <div className="stat-icon primary" style={{ background: '#eff6ff', color: '#3b82f6' }}>#</div>
+                      <div className="stat-info">
+                          <h3>{ingresos?.cantidad || 0}</h3>
+                          <p>Cantidad de Pagos</p>
+                      </div>
+                    </div>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-icon primary" style={{ background: '#eff6ff', color: '#3b82f6' }}>#</div>
-                  <div className="stat-info">
-                      <h3>{ingresos?.cantidad || 0}</h3>
-                      <p>Cantidad de Pagos</p>
-                  </div>
-                </div>
-            </div>
 
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Código</th>
-                    <th>Estudiante</th>
-                    <th>Curso</th>
-                    <th>Monto</th>
-                    <th>Método</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ingresos?.pagos && ingresos.pagos.length > 0 ? (
-                    ingresos.pagos.map((pago) => (
-                      <tr key={pago.codigo}>
-                        <td>{new Date(pago.fecha_pago).toLocaleDateString()}</td>
-                        <td>{pago.codigo}</td>
-                        <td>{pago.nombres} {pago.apellidos}</td>
-                        <td>{pago.curso}</td>
-                        <td>S/ {parseFloat(pago.monto).toFixed(2)}</td>
-                        <td><span className="badge badge-info">{pago.metodo_pago}</span></td>
+                <div className="table-container" style={{ padding: '0 20px 20px' }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Código</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Monto</th>
+                        <th>Método</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-                        No hay pagos en este período
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Reporte de Morosidad */}
-      <div className="card">
-        <div className="card-header" style={{ flexWrap: 'wrap', gap: '15px' }}>
-          <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaExclamationTriangle style={{ color: '#f59e0b', flexShrink: 0 }} />
-            Reporte de Morosidad
-          </h2>
-        </div>
-
-        {loading ? (
-          <div className="loading"><div className="spinner"></div></div>
-        ) : (
-          <>
-            <div style={{ marginBottom: '20px', padding: '15px', background: '#fef3c7', borderRadius: '8px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px' }}>
-                <div>
-                  <p style={{ color: '#92400e', fontSize: '14px' }}>Total Morosos</p>
-                  <h2 style={{ color: '#b45309', fontSize: '24px' }}>{morosidad?.totalMorosos || 0}</h2>
-                </div>
-                <div>
-                  <p style={{ color: '#92400e', fontSize: '14px' }}>Deuda Total</p>
-                  <h2 style={{ color: '#ef4444', fontSize: '24px' }}>S/ {morosidad?.totalDeuda || '0.00'}</h2>
+                    </thead>
+                    <tbody>
+                      {ingresos?.pagos && ingresos.pagos.length > 0 ? (
+                        ingresos.pagos.map((pago) => (
+                          <tr key={pago.codigo}>
+                            <td>{new Date(pago.fecha_pago).toLocaleDateString()}</td>
+                            <td>{pago.codigo}</td>
+                            <td>{pago.nombres} {pago.apellidos}</td>
+                            <td>{pago.curso}</td>
+                            <td>S/ {parseFloat(pago.monto).toFixed(2)}</td>
+                            <td><span className="badge badge-info">{pago.metodo_pago}</span></td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No hay pagos en este período</td></tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                <div style={{ marginBottom: '25px', padding: '20px', margin: '0 20px', background: '#fef2f2', borderRadius: '16px', border: '1px solid #fecaca' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px' }}>
+                    <div>
+                      <p style={{ color: '#991b1b', fontSize: '12px', fontWeight: '800' }}>TOTAL MOROSOS</p>
+                      <h2 style={{ color: '#991b1b', fontSize: '32px', fontWeight: '900' }}>{morosidad?.totalMorosos || 0}</h2>
+                    </div>
+                    <div>
+                      <p style={{ color: '#991b1b', fontSize: '12px', fontWeight: '800' }}>DEUDA TOTAL ACUMULADA</p>
+                      <h2 style={{ color: '#ef4444', fontSize: '32px', fontWeight: '900' }}>S/ {morosidad?.totalDeuda || '0.00'}</h2>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>DNI</th>
-                    <th>Estudiante</th>
-                    <th>Curso</th>
-                    <th>Teléfono</th>
-                    <th>Monto Total</th>
-                    <th>Pagado</th>
-                    <th>Pendiente</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {morosidad?.morosos && morosidad.morosos.length > 0 ? (
-                    morosidad.morosos.map((moroso) => (
-                      <tr key={moroso.estudiante_codigo}>
-                        <td>{moroso.estudiante_codigo}</td>
-                        <td>{moroso.dni}</td>
-                        <td>{moroso.nombres} {moroso.apellidos}</td>
-                        <td>{moroso.curso}</td>
-                        <td>{moroso.telefono || moroso.telefono_apoderado || '-'}</td>
-                        <td>S/ {parseFloat(moroso.monto_total).toFixed(2)}</td>
-                        <td>S/ {parseFloat(moroso.monto_pagado).toFixed(2)}</td>
-                        <td style={{ color: '#ef4444', fontWeight: 'bold' }}>
-                          S/ {parseFloat(moroso.monto_pendiente).toFixed(2)}
-                        </td>
+                <div className="table-container" style={{ padding: '0 20px 20px' }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Código</th>
+                        <th>DNI</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Teléfono</th>
+                        <th>Monto Total</th>
+                        <th>Pagado</th>
+                        <th>Pendiente</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
-                        No hay estudiantes con deudas pendientes
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {morosidad?.morosos && morosidad.morosos.length > 0 ? (
+                        morosidad.morosos.map((moroso) => (
+                          <tr key={moroso.estudiante_codigo}>
+                            <td>{moroso.estudiante_codigo}</td>
+                            <td>{moroso.dni}</td>
+                            <td>{moroso.nombres} {moroso.apellidos}</td>
+                            <td>{moroso.curso}</td>
+                            <td>{moroso.telefono || moroso.telefono_apoderado || '-'}</td>
+                            <td>S/ {parseFloat(moroso.monto_total).toFixed(2)}</td>
+                            <td>S/ {parseFloat(moroso.monto_pagado).toFixed(2)}</td>
+                            <td style={{ color: '#ef4444', fontWeight: '900' }}>S/ {parseFloat(moroso.monto_pendiente).toFixed(2)}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr><td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>No hay estudiantes con deudas pendientes</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
