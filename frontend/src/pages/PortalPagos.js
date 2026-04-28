@@ -14,6 +14,7 @@ const PortalPagos = () => {
   const [matriculas, setMatriculas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('');
+  const [showDeudaModal, setShowDeudaModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,12 +38,13 @@ const PortalPagos = () => {
     navigate('/portal');
   };
 
+  const totalPagado = pagos.reduce((acc, p) => acc + parseFloat(p.monto || 0), 0);
+  const totalDeuda = matriculas.reduce((acc, m) => acc + Math.max(0, parseFloat(m.monto_total || 0) - parseFloat(m.monto_pagado || 0)), 0);
+  const cursosConDeuda = matriculas.filter(m => (parseFloat(m.monto_total) - parseFloat(m.monto_pagado)) > 0);
+
   const pagosFiltrados = filtro
     ? pagos.filter(p => p.curso_nombre?.toLowerCase().includes(filtro.toLowerCase()))
     : pagos;
-
-  const totalPagado = pagos.reduce((acc, p) => acc + parseFloat(p.monto || 0), 0);
-  const totalDeuda = matriculas.reduce((acc, m) => acc + Math.max(0, parseFloat(m.monto_total || 0) - parseFloat(m.monto_pagado || 0)), 0);
 
   const metodoBadge = (metodo) => {
     const map = { efectivo: '#10b981', transferencia: '#3b82f6', yape: '#8b5cf6', plin: '#ec4899' };
@@ -54,7 +56,6 @@ const PortalPagos = () => {
 
   return (
     <div style={styles.page} className="premium-dashboard">
-      {/* Header Estilo Apple/Elite */}
       <header style={styles.headerPremium}>
         <div style={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
@@ -64,150 +65,119 @@ const PortalPagos = () => {
               <p style={{ fontSize: '10px', color: '#64748b', margin: 0, fontWeight: '700', letterSpacing: '0.1em' }}>PAGOS ALUMNO</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
-            <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión">
-              <FaSignOutAlt />
-            </button>
-          </div>
+          <button onClick={handleLogout} style={styles.logoutBtn} title="Cerrar Sesión"><FaSignOutAlt /></button>
         </div>
       </header>
       <StudentNavbar />
 
       <main style={styles.mainContent}>
-        {/* Banner con Glassmorphism */}
         <div style={styles.banner}>
           <div style={{ flex: 1 }}>
             <div style={styles.badgeTop}>ESTADO DE CUENTA</div>
-            <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '8px', letterSpacing: '-0.03em' }}>
-              Mi Historial de Pagos 💸
-            </h2>
-            <p style={{ opacity: 0.85, fontSize: '16px', fontWeight: '500', maxWidth: '500px' }}>
-              Consulta tus abonos, descarga recibos oficiales y mantén tus finanzas académicas al día.
-            </p>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '8px' }}>Mi Historial de Pagos 💸</h2>
+            <p style={{ opacity: 0.85, fontSize: '16px', fontWeight: '500' }}>Consulta tus abonos y descarga recibos oficiales.</p>
           </div>
-          <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', padding: '20px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-             <div style={{ fontSize: '10px', opacity: 0.8, fontWeight: '900', marginBottom: '5px' }}>SALDO PENDIENTE</div>
+          <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', padding: '20px 30px', borderRadius: '24px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+             <div style={{ fontSize: '10px', opacity: 0.8, fontWeight: '900', marginBottom: '5px' }}>SALDO PENDIENTE TOTAL</div>
              <div style={{ fontSize: '28px', fontWeight: '900', color: totalDeuda > 0 ? '#ff8a8a' : '#fff' }}>S/ {totalDeuda.toFixed(2)}</div>
           </div>
         </div>
 
-        {/* Stats Row - Premium Cards */}
         <div style={styles.statsRow}>
-          {[
-            { label: 'Abonos realizados', value: pagos.length, color: '#4361ee', bg: '#eff6ff' },
-            { label: 'Inversión total', value: `S/ ${totalPagado.toFixed(2)}`, color: '#10b981', bg: '#f0fdf4' },
-            { label: 'Cursos con deuda', value: matriculas.filter(m => (m.monto_total - m.monto_pagado) > 0).length, color: totalDeuda > 0 ? '#ef4444' : '#10b981', bg: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4' },
-          ].map((s, i) => (
-            <div key={i} style={styles.statCard} className="stat-card">
-              <div style={{ ...styles.statIcon, background: s.bg, color: s.color }}><FaMoneyBillWave /></div>
-              <div>
-                <div style={styles.statLabel}>{s.label.toUpperCase()}</div>
-                <div style={styles.statValue}>{s.value}</div>
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, background: '#eff6ff', color: '#4361ee' }}><FaMoneyBillWave /></div>
+            <div><div style={styles.statLabel}>ABONOS REALIZADOS</div><div style={styles.statValue}>{pagos.length}</div></div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={{ ...styles.statIcon, background: '#f0fdf4', color: '#10b981' }}><FaMoneyBillWave /></div>
+            <div><div style={styles.statLabel}>INVERSIÓN TOTAL</div><div style={styles.statValue}>S/ {totalPagado.toFixed(2)}</div></div>
+          </div>
+          <div 
+            style={{ ...styles.statCard, cursor: 'pointer', border: totalDeuda > 0 ? '1px solid #fca5a5' : '1px solid #e2e8f0' }} 
+            onClick={() => setShowDeudaModal(true)}
+          >
+            <div style={{ ...styles.statIcon, background: totalDeuda > 0 ? '#fef2f2' : '#f0fdf4', color: totalDeuda > 0 ? '#ef4444' : '#10b981' }}><FaMoneyBillWave /></div>
+            <div>
+              <div style={styles.statLabel}>CURSOS CON DEUDA</div>
+              <div style={{ ...styles.statValue, display: 'flex', alignItems: 'center', gap: 10 }}>
+                {cursosConDeuda.length}
+                <span style={{ fontSize: '9px', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '10px' }}>VER DETALLE</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Tabla */}
-        <div style={styles.card}>
-          <div style={{ marginBottom: 20 }}>
-            <input
-              type="text"
-              placeholder="🔍  Buscar por curso..."
-              value={filtro}
-              onChange={(e) => setFiltro(e.target.value)}
-              style={styles.searchInput}
-            />
+        {showDeudaModal && (
+          <div className="modal-overlay" onClick={() => setShowDeudaModal(false)} style={{ zIndex: 1000 }}>
+            <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', borderRadius: '32px' }}>
+              <div className="modal-header">
+                <h2 className="modal-title">Cursos con Saldo Pendiente 📋</h2>
+                <button className="modal-close" onClick={() => setShowDeudaModal(false)}>×</button>
+              </div>
+              <div className="modal-body" style={{ padding: '0 30px 30px' }}>
+                <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '20px' }}>Detalle de saldos por curso matriculado.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {cursosConDeuda.map((m, idx) => {
+                    const saldo = m.monto_total - m.monto_pagado;
+                    return (
+                      <div key={idx} style={{ background: '#f8fafc', padding: '15px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontWeight: '800', color: '#1e293b' }}>{m.curso_nombre}</div>
+                          <div style={{ fontSize: '11px', color: '#94a3b8' }}>Total: S/ {m.monto_total} | Pagado: S/ {m.monto_pagado}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', color: '#ef4444', fontWeight: '900' }}>SALDO</div>
+                          <div style={{ fontSize: '18px', fontWeight: '900', color: '#ef4444' }}>S/ {saldo.toFixed(2)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button className="btn btn-primary" onClick={() => setShowDeudaModal(false)} style={{ width: '100%', marginTop: '25px', padding: '15px', borderRadius: '16px' }}>Cerrar Detalle</button>
+              </div>
+            </div>
           </div>
+        )}
 
+        <div style={styles.card}>
+          <div style={{ marginBottom: 20 }}><input type="text" placeholder="🔍  Buscar por curso..." value={filtro} onChange={(e) => setFiltro(e.target.value)} style={styles.searchInput} /></div>
           {pagosFiltrados.length === 0 ? (
             <p style={styles.emptyText}>No se encontraron pagos.</p>
           ) : (
             <div className="portal-table-wrap">
               <table style={styles.table}>
-                <thead>
-                  <tr>
-                    {['Código Pago', 'Curso', 'Monto', 'Fecha', 'Método', 'N° Recibo', 'Acciones'].map(h => (
-                      <th key={h} style={styles.th}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
+                <thead><tr>{['Código Pago', 'Curso', 'Monto', 'Fecha', 'Método', 'N° Recibo', 'Acciones'].map(h => <th key={h} style={styles.th}>{h}</th>)}</tr></thead>
                 <tbody>
                   {pagosFiltrados.map(p => (
                     <tr key={p.id} style={styles.tr}>
                       <td style={styles.td}><code style={styles.code}>{p.codigo}</code></td>
-                      <td style={styles.td}>
-                        <strong>{p.curso_nombre}</strong>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{p.horario}</div>
-                      </td>
+                      <td style={styles.td}><strong>{p.curso_nombre}</strong><div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{p.horario}</div></td>
                       <td style={styles.td}><span style={styles.montoPill}>S/ {parseFloat(p.monto).toFixed(2)}</span></td>
                       <td style={styles.td}>{p.fecha_pago ? new Date(p.fecha_pago).toLocaleDateString('es-PE') : '—'}</td>
                       <td style={styles.td}>{metodoBadge(p.metodo_pago)}</td>
                       <td style={styles.td}><span style={{ color: '#64748b' }}>{p.numero_recibo || '—'}</span></td>
                       <td style={styles.td}>
-                        <button
-                          onClick={() => {
-                            try {
-                              const doc = new jsPDF();
-                              const pageWidth = doc.internal.pageSize.getWidth();
-                              
-                              // Cabecera Alba
-                              doc.setFillColor(67, 97, 238);
-                              doc.rect(0, 0, pageWidth, 45, 'F');
-                              doc.setTextColor(255, 255, 255);
-                              doc.setFontSize(22);
-                              doc.setFont('helvetica', 'bold');
-                              doc.text('RECIBO DE PAGO OFICIAL', 15, 25);
-                              
-                              doc.setFontSize(10);
-                              doc.setFont('helvetica', 'normal');
-                              doc.text('ACADEMIA ALBA PERÚ - ÁREA DE FINANZAS', 15, 33);
-                              doc.text(`Fecha de Impresión: ${new Date().toLocaleDateString('es-PE')}`, 15, 38);
-
-                              // Cuerpo
-                              doc.setTextColor(30, 41, 59);
-                              doc.setFontSize(12);
-                              doc.setFont('helvetica', 'bold');
-                              doc.text('DETALLES DEL ABONO', 15, 60);
-
-                              const tableData = [
-                                ['CÓDIGO DE OPERACIÓN', p.codigo],
-                                ['CONCEPTO / CURSO', p.curso_nombre.toUpperCase()],
-                                ['HORARIO', (p.horario || 'N/A').toUpperCase()],
-                                ['MONTO ABONADO', `S/ ${parseFloat(p.monto).toFixed(2)}`],
-                                ['FECHA DE PAGO', new Date(p.fecha_pago).toLocaleDateString('es-PE')],
-                                ['MÉTODO DE PAGO', p.metodo_pago.toUpperCase()],
-                                ['NÚMERO DE COMPROBANTE', p.numero_recibo || 'N/A']
-                              ];
-
-                              doc.autoTable({
-                                startY: 70,
-                                body: tableData,
-                                theme: 'grid',
-                                styles: { fontSize: 10, cellPadding: 6 },
-                                columnStyles: { 0: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 60 } }
-                              });
-
-                              const finalY = doc.lastAutoTable.finalY + 20;
-                              doc.setFontSize(9);
-                              doc.setTextColor(148, 163, 184);
-                              doc.text('Este documento es una constancia digital de pago realizada en nuestro portal.', 15, finalY);
-                              doc.text('Gracias por su confianza en Academia Alba Perú.', 15, finalY + 5);
-
-                              doc.save(`Recibo_Alba_${p.numero_recibo || p.codigo}.pdf`);
-                              toast.success('Recibo descargado');
-                            } catch(e) { toast.error('Error al generar PDF'); }
-                          }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 6,
-                            background: '#eff6ff', color: '#4361ee', border: 'none',
-                            padding: '6px 12px', borderRadius: 8, fontSize: 12,
-                            fontWeight: 700, cursor: 'pointer'
-                          }}
-                          title="Descargar PDF"
-                        >
-                          <FaFilePdf size={14} /> PDF
-                        </button>
+                        <button onClick={() => {
+                          try {
+                            const doc = new jsPDF();
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            doc.setFillColor(67, 97, 238); doc.rect(0, 0, pageWidth, 45, 'F');
+                            doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+                            doc.text('RECIBO DE PAGO OFICIAL', 15, 25);
+                            doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+                            doc.text('ACADEMIA ALBA PERÚ - ÁREA DE FINANZAS', 15, 33);
+                            doc.setTextColor(30, 41, 59); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+                            doc.text('DETALLES DEL ABONO', 15, 60);
+                            const tableData = [
+                              ['CÓDIGO', p.codigo], ['CURSO', p.curso_nombre.toUpperCase()], ['HORARIO', (p.horario || 'N/A').toUpperCase()],
+                              ['MONTO', `S/ ${parseFloat(p.monto).toFixed(2)}`], ['FECHA', new Date(p.fecha_pago).toLocaleDateString('es-PE')],
+                              ['MÉTODO', p.metodo_pago.toUpperCase()], ['RECIBO', p.numero_recibo || 'N/A']
+                            ];
+                            doc.autoTable({ startY: 70, body: tableData, theme: 'grid', styles: { fontSize: 10, cellPadding: 6 }, columnStyles: { 0: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 60 } } });
+                            doc.save(`Recibo_Alba_${p.codigo}.pdf`);
+                            toast.success('PDF Descargado');
+                          } catch(e) { toast.error('Error al generar PDF'); }
+                        }} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#eff6ff', color: '#4361ee', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}><FaFilePdf size={14} /> PDF</button>
                       </td>
                     </tr>
                   ))}
@@ -223,24 +193,23 @@ const PortalPagos = () => {
 
 const styles = {
   page: { minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
-  headerPremium: { background: '#0f172a', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
+  headerPremium: { background: '#0f172a', borderBottom: '1px solid #e2e8f0', padding: '12px 40px', position: 'sticky', top: 0, zIndex: 100 },
   headerInner: { maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  backBtn: { color: '#4361ee', textDecoration: 'none', fontWeight: '800', fontSize: '13px' },
-  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.2s' },
+  logoutBtn: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   mainContent: { maxWidth: 1400, margin: '0 auto', padding: '40px' },
   banner: { background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', color: 'white', padding: '45px 50px', borderRadius: '32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
-  badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px', letterSpacing: '0.15em', border: '1px solid rgba(255,255,255,0.1)' },
-  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8fafc' },
+  badgeTop: { background: 'rgba(255,255,255,0.1)', color: 'white', padding: '5px 14px', borderRadius: '50px', fontSize: '9px', fontWeight: '900', display: 'inline-block', marginBottom: '15px' },
+  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' },
   spinner: { width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#4361ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' },
-  statCard: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'all 0.3s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' },
+  statCard: { background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' },
   statIcon: { width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' },
-  statLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '4px', letterSpacing: '0.05em' },
+  statLabel: { fontSize: '10px', fontWeight: '800', color: '#94a3b8', marginBottom: '4px' },
   statValue: { fontSize: '24px', fontWeight: '900', color: '#0f172a' },
-  card: { background: 'white', borderRadius: '32px', padding: '35px', marginBottom: '30px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.03)' },
-  searchInput: { width: '100%', maxWidth: '340px', background: '#f8fafc', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '700', color: '#0f172a', outline: 'none', transition: 'all 0.2s', marginBottom: '10px' },
+  card: { background: 'white', borderRadius: '32px', padding: '35px', marginBottom: '30px', border: '1px solid #e2e8f0' },
+  searchInput: { width: '100%', maxWidth: '340px', background: '#f8fafc', border: '2px solid #f1f5f9', padding: '12px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: '700' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { background: '#f8fafc', padding: '18px 25px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid #f1f5f9' },
+  th: { background: '#f8fafc', padding: '18px 25px', textAlign: 'left', fontSize: '10px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' },
   td: { padding: '20px 25px', borderBottom: '1px solid #f1f5f9', fontSize: '14px', color: '#475569' },
   tr: { transition: 'all 0.2s' },
   code: { background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: '800', color: '#4361ee' },
