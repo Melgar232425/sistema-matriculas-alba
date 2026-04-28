@@ -21,7 +21,6 @@ const PortalDocenteInicio = () => {
   const [guardando, setGuardando] = useState(false);
   const navigate = useNavigate();
   const [errorDia, setErrorDia] = useState(null);
-  const [totalSesionesCiclo, setTotalSesionesCiclo] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -89,8 +88,6 @@ const PortalDocenteInicio = () => {
   const seleccionarCurso = (c) => {
     if (Object.keys(cambiosPendientes).length > 0 && !window.confirm('¿Perder cambios pendientes?')) return;
     setCursoSeleccionado(c);
-    const total = calcularTotalSesiones(c.fecha_inicio, c.fecha_fin, c.horario);
-    setTotalSesionesCiclo(total);
   };
 
   // Efecto para validar día de clase cuando cambia el curso o la fecha
