@@ -398,16 +398,94 @@ const Estudiantes = () => {
               <h2 className="modal-title">Historial del Estudiante</h2>
               <button className="modal-close" onClick={cerrarModalHistorial}>×</button>
             </div>
-            <div className="modal-body">
-               {/* Simplified content for safety */}
-               {historialData && (
-                 <div>
-                    <p><strong>DNI:</strong> {historialData.datosPersonales.dni}</p>
-                    <p><strong>Nombre:</strong> {historialData.datosPersonales.nombres} {historialData.datosPersonales.apellidos}</p>
-                    {/* Add more as needed */}
+            <div className="modal-body" style={{ padding: '0 30px 30px' }}>
+               {historialData ? (
+                 <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                    {/* Sección 1: Datos Personales */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px', background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                       <div>
+                          <label style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>DNI</label>
+                          <div style={{ fontWeight: '700' }}>{historialData.datosPersonales.dni}</div>
+                       </div>
+                       <div>
+                          <label style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Teléfono</label>
+                          <div style={{ fontWeight: '700' }}>{historialData.datosPersonales.telefono || '—'}</div>
+                       </div>
+                       <div>
+                          <label style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Correo</label>
+                          <div style={{ fontWeight: '700' }}>{historialData.datosPersonales.email || '—'}</div>
+                       </div>
+                       <div style={{ gridColumn: 'span 2' }}>
+                          <label style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Dirección</label>
+                          <div style={{ fontWeight: '700' }}>{historialData.datosPersonales.direccion || '—'}</div>
+                       </div>
+                       <div>
+                          <label style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '800', textTransform: 'uppercase' }}>Apoderado</label>
+                          <div style={{ fontWeight: '700' }}>{historialData.datosPersonales.nombre_apoderado || '—'}</div>
+                       </div>
+                    </div>
+
+                    {/* Sección 2: Matrículas y Pagos */}
+                    <h3 style={{ fontSize: '14px', fontWeight: '900', color: '#0f172a', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                       <span style={{ width: '4px', height: '16px', background: '#4361ee', borderRadius: '2px' }}></span>
+                       RESUMEN DE CURSOS Y PAGOS
+                    </h3>
+                    
+                    <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px', border: '1px solid #f1f5f9' }}>
+                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                             <tr style={{ background: '#f8fafc' }}>
+                                <th style={{ padding: '12px', fontSize: '10px', color: '#94a3b8', textAlign: 'left' }}>CURSO / CICLO</th>
+                                <th style={{ padding: '12px', fontSize: '10px', color: '#94a3b8', textAlign: 'center' }}>TOTAL</th>
+                                <th style={{ padding: '12px', fontSize: '10px', color: '#94a3b8', textAlign: 'center' }}>PAGADO</th>
+                                <th style={{ padding: '12px', fontSize: '10px', color: '#94a3b8', textAlign: 'center' }}>SALDO</th>
+                                <th style={{ padding: '12px', fontSize: '10px', color: '#94a3b8', textAlign: 'center' }}>ESTADO</th>
+                             </tr>
+                          </thead>
+                          <tbody>
+                             {historialData.matriculas && historialData.matriculas.length > 0 ? (
+                                historialData.matriculas.map((m, idx) => {
+                                   const saldo = m.monto_total - m.monto_pagado;
+                                   return (
+                                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                         <td style={{ padding: '12px', fontSize: '13px' }}>
+                                            <div style={{ fontWeight: '700' }}>{m.curso}</div>
+                                            <div style={{ fontSize: '10px', color: '#64748b' }}>{m.ciclo}</div>
+                                         </td>
+                                         <td style={{ padding: '12px', textAlign: 'center', fontSize: '13px' }}>S/ {parseFloat(m.monto_total).toFixed(2)}</td>
+                                         <td style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#10b981', fontWeight: '700' }}>S/ {parseFloat(m.monto_pagado).toFixed(2)}</td>
+                                         <td style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: saldo > 0 ? '#ef4444' : '#10b981', fontWeight: '700' }}>S/ {saldo.toFixed(2)}</td>
+                                         <td style={{ padding: '12px', textAlign: 'center' }}>
+                                            <span style={{ 
+                                               padding: '4px 8px', 
+                                               borderRadius: '6px', 
+                                               fontSize: '10px', 
+                                               fontWeight: '800',
+                                               background: saldo <= 0 ? '#f0fdf4' : (m.monto_pagado > 0 ? '#fffbeb' : '#fef2f2'),
+                                               color: saldo <= 0 ? '#10b981' : (m.monto_pagado > 0 ? '#f59e0b' : '#ef4444')
+                                            }}>
+                                               {saldo <= 0 ? 'PAGADO' : (m.monto_pagado > 0 ? 'PARCIAL' : 'PENDIENTE')}
+                                            </span>
+                                         </td>
+                                      </tr>
+                                   );
+                                })
+                             ) : (
+                                <tr>
+                                   <td colSpan="5" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' }}>No registra matrículas activas.</td>
+                                </tr>
+                             )}
+                          </tbody>
+                       </table>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '20px' }}>
+                       <button className="btn btn-outline" onClick={cerrarModalHistorial}>Cerrar Historial</button>
+                    </div>
                  </div>
+               ) : (
+                 <div className="loading"><div className="spinner"></div></div>
                )}
-               <button className="btn btn-outline" onClick={cerrarModalHistorial}>Cerrar</button>
             </div>
           </div>
         </div>
