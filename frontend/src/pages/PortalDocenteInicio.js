@@ -205,7 +205,7 @@ const PortalDocenteInicio = () => {
       <header style={styles.header}>
         <div style={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
-            <div style={styles.logoCircle}>A</div>
+            <img src="/logo_oficial.png" alt="Logo Alba" style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover', background: 'white', padding: '2px' }} />
             <div>
               <h1 style={{ fontSize: '18px', fontWeight: '900', color: 'white', margin: 0, letterSpacing: '-0.5px' }}>ACADEMIA ALBA</h1>
               <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', margin: 0, fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>PORTAL DOCENTE</p>
