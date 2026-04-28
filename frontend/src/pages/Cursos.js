@@ -678,7 +678,7 @@ const Cursos = () => {
               <option value="">Todos los Ciclos</option>
               {ciclos.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.nombre} {c.estado === 'inactivo' ? '(Cerrado)' : ''}
+                  {c.nombre} {c.estado === 'inactivo' ? '— [HISTÓRICO / CERRADO]' : ''}
                 </option>
               ))}
             </select>
@@ -905,9 +905,9 @@ const Cursos = () => {
                       required
                     >
                       <option value="">Seleccionar ciclo</option>
-                      {ciclos.map(c => (
+                      {ciclos.filter(c => c.estado === 'activo').map(c => (
                         <option key={c.id} value={c.id}>
-                          {c.nombre} {c.estado === 'inactivo' ? '(Cerrado)' : ''}
+                          {c.nombre}
                         </option>
                       ))}
                     </select>
