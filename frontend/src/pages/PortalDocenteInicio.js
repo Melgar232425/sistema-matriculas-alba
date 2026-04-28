@@ -224,6 +224,7 @@ const PortalDocenteInicio = () => {
       </header>
 
       <main style={styles.main} className="fade-in">
+        {/* Banner con Glassmorphism idéntico al alumno */}
         <div style={styles.banner}>
           <div style={{ flex: 1 }}>
             <div style={styles.badgeTop}>PANEL DE CONTROL ACADÉMICO</div>
@@ -236,12 +237,12 @@ const PortalDocenteInicio = () => {
           </div>
           <div style={styles.statsRow}>
             <div style={styles.miniStat}>
-              <div style={styles.miniVal}>{cursos.length}</div>
-              <div style={styles.miniLab}>Cursos</div>
+              <div style={{ fontSize: '10px', opacity: 0.7, fontWeight: '800', marginBottom: '4px' }}>CURSOS</div>
+              <div style={{ fontSize: '24px', fontWeight: '900' }}>{cursos.length}</div>
             </div>
             <div style={styles.miniStat}>
-              <div style={styles.miniVal}>{estudiantes.length || '0'}</div>
-              <div style={styles.miniLab}>Alumnos</div>
+              <div style={{ fontSize: '10px', opacity: 0.7, fontWeight: '800', marginBottom: '4px' }}>ALUMNOS</div>
+              <div style={{ fontSize: '24px', fontWeight: '900' }}>{estudiantes.length || '0'}</div>
             </div>
           </div>
         </div>
