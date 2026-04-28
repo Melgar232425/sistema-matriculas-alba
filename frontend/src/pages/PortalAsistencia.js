@@ -73,25 +73,29 @@ const PortalAsistencia = () => {
   const resumenPorCurso = useMemo(() => {
     const cursosMap = {};
     
-    // Inicializar con datos de matrículas para tener las fechas del ciclo
+    // Inicializar con datos de matrículas usando curso_id único
     matriculas.forEach(m => {
-      cursosMap[m.curso_nombre] = {
+      const key = `${m.curso_id}_${m.id}`; // Llave única por curso y matrícula
+      cursosMap[key] = {
+        id: m.curso_id,
         nombre: m.curso_nombre,
+        horario: m.horario,
         asistencias: 0,
         faltas: 0,
         totalCiclo: calcularTotalSesiones(m.fecha_inicio, m.fecha_fin, m.horario)
       };
     });
 
-    // Sumar asistencias reales
+    // Sumar asistencias reales filtrando por curso_id
     asistencias.forEach(a => {
-      if (!cursosMap[a.curso_nombre]) {
-        cursosMap[a.curso_nombre] = { nombre: a.curso_nombre, asistencias: 0, faltas: 0, totalCiclo: 0 };
-      }
-      if (a.estado === 'presente' || a.estado === 'tardanza') {
-        cursosMap[a.curso_nombre].asistencias++;
-      } else if (a.estado === 'ausente') {
-        cursosMap[a.curso_nombre].faltas++;
+      // Buscamos la matrícula correspondiente para este curso
+      const key = Object.keys(cursosMap).find(k => cursosMap[k].id === a.curso_id);
+      if (key) {
+        if (a.estado === 'presente' || a.estado === 'tardanza') {
+          cursosMap[key].asistencias++;
+        } else if (a.estado === 'ausente') {
+          cursosMap[key].faltas++;
+        }
       }
     });
 
@@ -183,7 +187,10 @@ const PortalAsistencia = () => {
                   const porcFaltas = item.totalCiclo > 0 ? ((item.faltas / item.totalCiclo) * 100).toFixed(1) : '0.0';
                   return (
                     <tr key={idx} style={styles.tr}>
-                      <td style={{...styles.td, fontWeight: 700, color: '#1e293b'}}>{item.nombre}</td>
+                      <td style={{...styles.td, color: '#1e293b'}}>
+                        <div style={{fontWeight: 700}}>{item.nombre}</div>
+                        <div style={{fontSize: '11px', color: '#64748b', marginTop: '4px'}}>{item.horario}</div>
+                      </td>
                       <td style={{...styles.td, textAlign: 'center'}}>
                         <div style={styles.countBadge}>{item.asistencias} de {item.totalCiclo}</div>
                       </td>
