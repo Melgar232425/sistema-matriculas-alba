@@ -13,7 +13,7 @@ const PortalHorario = () => {
     if (!localStorage.getItem('student_token')) { navigate('/portal'); return; }
     portalAPI.getHorario()
       .then(res => setHorario(res.data.data || []))
-      .catch(console.error)
+      .catch(() => { /* Error de red silencioso */ })
       .finally(() => setLoading(false));
   }, [navigate]);
 
