@@ -1,7 +1,7 @@
 // Página de Reportes
 import React, { useState, useEffect } from 'react';
 import { reportesAPI } from '../services/api';
-import { FaFileExport, FaExclamationTriangle } from 'react-icons/fa';
+import { FaFileExport } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import XLSX from 'xlsx-js-style';
 
