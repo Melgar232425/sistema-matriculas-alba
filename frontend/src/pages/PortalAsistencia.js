@@ -8,6 +8,31 @@ import {
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
+const getDiasDeClase = (horarioStr) => {
+  if (!horarioStr) return [];
+  const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  const horNorm = horarioStr.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return DIAS_SEMANA.filter(d => horNorm.includes(d));
+};
+
+const calcularTotalSesiones = (fechaInicio, fechaFin, horarioStr) => {
+  if (!fechaInicio || !fechaFin || !horarioStr) return 0;
+  const diasClase = getDiasDeClase(horarioStr);
+  if (diasClase.length === 0) return 0;
+  const start = new Date(fechaInicio + 'T12:00:00');
+  const end = new Date(fechaFin + 'T12:00:00');
+  let count = 0;
+  const current = new Date(start);
+  const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+  const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  while (current <= end) {
+    const diaActual = normalizar(diasSemanaMap[current.getDay()]);
+    if (diasClase.includes(diaActual)) count++;
+    current.setDate(current.getDate() + 1);
+  }
+  return count;
+};
+
 const PortalAsistencia = () => {
   const [asistencias, setAsistencias] = useState([]);
   const [matriculas, setMatriculas] = useState([]);
@@ -15,31 +40,6 @@ const PortalAsistencia = () => {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem('student_user') || '{}');
-
-  const getDiasDeClase = (horarioStr) => {
-    if (!horarioStr) return [];
-    const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
-    const horNorm = horarioStr.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    return DIAS_SEMANA.filter(d => horNorm.includes(d));
-  };
-
-  const calcularTotalSesiones = (fechaInicio, fechaFin, horarioStr) => {
-    if (!fechaInicio || !fechaFin || !horarioStr) return 0;
-    const diasClase = getDiasDeClase(horarioStr);
-    if (diasClase.length === 0) return 0;
-    const start = new Date(fechaInicio + 'T12:00:00');
-    const end = new Date(fechaFin + 'T12:00:00');
-    let count = 0;
-    const current = new Date(start);
-    const diasSemanaMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-    const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    while (current <= end) {
-      const diaActual = normalizar(diasSemanaMap[current.getDay()]);
-      if (diasClase.includes(diaActual)) count++;
-      current.setDate(current.getDate() + 1);
-    }
-    return count;
-  };
 
   useEffect(() => {
     if (!localStorage.getItem('student_token')) { navigate('/portal'); return; }
