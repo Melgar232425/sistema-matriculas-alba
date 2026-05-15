@@ -118,7 +118,23 @@ app.get('/api/fix-db', async (req, res) => {
       // Ignorar si ya existe
     }
     
-    res.json({ success: true, message: "Limpieza profunda completada: Base de datos, tabla de seguimientos e índices actualizados" });
+    // 3. Resolver conflictos de aulas en cursos activos
+    const [cursosActivos] = await promisePool.query("SELECT id, horario, nombre FROM cursos WHERE estado = 'activo'");
+    const aulasDisp = ['Aula 1', 'Aula 2', 'Aula 3', 'Aula 4', 'Aula 5', 'Aula 6', 'Aula 7', 'Aula 8', 'Laboratorio 1', 'Laboratorio 2'];
+    const grp = {};
+    cursosActivos.forEach(c => {
+      if (!grp[c.horario]) grp[c.horario] = [];
+      grp[c.horario].push(c);
+    });
+    for (const h in grp) {
+      if (grp[h].length > 1) {
+        for (let i = 0; i < grp[h].length; i++) {
+          await promisePool.query('UPDATE cursos SET aula = ? WHERE id = ?', [aulasDisp[i % aulasDisp.length], grp[h][i].id]);
+        }
+      }
+    }
+    
+    res.json({ success: true, message: "Limpieza profunda y resolución de conflictos de aulas completada." });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
