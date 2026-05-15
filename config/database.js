@@ -14,7 +14,10 @@ const pool = mysql.createPool({
   queueLimit: 0,
   connectTimeout: 10000, // Punto P6: Timeout de 10s
   charset: 'utf8mb4',     // Punto S11
-  timezone: '-05:00'      // Punto S11: Hora de Perú
+  timezone: '-05:00',
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Promisificar el pool para usar async/await
