@@ -140,10 +140,20 @@ app.get('/api/fix-db', async (req, res) => {
       const docenteId = carlos[0].id;
       // Asignamos a Carlos a Aritmética y Álgebra
       await promisePool.query("UPDATE cursos SET docente_id = ? WHERE nombre = 'Aritmética' LIMIT 1", [docenteId]);
-      await promisePool.query("UPDATE cursos SET docente_id = ? WHERE nombre = 'Álgebra' LIMIT 1", [docenteId]);
+      // Aseguramos que tenga alumnos matriculados para la demo
+      const [alumnos] = await promisePool.query("SELECT id FROM estudiantes LIMIT 5");
+      const [curso1] = await promisePool.query("SELECT id FROM cursos WHERE nombre = 'Aritmética' LIMIT 1");
+      const [curso2] = await promisePool.query("SELECT id FROM cursos WHERE nombre = 'Álgebra' LIMIT 1");
+      
+      if (alumnos.length > 0 && curso1.length > 0 && curso2.length > 0) {
+        for (const alu of alumnos) {
+          await promisePool.query("INSERT IGNORE INTO matriculas (estudiante_id, curso_id, ciclo_id, fecha_matricula, estado_pago, estado_matricula, monto_total, monto_pagado) VALUES (?, ?, 2, NOW(), 'pagado', 'activa', 120, 120)", [alu.id, curso1[0].id]);
+          await promisePool.query("INSERT IGNORE INTO matriculas (estudiante_id, curso_id, ciclo_id, fecha_matricula, estado_pago, estado_matricula, monto_total, monto_pagado) VALUES (?, ?, 2, NOW(), 'parcial', 'activa', 120, 60)", [alu.id, curso2[0].id]);
+        }
+      }
     }
     
-    res.json({ success: true, message: "Configuración de demo lista: Carlos Quispe tiene ahora 2 cursos." });
+    res.json({ success: true, message: "Configuración de demo COMPLETA: Carlos Quispe tiene 2 cursos y alumnos registrados." });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
