@@ -99,7 +99,8 @@ const getCoursePosition = (horario) => {
     if (!horario) return null;
 
     const cleanHorario = horario.toLowerCase();
-    const parts = cleanHorario.split('-').map(p => p.trim());
+    // Soporta tanto guion normal (-) como guion largo (–)
+    const parts = cleanHorario.split(/[-–]/).map(p => p.trim());
     if (parts.length < 2) return null;
 
     const startMin = horaAMinutos(parts[0]);
