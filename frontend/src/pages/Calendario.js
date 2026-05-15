@@ -45,7 +45,8 @@ const parsearDiasCurso = (horario) => {
 
 const extraerHora = (horario) => {
     if (!horario) return '';
-    const match = horario.match(/\d{1,2}:\d{2}\s*(AM|PM|am|pm)?(\s*-\s*\d{1,2}:\d{2}\s*(AM|PM|am|pm)?)?/);
+    // Regex mejorada para soportar guiones normales (-) y guiones largos (–)
+    const match = horario.match(/\d{1,2}:\d{2}\s*(AM|PM|am|pm)?(\s*[-–]\s*\d{1,2}:\d{2}\s*(AM|PM|am|pm)?)?/);
     return match ? match[0] : '';
 };
 
@@ -59,9 +60,11 @@ const horaAMinutos = (horaStr) => {
 
     let cleanTime = horaLimpia.trim().toLowerCase();
     
-    // Si sigue siendo un rango, tomar solo el inicio
+    // Si sigue siendo un rango, tomar solo el inicio (soporta - y –)
     if (cleanTime.includes('-')) {
         cleanTime = cleanTime.split('-')[0].trim();
+    } else if (cleanTime.includes('–')) {
+        cleanTime = cleanTime.split('–')[0].trim();
     }
 
     let isPM = cleanTime.includes('pm') || cleanTime.includes('p.m');
@@ -90,7 +93,7 @@ const horaAMinutos = (horaStr) => {
 
 const PIXELS_PER_MINUTE = 0.8;
 const START_HOUR = 7; // 7 AM
-const END_HOUR = 19; // 7 PM
+const END_HOUR = 21; // 9 PM - Extendido para ver el turno noche
 
 const getCoursePosition = (horario) => {
     if (!horario) return null;
@@ -183,7 +186,7 @@ const Calendario = () => {
     const [filtroDocente, setFiltroDocente] = useState('');
     const [filtroAula, setFiltroAula] = useState(''); // Default to All Aulas
     const [filtroCurso, setFiltroCurso] = useState('');
-    const [filtroCiclo, setFiltroCiclo] = useState('');
+    const [filtroCiclo, setFiltroCiclo] = useState('2'); // Pre-seleccionamos el Ciclo I 2026 para la demo
 
     useEffect(() => {
         cargarCursos();
