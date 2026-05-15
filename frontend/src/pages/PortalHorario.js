@@ -50,29 +50,40 @@ const PortalHorario = () => {
     if (!str) return [];
     try {
       const normalizar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const regex = /^(.*?)\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)$/i;
-      const match = str.trim().match(regex);
-      if (!match) return [];
-      const [, diasStr, hInicio, mInicio, hFin, mFin] = match;
-      
+      const h = ' ' + normalizar(str) + ' ';
+
+      // 1. Detectar días
       let diasDetectados = [];
-      const diasNorm = normalizar(diasStr);
-      
-      if (diasNorm.includes(' a ')) {
-        const [inicioDia, finDia] = diasNorm.split(' a ');
-        const idxInicio = DIAS.findIndex(d => normalizar(d).includes(inicioDia.trim()));
-        const idxFin = DIAS.findIndex(d => normalizar(d).includes(finDia.trim()));
-        if (idxInicio !== -1 && idxFin !== -1) {
-          diasDetectados = DIAS.slice(idxInicio, idxFin + 1);
-        }
+      const keywords = {
+        'Lunes': ['lunes', 'lun'],
+        'Martes': ['martes', 'mar'],
+        'Miércoles': ['miercoles', 'miércoles', 'mie', 'mié'],
+        'Jueves': ['jueves', 'jue'],
+        'Viernes': ['viernes', 'vie'],
+        'Sábado': ['sabado', 'sábado', 'sab', 'sáb']
+      };
+
+      if (h.includes('diario') || h.includes('lunes a viernes')) {
+        diasDetectados = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
       } else {
-        diasDetectados = DIAS.filter(d => diasNorm.includes(normalizar(d)));
+        for (const [dia, kws] of Object.entries(keywords)) {
+          if (kws.some(kw => h.includes(kw))) diasDetectados.push(dia);
+        }
       }
+
+      // 2. Extraer horas
+      const match = str.match(/(\d{1,2}:\d{2})\s*(AM|PM|am|pm)?\s*[-–]\s*(\d{1,2}:\d{2})\s*(AM|PM|am|pm)?/i);
+      if (!match) return [];
+
+      const [, hInicio, mInicio, hFin, mFin] = match;
+      // Inferir AM/PM si falta en el inicio
+      const meridiemFin = mFin || 'AM';
+      const meridiemInicio = mInicio || meridiemFin;
 
       return diasDetectados.map(dia => ({
         dia,
-        inicio: normalizarHora(hInicio, mInicio),
-        fin: normalizarHora(hFin, mFin)
+        inicio: normalizarHora(hInicio, meridiemInicio),
+        fin: normalizarHora(hFin, meridiemFin)
       }));
     } catch (e) { return []; }
   };

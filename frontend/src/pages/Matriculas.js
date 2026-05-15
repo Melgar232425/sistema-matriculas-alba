@@ -1,7 +1,7 @@
 // Página de Matrículas
 import React, { useState, useEffect } from 'react';
 import { matriculasAPI, estudiantesAPI, cursosAPI } from '../services/api';
-import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye, FaFilePdf } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTimes, FaTrash, FaEye, FaFilePdf, FaClock } from 'react-icons/fa';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import toast from 'react-hot-toast';
@@ -561,7 +561,10 @@ const Matriculas = () => {
                     border: '1px solid #e2e8f0'
                   }}>
                     <div>
-                      <div style={{ fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>{m.curso_nombre}</div>
+                      <div style={{ fontWeight: '600', color: '#0f172a', marginBottom: '2px' }}>{m.curso_nombre}</div>
+                      <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <FaClock size={10} /> {m.horario || 'Horario no definido'}
+                      </div>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <span className={`badge ${m.estado_matricula === 'activa' ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '10px' }}>
                           {m.estado_matricula}
