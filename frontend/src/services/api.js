@@ -1,8 +1,8 @@
 // Servicio para comunicarse con el backend
 import axios from 'axios';
 
-// URL base del backend - Forzamos Railway para evitar fallos de conexión
-const API_URL = 'https://sistema-matriculas-alba-production.up.railway.app/api';
+// URL base del backend - Forzamos Vercel para producción
+const API_URL = 'https://sistema-matriculas-alba-backend.vercel.app/api';
 
 // Crear instancia de axios con configuración por defecto
 const api = axios.create({
