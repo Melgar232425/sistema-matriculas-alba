@@ -134,7 +134,16 @@ app.get('/api/fix-db', async (req, res) => {
       }
     }
     
-    res.json({ success: true, message: "Limpieza profunda y resolución de conflictos de aulas completada." });
+    // 4. Configurar un docente con 2 cursos para la demo (Carlos Quispe)
+    const [carlos] = await promisePool.query("SELECT id FROM docentes WHERE nombres LIKE '%Carlos Eduardo%' LIMIT 1");
+    if (carlos.length > 0) {
+      const docenteId = carlos[0].id;
+      // Asignamos a Carlos a Aritmética y Álgebra
+      await promisePool.query("UPDATE cursos SET docente_id = ? WHERE nombre = 'Aritmética' LIMIT 1", [docenteId]);
+      await promisePool.query("UPDATE cursos SET docente_id = ? WHERE nombre = 'Álgebra' LIMIT 1", [docenteId]);
+    }
+    
+    res.json({ success: true, message: "Configuración de demo lista: Carlos Quispe tiene ahora 2 cursos." });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
